@@ -3838,9 +3838,13 @@ window.openChatWithAI = async function() {
   chatInput.value = '';
   chatLog.scrollTop = chatLog.scrollHeight;
 
+  console.log("Отправка сообщения:", chatHistory);
+
   try {
     // Отправляем всю историю сообщений
     const response = await zukiChat.sendMessage(chatHistory);
+
+    console.log("Ответ от ИИ:", response);
 
     // Проверяем ответ и добавляем его в историю
     if (response && response.data && response.data.choices && response.data.choices[0]) {
@@ -3850,8 +3854,11 @@ window.openChatWithAI = async function() {
       // Добавляем ответ ИИ в лог
       chatLog.innerHTML += `<div><strong>AI:</strong> ${aiResponse}</div>`;
       chatLog.scrollTop = chatLog.scrollHeight;
+    } else {
+      console.error("Некорректный ответ от ИИ:", response);
     }
   } catch (error) {
+    console.error("Ошибка при отправке сообщения:", error);
     chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> ${error.message}</div>`;
   }
 }
