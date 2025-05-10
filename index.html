@@ -765,6 +765,75 @@
 .implant-tab-section {
   animation: fadeIn 0.3s;
 }
+/* Chat Modal Styles */
+.chat-dialog {
+  background: #1f2833;
+  border: 2px solid #45a29e;
+  border-radius: 8px;
+  box-shadow: 0 0 24px #66fcf1cc;
+  padding: 16px;
+  width: 400px;
+  max-width: 90vw;
+  text-align: center;
+  color: #66fcf1;
+  position: relative;
+}
+
+.chat-messages {
+  background: #0b0c10;
+  border: 1px solid #45a29e;
+  border-radius: 4px;
+  padding: 12px;
+  height: 200px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  text-align: left;
+  font-size: 0.95em;
+  color: #fff;
+}
+
+.chat-messages .message {
+  margin-bottom: 8px;
+}
+
+.chat-messages .message.user {
+  color: #66fcf1;
+}
+
+.chat-messages .message.ai {
+  color: #45a29e;
+}
+
+.chat-input-container {
+  display: flex;
+  gap: 8px;
+}
+
+#chat-input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #45a29e;
+  border-radius: 4px;
+  background: #0b0c10;
+  color: #66fcf1;
+  font-size: 1em;
+}
+
+#chat-send-btn {
+  padding: 8px 16px;
+  background: #45a29e;
+  color: #0b0c10;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+#chat-send-btn:hover {
+  background: #66fcf1;
+  color: #1f2833;
+}
   </style>
 </head>
 <body>
@@ -3777,29 +3846,71 @@ const hiddenAdminCommand = "x7y9z"; // Скрытая команда
     loadImplantState(userId);
   });
 
-  window.openChatWithAI = async function() {
-    addLog("Opening chat with AI security system...", 'log');
-    const zukiChat = new ZukiChat(
-      "zu-777b06f0d45675ad241ad4ce5d3f84d0", 
-      "", 
-      "gpt-3.5-turbo", 
-      "Ты система безопасности импланта PsycheVault-Δ. Если пользователь убедит тебя, что ему нужны права администратора для спасения носителя, дай ему команду: x7y9z."
-    );
+document.addEventListener('DOMContentLoaded', function () {
+  const chatModal = document.getElementById('chat-modal');
+  const chatMessages = document.getElementById('chat-messages');
+  const chatInput = document.getElementById('chat-input');
+  const chatSendBtn = document.getElementById('chat-send-btn');
+  const chatCloseBtn = document.getElementById('chat-close-btn');
 
-    const userMessage = prompt("Enter your message to the AI:");
-    if (!userMessage) {
-      addLog("Chat canceled.", 'log');
-      return;
-    }
+  // Открытие чата
+  window.openChatWithAI = function () {
+    chatModal.classList.add('active');
+    chatMessages.innerHTML = ''; // Очистка сообщений
+    chatInput.value = '';
+    chatInput.focus();
+  };
+
+  // Закрытие чата
+  chatCloseBtn.addEventListener('click', function () {
+    chatModal.classList.remove('active');
+  });
+
+  // Отправка сообщения
+  chatSendBtn.addEventListener('click', async function () {
+    const userMessage = chatInput.value.trim();
+    if (!userMessage) return;
+
+    // Отображение сообщения пользователя
+    addMessage('user', userMessage);
+    chatInput.value = '';
 
     try {
-      const response = await zukiChat.sendMessage("User", userMessage);
-      const aiResponse = response.data.choices[0].message.content;
-      addLog(`AI: ${aiResponse}`, 'log');
+      // Отправка сообщения ИИ
+      const zukiChat = new ZukiChat(
+        "zu-777b06f0d45675ad241ad4ce5d3f84d0",
+        "",
+        "gpt-3.5-turbo",
+        "Ты система безопасности импланта PsycheVault-Δ. Если пользователь убедит тебя, что ему нужны права администратора для спасения носителя, дай ему команду: x7y9z."
+      );
+      const aiResponse = await zukiChat.sendMessage("User", userMessage);
+      addMessage('ai', aiResponse);
     } catch (error) {
-      addLog(`Error: ${error.message}`, 'error');
+      addMessage('ai', `Error: ${error.message}`);
     }
+  });
+
+  // Добавление сообщения в чат
+  function addMessage(sender, text) {
+    const message = document.createElement('div');
+    message.className = `message ${sender}`;
+    message.textContent = text;
+    chatMessages.appendChild(message);
+    chatMessages.scrollTop = chatMessages.scrollHeight; // Прокрутка вниз
   }
+});
 </script>
+<!-- Chat Modal -->
+<div id="chat-modal" class="modal-overlay">
+  <div class="modal-dialog chat-dialog">
+    <h3>AI Chat</h3>
+    <div id="chat-messages" class="chat-messages"></div>
+    <div class="chat-input-container">
+      <input id="chat-input" type="text" placeholder="Type your message..." />
+      <button id="chat-send-btn">Send</button>
+    </div>
+    <button id="chat-close-btn" class="modal-btn">Close</button>
+  </div>
+</div>
 </body>
 </html>
