@@ -36,31 +36,28 @@ export class ZukiChatCall{
     }
 
 
-    async CHAT_CALL(userName, userMessage, requestedModel, systemPrompt, currTemp, endpoint) {
+async CHAT_CALL(userName, userMessage, requestedModel, systemPrompt, currTemp, endpoint) {
+    try {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${this.API_KEY}`,
+            },
+            body: JSON.stringify(this.CHAT_DATA(userName, userMessage, requestedModel, systemPrompt, currTemp)),
+        });
 
-        /**
-         * Makes an API call via the desired enpoint.
-        */
-
-        try {
-
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${this.API_KEY}`,
-                },
-                body: JSON.stringify(this.CHAT_DATA(userName, userMessage, requestedModel, systemPrompt, currTemp)),
-            });
-
-            const responseData = await response.json(); //Main response.
-
-            return responseData['choices'][0]['message']['content']; //Returns as a Promise function.
-
-        } catch (error) {
-            console.error('Error:', error);
+        // Проверяем статус ответа
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`);
         }
 
+        const responseData = await response.json(); // Основной ответ
+        return responseData['choices'][0]['message']['content']; // Возвращаем содержимое ответа
+    } catch (error) {
+        console.error('Error:', error.message);
+        throw error; // Пробрасываем ошибку дальше
     }
-
+}
 }
