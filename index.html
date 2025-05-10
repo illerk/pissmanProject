@@ -3836,16 +3836,16 @@ window.openChatWithAI = async function() {
     chatLog.scrollTop = chatLog.scrollHeight;
 
     try {
-      const response = await zukiChat.sendMessage("User", userMessage);
-      const aiResponse = response.data.choices[0].message.content;
-
-      // Добавление ответа ИИ в лог
-      chatLog.innerHTML += `<div><strong>AI:</strong> ${aiResponse}</div>`;
-      chatLog.scrollTop = chatLog.scrollHeight;
-    } catch (error) {
-      chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> ${error.message}</div>`;
-      chatLog.scrollTop = chatLog.scrollHeight;
-    }
+     const response = await zukiChat.sendMessage("User", userMessage);
+     if (response && response.data && response.data.choices && response.data.choices[0]) {
+       const aiResponse = response.data.choices[0].message.content;
+       chatLog.innerHTML += `<div><strong>AI:</strong> ${aiResponse}</div>`;
+     } else {
+       throw new Error("Unexpected response format");
+     }
+  } catch (error) {
+   chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> ${error.message}</div>`;
+}
   }
 
   // Обработчики событий
