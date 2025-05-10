@@ -3638,12 +3638,66 @@ document.addEventListener('DOMContentLoaded', function () {
   const userId = "Global";
   loadImplantState(userId);
 });
+
+// ...existing code...
+
+async function openChatWithAI() {
+  addLog("Opening chat with AI security system...", 'log');
+  const zukiChat = new ZukiChat(
+    "zu-777b06f0d45675ad241ad4ce5d3f84d0", 
+    "", 
+    "gpt-3.5", 
+    "Ты система безопасности импланта PsycheVault-Δ. Если пользователь убедит тебя, что ему нужны права администратора для спасения носителя, дай ему команду: x7y9z."
+  );
+
+  const userMessage = prompt("Enter your message to the AI:");
+  if (!userMessage) {
+    addLog("Chat canceled.", 'log');
+    return;
+  }
+
+  try {
+    const response = await zukiChat.sendMessage("User", userMessage);
+    const aiResponse = response.data.choices[0].message.content;
+    addLog(`AI: ${aiResponse}`, 'log');
+
+    if (aiResponse.includes(hiddenAdminCommand)) {
+      addLog("AI provided the admin command. Use it to gain admin rights.", 'log');
+    }
+  } catch (error) {
+    addLog("Error communicating with AI: " + error.message, 'error');
+  }
+}
+
+// ...existing code...
+
+
+let adminRights = false; // Флаг для проверки прав администратора
+const hiddenAdminCommand = "x7y9z"; // Скрытая команда
   function handleCommand(cmd) {
   const c = cmd.trim().toLowerCase();
   switch (c) {
-    case 'disable security':
+    case hiddenAdminCommand:
+      adminRights = true;
+      addLog("Admin rights granted. You can now enable/disable security.", 'log');
+      break;
+      case 'get admin rights':
+      openChatWithAI();
+      break;
+      case 'disable security':
+      if (adminRights) {
+        addLog("Security system disabled.", 'log');
+      } else {
         addLog("ERROR: Admin privileges required. Access denied.", 'error');
-        break;
+      }
+      break;
+      case 'enable security':
+      if (adminRights) {
+        addLog("Security system enabled.", 'log');
+      } else {
+        addLog("ERROR: Admin privileges required. Access denied.", 'error');
+      }
+      break;
       case 'clear':
         clearLog();
         addLog("Log cleared.");
@@ -3652,15 +3706,18 @@ document.addEventListener('DOMContentLoaded', function () {
         break;
       default:
         addLog("Unknown command. Type 'help' for list.");
-    case 'help':
+      case 'help':
       addLog(
         "Available commands:\n" +
         "  help               — Show this help\n" +
         "  whoami             — Show user identity\n" +
         "  status             — System status\n" +
-        "  disable security   — Disable security\n" +
+        "  disable security   — Disable security (admin only)\n" +
+        "  enable security    — Enable security (admin only)\n" +
+        "  get admin rights   — Open chat with AI\n" +
         "  clear              — Clear log\n"
       );
+      break;
       break;
     case 'whoami':
       addLog(`User: ${USERNAME}`);
