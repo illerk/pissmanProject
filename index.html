@@ -3776,7 +3776,7 @@ const hiddenAdminCommand = "x7y9z"; // Скрытая команда
     loadImplantState(userId);
   });
 
-  async function window.openChatWithAI() {
+  window.openChatWithAI = async function() {
     addLog("Opening chat with AI security system...", 'log');
     const zukiChat = new ZukiChat(
       "zu-777b06f0d45675ad241ad4ce5d3f84d0", 
