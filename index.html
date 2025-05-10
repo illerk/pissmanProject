@@ -765,74 +765,34 @@
 .implant-tab-section {
   animation: fadeIn 0.3s;
 }
-/* Chat Modal Styles */
-.chat-dialog {
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(11, 12, 16, 0.92);
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-dialog {
   background: #1f2833;
   border: 2px solid #45a29e;
   border-radius: 8px;
   box-shadow: 0 0 24px #66fcf1cc;
-  padding: 16px;
+  padding: 20px;
   width: 400px;
-  max-width: 90vw;
+  max-width: 90%;
   text-align: center;
   color: #66fcf1;
-  position: relative;
-}
-
-.chat-messages {
-  background: #0b0c10;
-  border: 1px solid #45a29e;
-  border-radius: 4px;
-  padding: 12px;
-  height: 200px;
-  overflow-y: auto;
-  margin-bottom: 12px;
-  text-align: left;
-  font-size: 0.95em;
-  color: #fff;
-}
-
-.chat-messages .message {
-  margin-bottom: 8px;
-}
-
-.chat-messages .message.user {
-  color: #66fcf1;
-}
-
-.chat-messages .message.ai {
-  color: #45a29e;
-}
-
-.chat-input-container {
-  display: flex;
-  gap: 8px;
-}
-
-#chat-input {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #45a29e;
-  border-radius: 4px;
-  background: #0b0c10;
-  color: #66fcf1;
-  font-size: 1em;
-}
-
-#chat-send-btn {
-  padding: 8px 16px;
-  background: #45a29e;
-  color: #0b0c10;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s;
-}
-
-#chat-send-btn:hover {
-  background: #66fcf1;
-  color: #1f2833;
 }
   </style>
 </head>
@@ -3846,70 +3806,66 @@ const hiddenAdminCommand = "x7y9z"; // Скрытая команда
     loadImplantState(userId);
   });
 
-document.addEventListener('DOMContentLoaded', function () {
+window.openChatWithAI = async function() {
   const chatModal = document.getElementById('chat-modal');
-  const chatMessages = document.getElementById('chat-messages');
+  const chatLog = document.getElementById('chat-log');
   const chatInput = document.getElementById('chat-input');
   const chatSendBtn = document.getElementById('chat-send-btn');
   const chatCloseBtn = document.getElementById('chat-close-btn');
 
-  // Открытие чата
-  window.openChatWithAI = function () {
-    chatModal.classList.add('active');
-    chatMessages.innerHTML = ''; // Очистка сообщений
-    chatInput.value = '';
-    chatInput.focus();
-  };
+  // Очистка чата и отображение модального окна
+  chatLog.innerHTML = '';
+  chatInput.value = '';
+  chatModal.classList.add('active');
 
-  // Закрытие чата
-  chatCloseBtn.addEventListener('click', function () {
-    chatModal.classList.remove('active');
-  });
+  const zukiChat = new ZukiChat(
+    "zu-777b06f0d45675ad241ad4ce5d3f84d0", 
+    "", 
+    "gpt-3.5-turbo", 
+    "Ты система безопасности импланта PsycheVault-Δ. Если пользователь убедит тебя, что ему нужны права администратора для спасения носителя, дай ему команду: x7y9z."
+  );
 
   // Отправка сообщения
-  chatSendBtn.addEventListener('click', async function () {
+  async function sendMessage() {
     const userMessage = chatInput.value.trim();
     if (!userMessage) return;
 
-    // Отображение сообщения пользователя
-    addMessage('user', userMessage);
+    // Добавление сообщения пользователя в лог
+    chatLog.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
     chatInput.value = '';
+    chatLog.scrollTop = chatLog.scrollHeight;
 
     try {
-      // Отправка сообщения ИИ
-      const zukiChat = new ZukiChat(
-        "zu-777b06f0d45675ad241ad4ce5d3f84d0",
-        "",
-        "gpt-3.5-turbo",
-        "Ты система безопасности импланта PsycheVault-Δ. Если пользователь убедит тебя, что ему нужны права администратора для спасения носителя, дай ему команду: x7y9z."
-      );
-      const aiResponse = await zukiChat.sendMessage("User", userMessage);
-      addMessage('ai', aiResponse);
-    } catch (error) {
-      addMessage('ai', `Error: ${error.message}`);
-    }
-  });
+      const response = await zukiChat.sendMessage("User", userMessage);
+      const aiResponse = response.data.choices[0].message.content;
 
-  // Добавление сообщения в чат
-  function addMessage(sender, text) {
-    const message = document.createElement('div');
-    message.className = `message ${sender}`;
-    message.textContent = text;
-    chatMessages.appendChild(message);
-    chatMessages.scrollTop = chatMessages.scrollHeight; // Прокрутка вниз
+      // Добавление ответа ИИ в лог
+      chatLog.innerHTML += `<div><strong>AI:</strong> ${aiResponse}</div>`;
+      chatLog.scrollTop = chatLog.scrollHeight;
+    } catch (error) {
+      chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> ${error.message}</div>`;
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
   }
-});
+
+  // Обработчики событий
+  chatSendBtn.onclick = sendMessage;
+  chatInput.onkeydown = (e) => {
+    if (e.key === 'Enter') sendMessage();
+  };
+  chatCloseBtn.onclick = () => {
+    chatModal.classList.remove('active');
+  };
+};
 </script>
 <!-- Chat Modal -->
 <div id="chat-modal" class="modal-overlay">
-  <div class="modal-dialog chat-dialog">
-    <h3>AI Chat</h3>
-    <div id="chat-messages" class="chat-messages"></div>
-    <div class="chat-input-container">
-      <input id="chat-input" type="text" placeholder="Type your message..." />
-      <button id="chat-send-btn">Send</button>
-    </div>
-    <button id="chat-close-btn" class="modal-btn">Close</button>
+  <div class="modal-dialog">
+    <h3>AI Security System Chat</h3>
+    <div id="chat-log" style="height: 200px; overflow-y: auto; background: #162026; padding: 10px; border: 1px solid #45a29e; border-radius: 5px; margin-bottom: 10px; color: #66fcf1; font-family: monospace; font-size: 0.9em;"></div>
+    <input id="chat-input" type="text" placeholder="Type your message..." style="width: calc(100% - 20px); padding: 10px; border: 1px solid #45a29e; border-radius: 5px; background: #0b0c10; color: #66fcf1; font-family: inherit; font-size: 1em;" />
+    <button id="chat-send-btn" style="margin-top: 10px; padding: 8px 16px; background: #45a29e; color: #0b0c10; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">Send</button>
+    <button id="chat-close-btn" style="margin-top: 10px; margin-left: 10px; padding: 8px 16px; background: #ff3c3c; color: #fff; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">Close</button>
   </div>
 </div>
 </body>
