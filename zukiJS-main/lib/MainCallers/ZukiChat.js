@@ -2,7 +2,7 @@ import { ZukiChatCall } from "../SubCallers/ZukiChatCall.js";
 
 export class ZukiChat {
     constructor(API_KEY, API_BACKUP_KEY = "", model = "gpt-3.5", systemPrompt = "You are a helpful assistant.", temperature = 0.7) {
-        this.API_KEY = "zu-777b06f0d45675ad241ad4ce5d3f84d0";
+        this.API_KEY = API_KEY;
         this.API_BACKUP_KEY = API_BACKUP_KEY;
         this.API_ENDPOINT = 'https://api.zukijourney.com/v1/chat/completions';
         this.API_ENDPOINT_UNFILTERED = 'https://api.zukijourney.com/v1/chat/completions';
