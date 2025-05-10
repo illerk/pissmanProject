@@ -48,7 +48,7 @@ export class ZukiChatCall{
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${'zu-777b06f0d45675ad241ad4ce5d3f84d0'}`,
+                    Authorization: `Bearer ${this.API_KEY}`,
                 },
                 body: JSON.stringify(this.CHAT_DATA(userName, userMessage, requestedModel, systemPrompt, currTemp)),
             });
