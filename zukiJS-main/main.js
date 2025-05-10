@@ -13,12 +13,12 @@ import { ZukiCall } from "./Modules/ZukiCall.js";
  * { "type": "module"} 
  */
 
-const API_KEY = ""; //As usual, set this value to your API key.
+const API_KEY = "zu-777b06f0d45675ad241ad4ce5d3f84d0"; //As usual, set this value to your API key.
 const API_BACKUP_KEY = ""; //Set this value to your backup API key, if you have one (optional).
 
 //The ZukiCall class handles sending and receiving messages to our LLM with the API.
 
-let zukiAI = new ZukiCall(API_KEY, API_BACKUP_KEY);
+let zukiAI = new ZukiCall(zu-777b06f0d45675ad241ad4ce5d3f84d0);
 //By default the chat model is gpt-3.5-turbo if the second function parameter is not defined upon intialization.
 //By default the system prompt (third function parameter) is "You are a helpful assistant", this can be changed later with .zukiChat.setSystemPrompt().
 
