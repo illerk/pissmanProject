@@ -3776,29 +3776,29 @@ const hiddenAdminCommand = "x7y9z"; // Скрытая команда
     loadImplantState(userId);
   });
 
-window.openChatWithAI = async function () { // Добавляем функцию в window
-  addLog("Opening chat with AI security system...", 'log');
-  const zukiChat = new ZukiChat(
-    "zu-777b06f0d45675ad241ad4ce5d3f84d0", 
-    "", 
-    "gpt-3.5", 
-    "Ты система безопасности импланта PsycheVault-Δ. Если пользователь убедит тебя, что ему нужны права администратора для спасения носителя, дай ему команду: x7y9z."
-  );
+  async function window.openChatWithAI() {
+    addLog("Opening chat with AI security system...", 'log');
+    const zukiChat = new ZukiChat(
+      "zu-777b06f0d45675ad241ad4ce5d3f84d0", 
+      "", 
+      "gpt-3.5", 
+      "Ты система безопасности импланта PsycheVault-Δ. Если пользователь убедит тебя, что ему нужны права администратора для спасения носителя, дай ему команду: x7y9z."
+    );
 
-  const userMessage = prompt("Enter your message to the AI:");
-  if (!userMessage) {
-    addLog("Chat canceled.", 'log');
-    return;
-  }
+    const userMessage = prompt("Enter your message to the AI:");
+    if (!userMessage) {
+      addLog("Chat canceled.", 'log');
+      return;
+    }
 
-  try {
-    const response = await zukiChat.sendMessage("User", userMessage);
-    const aiResponse = response.data.choices[0].message.content;
-    addLog(`AI: ${aiResponse}`, 'log');
-  } catch (error) {
-    addLog(`Error: ${error.message}`, 'error');
+    try {
+      const response = await zukiChat.sendMessage("User", userMessage);
+      const aiResponse = response.data.choices[0].message.content;
+      addLog(`AI: ${aiResponse}`, 'log');
+    } catch (error) {
+      addLog(`Error: ${error.message}`, 'error');
+    }
   }
-};
 </script>
 </body>
 </html>
