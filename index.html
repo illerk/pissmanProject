@@ -3510,6 +3510,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (log.length > maxLog) log = log.slice(-maxLog);
     renderLog();
   }
+    window.addLog = addLog;
   function clearLog() {
     log = [];
     renderLog();
