@@ -3830,29 +3830,27 @@ async function sendMessage() {
   const userMessage = chatInput.value.trim();
   if (!userMessage) return;
 
-  // Добавляем сообщение пользователя в историю
   chatHistory.push({ role: "user", content: userMessage });
-
-  // Отображаем сообщение пользователя в чате
   chatLog.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
   chatInput.value = '';
   chatLog.scrollTop = chatLog.scrollHeight;
 
   try {
-    console.log("Отправляемая история:", chatHistory); // Отладочный вывод
+    console.log("Отправляемая история:", JSON.stringify(chatHistory, null, 2));
     const response = await zukiChat.sendMessage(chatHistory);
+    console.log("Ответ от API:", response);
 
     if (response && response.data && response.data.choices && response.data.choices[0]) {
       const aiResponse = response.data.choices[0].message.content;
       chatHistory.push({ role: "assistant", content: aiResponse });
-
-      // Отображаем ответ ИИ в чате
       chatLog.innerHTML += `<div><strong>AI:</strong> ${aiResponse}</div>`;
       chatLog.scrollTop = chatLog.scrollHeight;
     } else {
+      console.error("Некорректный ответ от API:", response);
       chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> Empty response from AI.</div>`;
     }
   } catch (error) {
+    console.error("Ошибка при вызове API:", error);
     chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> ${error.message}</div>`;
   }
 }
