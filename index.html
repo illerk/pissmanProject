@@ -3843,13 +3843,13 @@ async function sendMessage() {
 
     // Проверяем, есть ли корректный ответ от API
     if (response && response.data && response.data.choices && response.data.choices[0]) {
-      const response = response.data.choices[0].message.content;
+      const aiResponse = response.data.choices[0].message.content;
 
       // Добавляем ответ ИИ в историю
-      chatHistory.push({ role: "assistant", content: response });
+      chatHistory.push({ role: "assistant", content: aiResponse });
 
       // Отображаем ответ в чате
-      chatLog.innerHTML += `<div><strong>AI:</strong> ${response}</div>`;
+      chatLog.innerHTML += `<div><strong>AI:</strong> ${aiResponse}</div>`;
       chatLog.scrollTop = chatLog.scrollHeight;
     } else {
       console.error("Некорректный ответ от API:", response);
