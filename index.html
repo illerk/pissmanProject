@@ -3830,6 +3830,7 @@ async function sendMessage() {
   const userMessage = chatInput.value.trim();
   if (!userMessage) return;
 
+  // Добавляем сообщение пользователя в историю
   chatHistory.push({ role: "user", content: userMessage });
   chatLog.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
   chatInput.value = '';
@@ -3840,14 +3841,19 @@ async function sendMessage() {
     const response = await zukiChat.sendMessage(chatHistory);
     console.log("Ответ от API:", response);
 
+    // Проверяем, есть ли корректный ответ от API
     if (response && response.data && response.data.choices && response.data.choices[0]) {
       const aiResponse = response.data.choices[0].message.content;
+
+      // Добавляем ответ ИИ в историю
       chatHistory.push({ role: "assistant", content: aiResponse });
+
+      // Отображаем ответ в чате
       chatLog.innerHTML += `<div><strong>AI:</strong> ${aiResponse}</div>`;
       chatLog.scrollTop = chatLog.scrollHeight;
     } else {
       console.error("Некорректный ответ от API:", response);
-      chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> Empty response from AI.</div>`;
+      chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> Некорректный ответ от API.</div>`;
     }
   } catch (error) {
     console.error("Ошибка при вызове API:", error);
