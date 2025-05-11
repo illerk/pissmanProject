@@ -3826,31 +3826,39 @@ window.openChatWithAI = async function() {
   );
   const chatHistory = [];
   // Отправка сообщения
-  async function sendMessage() {
+
+async function sendMessage() {
   const userMessage = chatInput.value.trim();
   if (!userMessage) return;
-  chatHistory.push({ role: "user", content: userMessage });
 
-    // Добавление сообщения пользователя в лог
-    chatLog.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
-    chatInput.value = '';
-    chatLog.scrollTop = chatLog.scrollHeight;
+  // Добавляем сообщение пользователя в массив messages
+  messages.push({ role: "user", content: userMessage });
 
-try {
-  
-  const response = await zukiChat.sendMessage(chatHistory);
-  chatLog.innerHTML += `<div><strong>Security AI:</strong> ${JSON.stringify(response)}</div>`; // Выводим response в чат
-  if (response && response.data && response.data.choices && response.data.choices[0]) {
+  // Отображаем сообщение пользователя в чате
+  chatLog.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
+  chatInput.value = '';
+  chatLog.scrollTop = chatLog.scrollHeight;
+
+  try {
+    // Отправляем массив messages
+    const response = await zukiChat.sendMessage(messages);
+
+    // Проверяем ответ и добавляем его в массив messages
+    if (response && response.data && response.data.choices && response.data.choices[0]) {
       const aiResponse = response.data.choices[0].message.content;
-      chatHistory.push({ role: "assistant", content: aiResponse });
+      messages.push({ role: "assistant", content: aiResponse });
 
-    chatLog.innerHTML += `<div><strong>AI:</strong> ${aiResponse}</div>`;
-    chatLog.scrollTop = chatLog.scrollHeight;
+      // Отображаем ответ ассистента в чате
+      chatLog.innerHTML += `<div><strong>AI:</strong> ${aiResponse}</div>`;
+      chatLog.scrollTop = chatLog.scrollHeight;
+    } else {
+      console.error("Некорректный ответ от ИИ:", response);
+    }
+  } catch (error) {
+    console.error("Ошибка при отправке сообщения:", error);
+    chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> ${error.message}</div>`;
   }
-} catch (error) {
-  chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> ${error.message}</div>`;
 }
-  }
 
   // Обработчики событий
   chatSendBtn.onclick = sendMessage;
