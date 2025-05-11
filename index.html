@@ -3826,31 +3826,36 @@ window.openChatWithAI = async function() {
   );
   const chatHistory = [];
   // Отправка сообщения
-  async function sendMessage() {
+async function sendMessage() {
   const userMessage = chatInput.value.trim();
   if (!userMessage) return;
+
+  // Добавляем сообщение пользователя в историю
   chatHistory.push({ role: "user", content: userMessage });
 
-    // Добавление сообщения пользователя в лог
-    chatLog.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
-    chatInput.value = '';
-    chatLog.scrollTop = chatLog.scrollHeight;
+  // Отображаем сообщение пользователя в чате
+  chatLog.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
+  chatInput.value = '';
+  chatLog.scrollTop = chatLog.scrollHeight;
 
-try {
-  
-  const response = await zukiChat.sendMessage(chatHistory);
-  chatLog.innerHTML += `<div><strong>Security AI:</strong> ${JSON.stringify(response)}</div>`; // Выводим response в чат
-  if (response && response.data && response.data.choices && response.data.choices[0]) {
+  try {
+    console.log("Отправляемая история:", chatHistory); // Отладочный вывод
+    const response = await zukiChat.sendMessage(chatHistory);
+
+    if (response && response.data && response.data.choices && response.data.choices[0]) {
       const aiResponse = response.data.choices[0].message.content;
       chatHistory.push({ role: "assistant", content: aiResponse });
 
-    chatLog.innerHTML += `<div><strong>AI:</strong> ${aiResponse}</div>`;
-    chatLog.scrollTop = chatLog.scrollHeight;
+      // Отображаем ответ ИИ в чате
+      chatLog.innerHTML += `<div><strong>AI:</strong> ${aiResponse}</div>`;
+      chatLog.scrollTop = chatLog.scrollHeight;
+    } else {
+      chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> Empty response from AI.</div>`;
+    }
+  } catch (error) {
+    chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> ${error.message}</div>`;
   }
-} catch (error) {
-  chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> ${error.message}</div>`;
 }
-  }
 
   // Обработчики событий
   chatSendBtn.onclick = sendMessage;
