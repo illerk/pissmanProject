@@ -3853,10 +3853,16 @@ async function sendMessage() {
       chatLog.scrollTop = chatLog.scrollHeight;
     } else {
       console.error("Некорректный ответ от API:", response);
-      chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> Некорректный ответ от API.</div>`;
+
+      // Сохраняем весь response в истории и выводим в чате
+      chatHistory.push({ role: "assistant", content: JSON.stringify(response) });
+      chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> ${JSON.stringify(response)}</div>`;
     }
   } catch (error) {
     console.error("Ошибка при вызове API:", error);
+
+    // Сохраняем ошибку в истории и выводим в чате
+    chatHistory.push({ role: "assistant", content: `Error: ${error.message}` });
     chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> ${error.message}</div>`;
   }
 }
