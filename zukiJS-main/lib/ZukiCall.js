@@ -1,5 +1,5 @@
-import { ZukiChat } from "./MainCallers/ZukiChat.js";
-import { ZukiImage } from "./MainCallers/ZukiImage.js";
+import { ZukiChat } from "/zukiJS-main/lib/MainCallers/ZukiChat.js";
+import { ZukiImage } from "/zukiJS-main/lib/MainCallers/ZukiImage.js";
 
 export class ZukiCall{
 
