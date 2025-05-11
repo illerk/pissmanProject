@@ -3826,15 +3826,17 @@ window.openChatWithAI = async function() {
   );
   const chatHistory = [];
   // Отправка сообщения
-  async function sendMessage() {
+async function sendMessage() {
   const userMessage = chatInput.value.trim();
   if (!userMessage) return;
+
+  // Добавляем сообщение пользователя в историю
   chatHistory.push({ role: "user", content: userMessage });
 
-    // Добавление сообщения пользователя в лог
-    chatLog.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
-    chatInput.value = '';
-    chatLog.scrollTop = chatLog.scrollHeight;
+  // Добавление сообщения пользователя в лог
+  chatLog.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
+  chatInput.value = '';
+  chatLog.scrollTop = chatLog.scrollHeight;
 
   try {
     // Отправляем всю историю сообщений
@@ -3855,7 +3857,7 @@ window.openChatWithAI = async function() {
     console.error("Ошибка при отправке сообщения:", error);
     chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> ${error.message}</div>`;
   }
-  }
+}
 
   // Обработчики событий
   chatSendBtn.onclick = sendMessage;
