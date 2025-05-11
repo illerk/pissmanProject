@@ -3799,7 +3799,7 @@ const hiddenAdminCommand = "x7y9z"; // Скрытая команда
 })();
   </script>
   <script type="module">
-  import { ZukiCall } from '/zukiJS-main/lib/ZukiCall.js';
+  import { ZukiChat } from '/zukiJS-main/lib/ZukiChat.js';
 
   document.addEventListener('DOMContentLoaded', function () {
     const userId = "Global";
@@ -3843,13 +3843,13 @@ async function sendMessage() {
 
     // Проверяем, есть ли корректный ответ от API
     if (response && response.data && response.data.choices && response.data.choices[0]) {
-      const aiResponse = response.data.choices[0].message.content;
+      const response = response.data.choices[0].message.content;
 
       // Добавляем ответ ИИ в историю
-      chatHistory.push({ role: "assistant", content: aiResponse });
+      chatHistory.push({ role: "assistant", content: response });
 
       // Отображаем ответ в чате
-      chatLog.innerHTML += `<div><strong>AI:</strong> ${aiResponse}</div>`;
+      chatLog.innerHTML += `<div><strong>AI:</strong> ${response}</div>`;
       chatLog.scrollTop = chatLog.scrollHeight;
     } else {
       console.error("Некорректный ответ от API:", response);
