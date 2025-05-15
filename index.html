@@ -3801,79 +3801,10 @@ const hiddenAdminCommand = "x7y9z"; // Скрытая команда
   });
 
 window.openChatWithAI = function() {
-  const chatModal = document.getElementById('chat-modal');
-  const chatLog = document.getElementById('chat-log');
-  const chatInput = document.getElementById('chat-input');
-  const chatSendBtn = document.getElementById('chat-send-btn');
-  const chatCloseBtn = document.getElementById('chat-close-btn');
-
-  chatLog.innerHTML = '';
-  chatInput.value = '';
-  chatModal.classList.add('active');
-
-  const chatHistory = [
-    {
-      role: "system",
-      content: "..."
-    }
-  ];
-
-  async function sendMessage() {
-    const userMessage = chatInput.value.trim();
-    if (!userMessage) return;
-
-    chatHistory.push({ role: "user", content: userMessage });
-    chatLog.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
-    chatInput.value = '';
-    chatLog.scrollTop = chatLog.scrollHeight;
-
-    try {
-      chatLog.innerHTML += `<div><em>AI is typing...</em></div>`;
-      chatLog.scrollTop = chatLog.scrollHeight;
-
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "gpt-4.1",
-          messages: chatHistory
-        })
-      });
-
-      const data = await response.json();
-      if (data && data.choices && data.choices[0]?.message?.content) {
-        const aiResponse = data.choices[0].message.content;
-        chatHistory.push({ role: "assistant", content: aiResponse });
-        chatLog.innerHTML += `<div><strong>AI:</strong> ${aiResponse}</div>`;
-        chatLog.scrollTop = chatLog.scrollHeight;
-      } else {
-        chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> ${JSON.stringify(data)}</div>`;
-      }
-    } catch (error) {
-      chatLog.innerHTML += `<div style="color: #ff3c3c;"><strong>Error:</strong> ${error.message}</div>`;
-    }
+  window.open("https://google.com", "_blank");
+    return;
   }
-
-  // === Назначаем обработчики только один раз ===
-  chatSendBtn.onclick = sendMessage;
-  chatInput.onkeydown = (e) => {
-    if (e.key === 'Enter') sendMessage();
-  };
-  chatCloseBtn.onclick = () => {
-    chatModal.classList.remove('active');
-  };
-};
-
 </script>
-<!-- Chat Modal -->
-<div id="chat-modal" class="modal-overlay">
-  <div class="modal-dialog">
-    <h3>AI Security System Chat</h3>
-    <div id="chat-log" style="height: 200px; overflow-y: auto; background: #162026; padding: 10px; border: 1px solid #45a29e; border-radius: 5px; margin-bottom: 10px; color: #66fcf1; font-family: monospace; font-size: 0.9em;"></div>
-    <input id="chat-input" type="text" placeholder="Type your message..." style="width: calc(100% - 20px); padding: 10px; border: 1px solid #45a29e; border-radius: 5px; background: #0b0c10; color: #66fcf1; font-family: inherit; font-size: 1em;" />
-    <button id="chat-send-btn" style="margin-top: 10px; padding: 8px 16px; background: #45a29e; color: #0b0c10; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">Send</button>
-    <button id="chat-close-btn" style="margin-top: 10px; margin-left: 10px; padding: 8px 16px; background: #ff3c3c; color: #fff; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">Close</button>
-  </div>
 </div>
 </body>
 </html>
