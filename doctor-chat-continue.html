@@ -352,16 +352,19 @@ html, body {
     const sendBtn = document.getElementById('send-btn');
 
     ws.onmessage = function(event) {
-  if (typeof event.data === "string") {
-    addMessage("doctor", event.data);
-  } else if (event.data instanceof Blob) {
-    // Преобразуем Blob в строку
-    const reader = new FileReader();
-    reader.onload = function() {
-      addMessage("doctor", reader.result);
-    };
-    reader.readAsText(event.data);
-  }
+  showTypingIndicator();
+  setTimeout(() => {
+    hideTypingIndicator();
+    if (typeof event.data === "string") {
+      addMessage("doctor", event.data);
+    } else if (event.data instanceof Blob) {
+      const reader = new FileReader();
+      reader.onload = function() {
+        addMessage("doctor", reader.result);
+      };
+      reader.readAsText(event.data);
+    }
+  }, 1200 + Math.random() * 800); // 1.2-2 сек имитация печати
 };
 
     sendBtn.onclick = function() {
@@ -375,6 +378,22 @@ html, body {
     userInput.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') sendBtn.onclick();
     });
+
+    function showTypingIndicator() {
+  let typing = document.getElementById('typing-indicator');
+  if (!typing) {
+    typing = document.createElement('div');
+    typing.id = 'typing-indicator';
+    typing.className = 'typing-indicator';
+    typing.innerHTML = `Doctor is typing <span class="dot"></span><span class="dot"></span><span class="dot"></span>`;
+    chatLog.appendChild(typing);
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+}
+function hideTypingIndicator() {
+  const typing = document.getElementById('typing-indicator');
+  if (typing) typing.remove();
+}
 
     function addMessage(sender, text) {
       const row = document.createElement('div');
