@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
   <style>
+    body, * {
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
 @font-face {
   font-family: 'Determination Mono';
   src: url('fonts/determinationmonoweb-webfont.ttf') format('truetype');
@@ -988,6 +993,7 @@ function showFightMinigame() {
     const ctx = canvas.getContext('2d');
     let player = {x:150, y:90, w:20, h:20};
     let traps = [];
+    let warnings = []; // массив для предупреждающих линий
     let t = 0;
     let alive = true;
     let attackType = Math.floor(Math.random()*4); // 0:wave, 1:rain, 2:lasers, 3:chaos
@@ -1013,24 +1019,34 @@ function showFightMinigame() {
     }
 
     function glitchEffect() {
-      // Быстрое мерцание фона арены
       arenaBg = "#"+((1<<24)*Math.random()|0).toString(16).padStart(6,'0');
       setTimeout(()=>{ arenaBg="#222"; }, 120);
     }
 
     function draw() {
       ctx.clearRect(0,0,320,120);
-      // Эффект смены цвета фона арены
       ctx.save();
       ctx.fillStyle = arenaBg;
       ctx.fillRect(0,0,320,120);
       ctx.restore();
-      // Draw player heart
+
+    
+      warnings.forEach(warn => {
+        ctx.save();
+        ctx.globalAlpha = 0.85;
+        ctx.strokeStyle = "#f00";
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(warn.x, 0);
+        ctx.lineTo(warn.x, 120);
+        ctx.stroke();
+        ctx.restore();
+      });
+
       drawHeart(player.x, player.y, player.w);
-      // Draw traps
+
       traps.forEach(trap => {
         ctx.save();
-        // Эффект мерцания ловушек
         if (trap.type === 'laser') {
           ctx.globalAlpha = 0.5 + 0.5*Math.sin(t/4);
           ctx.strokeStyle = '#0ff';
@@ -1050,7 +1066,6 @@ function showFightMinigame() {
     let keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false };
 
     function update() {
-
       let speed = 4;
       if (keys.ArrowLeft) player.x = Math.max(0, player.x - speed);
       if (keys.ArrowRight) player.x = Math.min(300, player.x + speed);
@@ -1059,14 +1074,42 @@ function showFightMinigame() {
 
       if (!alive) return;
       t++;
+
+      // --- PATTERN 3: LASERS ---
+      if (attackType === 2) {
+        // Добавляем предупреждение (красная линия), затем через 0.15 сек появляется лазер
+        if (t % 18 === 0 && warnings.length < 10) { // чаще и больше лазеров
+          let x = 40 + Math.random()*240;
+          warnings.push({x: x, timer: 150}); // 6 кадров ~0.1-0.12 сек
+        }
+        
+        for (let i = warnings.length - 1; i >= 0; i--) {
+          warnings[i].timer--;
+          if (warnings[i].timer <= 0) {
+            
+            traps.push({
+              x: warnings[i].x,
+              y: 0,
+              w: 6, h: 120,
+              vx: 0,
+              vy: 0,
+              color: '#0ff',
+              type: 'laser'
+            });
+            warnings.splice(i, 1);
+          }
+        }
+        if (t % 36 === 0) { arenaBg = "#033"; setTimeout(()=>arenaBg="#222", 120); }
+      }
+
       // --- PATTERN 1: WAVE ---
-      if (attackType === 0 && t % 26 === 0 && traps.length < 8) { // реже и меньше
+      if (attackType === 0 && t % 26 === 0 && traps.length < 8) {
         let y = 20 + Math.sin(t/14)*40 + Math.random()*30;
         traps.push({
           x: 0,
           y: y,
           w: 20, h: 20,
-          vx: 1.5 + Math.random()*1.0, // медленнее
+          vx: 1.5 + Math.random()*1.0,
           vy: 0,
           color: '#f00',
           type: 'wave'
@@ -1081,25 +1124,11 @@ function showFightMinigame() {
           y: 0,
           w: 18, h: 18,
          vx: 0,
-          vy: 1.2 + Math.random()*1.2, // медленнее
+          vy: 1.2 + Math.random()*1.2,
           color: '#ff0',
           type: 'rain'
        });
        if (t % 36 === 0) { arenaBg = "#223"; setTimeout(()=>arenaBg="#222", 120); }
-      } 
-      // --- PATTERN 3: LASERS ---
-      if (attackType === 2 && t % 60 === 0 && traps.length < 4) {
-        let x = 40 + Math.random()*240;
-        traps.push({
-          x: x,
-          y: 0,
-          w: 6, h: 120,
-          vx: 0,
-          vy: 0,
-          color: '#0ff',
-          type: 'laser'
-        });
-        if (t % 120 === 0) { arenaBg = "#033"; setTimeout(()=>arenaBg="#222", 120); }
       }
       // --- PATTERN 4: CHAOS ---
       if (attackType === 3 && t % 14 === 0 && traps.length < 14) {
@@ -1131,32 +1160,30 @@ function showFightMinigame() {
         if (dist) {
         setPlayerHP(playerHP-1);
         glitchEffect();
-        // Воспроизвести звук урона игроку
         new Audio("sound/snd_damage.wav").play();
-        trap.x = -1000; // Remove trap
+        trap.x = -1000;
       }
       });
       draw();
-if (playerHP <= 0) {
-  alive = false;
-  const bossMusic = document.getElementById('boss-music');
-  if (bossMusic) bossMusic.pause();
-  // Эффект разбитого сердца
-  playHeartBreakEffect(canvas, player);
-  setTimeout(() => {
-    document.getElementById('game-root').innerHTML = `
-      <div style="background:#000;position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;">
-        <span id="conn-lost" style="color:#fff;font-family:'Fira Mono',monospace;font-size:2.5em;letter-spacing:0.1em;animation:blink 1s steps(2, start) infinite;">
-        connection lost
-        </span>
-      </div>
-      <style>
-      @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
-      </style>
-    `;
-  }, 1200); // Даем анимации проиграться ~1.2 сек
-  return;
-}
+      if (playerHP <= 0) {
+        alive = false;
+        const bossMusic = document.getElementById('boss-music');
+        if (bossMusic) bossMusic.pause();
+        playHeartBreakEffect(canvas, player);
+        setTimeout(() => {
+          document.getElementById('game-root').innerHTML = `
+            <div style="background:#000;position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;">
+              <span id="conn-lost" style="color:#fff;font-family:'Fira Mono',monospace;font-size:2.5em;letter-spacing:0.1em;animation:blink 1s steps(2, start) infinite;">
+              connection lost
+              </span>
+            </div>
+            <style>
+            @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+            </style>
+          `;
+        }, 1200);
+        return;
+      }
       if (t > 400) {
         alive = false;
         setTimeout(() => { phase = 4; renderPhase(); }, 800);
@@ -1167,13 +1194,13 @@ if (playerHP <= 0) {
 
     draw();
     document.onkeydown = function(e) {
-    if (!alive) return;
-    if (e.key in keys) keys[e.key] = true;
+      if (!alive) return;
+      if (e.key in keys) keys[e.key] = true;
     };
     document.onkeyup = function(e) {
-    if (!alive) return;
-    if (e.key in keys) keys[e.key] = false;
-};
+      if (!alive) return;
+      if (e.key in keys) keys[e.key] = false;
+    };
     update();
   }
 
