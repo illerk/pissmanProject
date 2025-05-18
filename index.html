@@ -3705,6 +3705,13 @@ const hiddenAdminCommand = "x7y9z"; // Скрытая команда
         break;
       default:
         addLog("Unknown command. Type 'help' for list.");
+        case 'contact':
+  if (adminRights) {
+    window.open('/doctor-chat.html', '_blank');
+  } else {
+    addLog("ERROR: Admin privileges required. Access denied.", 'error');
+  }
+  break;
       case 'help':
       addLog(
         "Available commands:\n" +
