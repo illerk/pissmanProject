@@ -325,10 +325,10 @@ html, body {
 <body>
   <div class="main-layout" id="main-layout" style="display:flex;">
     <div class="sidebar">
-      <img class="avatar-big" src="https://i.imgur.com/3QF1Q2Q.png" alt="Doctor">
+      <img class="avatar-big" src="https://files.catbox.moe/tanhc8.jpg" alt="Doctor">
       <div>
-        <div class="doctor-name">Dr. K</div>
-        <div class="doctor-role">Corporate Psychotherapist</div>
+        <div class="doctor-name">Doctor K.</div>
+        <div class="doctor-role">Psychotherapist</div>
         <div class="status-text"><span class="status-dot online"></span>Online</div>
         <div class="user-id" id="user-id"></div>
         <div class="encryption">
@@ -426,7 +426,7 @@ function handleMessage(data) {
     typing = document.createElement('div');
     typing.id = 'typing-indicator';
     typing.className = 'typing-indicator';
-    typing.innerHTML = `Doctor is typing <span class="dot"></span><span class="dot"></span><span class="dot"></span>`;
+    typing.innerHTML = `Doctor K. is typing <span class="dot"></span><span class="dot"></span><span class="dot"></span>`;
     chatLog.appendChild(typing);
     chatLog.scrollTop = chatLog.scrollHeight;
   }
@@ -441,7 +441,7 @@ function hideTypingIndicator() {
       row.className = 'msg-row ' + sender;
       if (sender === "doctor") {
         const avatar = document.createElement('img');
-        avatar.src = "https://i.imgur.com/3QF1Q2Q.png";
+        avatar.src = "https://files.catbox.moe/tanhc8.jpg";
         avatar.className = 'msg-avatar';
         row.appendChild(avatar);
       }
