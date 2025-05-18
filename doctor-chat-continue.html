@@ -324,6 +324,7 @@ html, body {
 </head>
 <body>
   <div class="main-layout" id="main-layout" style="display:flex;">
+    <audio id="bg-music" src="sound/Machine in the Walls (Mausoleum).mp3" loop></audio>
     <div class="sidebar">
       <img class="avatar-big" src="https://files.catbox.moe/tanhc8.jpg" alt="Doctor">
       <div>
@@ -352,6 +353,16 @@ html, body {
     </div>
   </div>
   <script>
+    document.body.addEventListener('click', function playMusicOnce() {
+  const music = document.getElementById('bg-music');
+  if (music && music.paused) {
+    music.volume = 0.7;
+    music.currentTime = 0;
+    music.play().catch(()=>{});
+  }
+  document.body.removeEventListener('click', playMusicOnce);
+});
+
     // Генерация user id (как в doctor-chat.html)
     function genUserId() {
       const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -402,9 +413,34 @@ function handleMessage(data) {
     }
   } catch (e) {
     // Если не JSON, значит это обычное текстовое сообщение от доктора
+    // Не показываем команды, начинающиеся с "/"
+    if (typeof data === "string" && data.startsWith("/")) {
+      if (data.trim() === "/disconnect") {
+        showConnectionLostForever();
+      }
+      return;
+    }
     addMessage("doctor", data);
     hideTypingIndicator();
   }
+}
+
+// Показывает экран "connection lost" навсегда
+function showConnectionLostForever() {
+  // Отключаем ввод
+  userInput.disabled = true;
+  sendBtn.disabled = true;
+  // Показываем экран поверх чата
+  document.body.innerHTML += `
+    <div id="conn-lost-overlay" style="background:#000;position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;">
+      <span style="color:#fff;font-family:'Fira Mono',monospace;font-size:2.5em;letter-spacing:0.1em;animation:blink 1s steps(2, start) infinite;">
+        connection lost
+      </span>
+    </div>
+    <style>
+      @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+    </style>
+  `;
 }
 
    sendBtn.onclick = function() {
