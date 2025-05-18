@@ -3681,8 +3681,16 @@ const hiddenAdminCommand = "x7y9z"; // Скрытая команда
       addLog("Admin rights granted. You can now enable/disable security.", 'log');
       break;
       case 'get admin rights':
-      openChatWithAI();
-      break;
+  showWirePuzzle(
+    function() {
+      adminRights = true;
+      addLog("Admin rights granted.", 'log');
+    },
+    function() {
+      addLog("Admin rights cancelled.", 'log');
+    }
+  );
+  break;
       case 'disable security':
       if (adminRights) {
         addLog("Security system disabled.", 'log');
@@ -3707,7 +3715,7 @@ const hiddenAdminCommand = "x7y9z"; // Скрытая команда
         addLog("Unknown command. Type 'help' for list.");
         case 'contact':
   if (adminRights) {
-    window.open('/doctor-chat.html', '_blank');
+    window.open('./doctor-chat.html', '_blank');
   } else {
     addLog("ERROR: Admin privileges required. Access denied.", 'error');
   }
@@ -3799,6 +3807,122 @@ const hiddenAdminCommand = "x7y9z"; // Скрытая команда
   });
 
 })();
+// ...existing code...
+
+// filepath: c:\Users\ACER Nitro\Downloads\PsycheVault_Implant_Scan_Report_Another_Kostilny.html
+
+function showWirePuzzle(onSuccess, onFail) {
+  // Создаём модальное окно
+  let modal = document.createElement('div');
+  modal.style.position = 'fixed';
+  modal.style.left = 0;
+  modal.style.top = 0;
+  modal.style.right = 0;
+  modal.style.bottom = 0;
+  modal.style.background = 'rgba(11,12,16,0.97)';
+  modal.style.zIndex = 99999;
+  modal.style.display = 'flex';
+  modal.style.alignItems = 'center';
+  modal.style.justifyContent = 'center';
+
+  // Провода: пары цветов, которые надо соединить
+  const colors = ['#ff3c3c', '#66fcf1', '#ffe066', '#45a29e'];
+  const names = ['Red', 'Cyan', 'Yellow', 'Green'];
+  let order = [0,1,2,3].sort(()=>Math.random()-0.5);
+
+  let html = `
+    <div style="background:#1f2833;border:2px solid #66fcf1;border-radius:12px;padding:32px 38px;min-width:340px;max-width:95vw;text-align:center;color:#66fcf1;position:relative;">
+      <h3 style="color:#ffe066;">ADMIN WIRE PUZZLE</h3>
+      <div style="margin-bottom:10px;">Connect the wires: match left and right by color.<br>Drag from left to right.</div>
+      <div id="wires-puzzle" style="display:flex;justify-content:center;gap:60px;margin:24px 0;">
+        <div id="wires-left" style="display:flex;flex-direction:column;gap:18px;"></div>
+        <div id="wires-right" style="display:flex;flex-direction:column;gap:18px;"></div>
+      </div>
+      <div id="wires-status" style="color:#ffe066;min-height:18px;margin-bottom:8px;"></div>
+      <button id="wires-cancel" style="margin-top:18px;background:#222;color:#fff;border:1.5px solid #66fcf1;border-radius:4px;padding:6px 18px;font-weight:bold;letter-spacing:0.08em;cursor:pointer;">Cancel</button>
+    </div>
+  `;
+  modal.innerHTML = html;
+  document.body.appendChild(modal);
+
+  // Рисуем провода
+  const left = modal.querySelector('#wires-left');
+  const right = modal.querySelector('#wires-right');
+  const status = modal.querySelector('#wires-status');
+  let connections = {};
+  let dragging = null;
+
+  for (let i=0; i<4; ++i) {
+    let btn = document.createElement('div');
+    btn.textContent = names[i];
+    btn.style.background = colors[i];
+    btn.style.color = '#222';
+    btn.style.fontWeight = 'bold';
+    btn.style.borderRadius = '6px';
+    btn.style.padding = '8px 18px';
+    btn.style.cursor = 'grab';
+    btn.style.userSelect = 'none';
+    btn.draggable = true;
+    btn.dataset.idx = i;
+    btn.ondragstart = e => { dragging = i; };
+    left.appendChild(btn);
+  }
+  for (let i=0; i<4; ++i) {
+    let btn = document.createElement('div');
+    btn.textContent = names[order[i]];
+    btn.style.background = colors[order[i]];
+    btn.style.color = '#222';
+    btn.style.fontWeight = 'bold';
+    btn.style.borderRadius = '6px';
+    btn.style.padding = '8px 18px';
+    btn.style.cursor = 'pointer';
+    btn.style.userSelect = 'none';
+    btn.dataset.idx = order[i];
+    btn.ondragover = e => e.preventDefault();
+    btn.ondrop = e => {
+      if (dragging !== null) {
+        connections[dragging] = parseInt(btn.dataset.idx);
+        btn.textContent = names[order[i]] + " ← " + names[dragging];
+        btn.style.opacity = 0.7;
+        checkWin();
+        dragging = null;
+      }
+    };
+    right.appendChild(btn);
+  }
+
+  function checkWin() {
+    if (Object.keys(connections).length === 4) {
+      let ok = true;
+      for (let i=0; i<4; ++i) {
+        if (connections[i] !== i) ok = false;
+      }
+      if (ok) {
+        status.textContent = "Correct! Admin rights granted.";
+        setTimeout(()=>{
+          document.body.removeChild(modal);
+          if (onSuccess) onSuccess();
+        }, 900);
+      } else {
+        status.textContent = "Incorrect wiring. Try again.";
+        setTimeout(()=>{
+          status.textContent = "";
+          // Сбросить соединения
+          connections = {};
+          Array.from(right.children).forEach((btn,i)=>{
+            btn.textContent = names[order[i]];
+            btn.style.opacity = 1;
+          });
+        }, 1200);
+      }
+    }
+  }
+
+  modal.querySelector('#wires-cancel').onclick = function() {
+    document.body.removeChild(modal);
+    if (onFail) onFail();
+  };
+}
   </script>
   <script type="module">
 
@@ -3807,10 +3931,7 @@ const hiddenAdminCommand = "x7y9z"; // Скрытая команда
     loadImplantState(userId);
   });
 
-window.openChatWithAI = function() {
-  window.open("https://google.com", "_blank");
-    return;
-  }
+
 </script>
 </div>
 </body>
