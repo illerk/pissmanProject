@@ -376,23 +376,36 @@ userInput.addEventListener('input', function() {
   }, 1200);
 });
 
-    ws.onmessage = function(event) {
+   ws.onmessage = function(event) {
+  // Если пришёл Blob, читаем его как текст
+  if (event.data instanceof Blob) {
+    const reader = new FileReader();
+    reader.onload = function() {
+      handleMessage(reader.result);
+    };
+    reader.readAsText(event.data);
+  } else {
+    handleMessage(event.data);
+  }
+};
+
+function handleMessage(data) {
   try {
-    const data = JSON.parse(event.data);
-    if (data.type === "typing") {
+    const parsed = JSON.parse(data);
+    if (parsed.type === "typing") {
       showTypingIndicator();
       return;
     }
-    if (data.type === "stop_typing") {
+    if (parsed.type === "stop_typing") {
       hideTypingIndicator();
       return;
     }
   } catch (e) {
     // Если не JSON, значит это обычное текстовое сообщение от доктора
-    addMessage("doctor", event.data);
-    hideTypingIndicator(); // На всякий случай убираем индикатор при получении сообщения
+    addMessage("doctor", data);
+    hideTypingIndicator();
   }
-};
+}
 
    sendBtn.onclick = function() {
   if (userInput.value.trim()) {
