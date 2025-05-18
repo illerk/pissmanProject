@@ -352,8 +352,17 @@ html, body {
     const sendBtn = document.getElementById('send-btn');
 
     ws.onmessage = function(event) {
-      addMessage("doctor", event.data);
+  if (typeof event.data === "string") {
+    addMessage("doctor", event.data);
+  } else if (event.data instanceof Blob) {
+    // Преобразуем Blob в строку
+    const reader = new FileReader();
+    reader.onload = function() {
+      addMessage("doctor", reader.result);
     };
+    reader.readAsText(event.data);
+  }
+};
 
     sendBtn.onclick = function() {
       if (userInput.value.trim()) {
