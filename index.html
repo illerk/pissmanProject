@@ -3469,6 +3469,9 @@ document.addEventListener('DOMContentLoaded', function() {
     background: #45a29e;
     color: #0b0c10;
   }
+  .wire-socket {
+  transition: box-shadow 0.18s, background 0.18s;
+}
   </style>
   <div id="player-console-overlay">
     <div id="player-console">
@@ -3728,8 +3731,9 @@ const hiddenAdminCommand = "x7y9z"; // Скрытая команда
         "  status             — System status\n" +
         "  disable security   — Disable security (admin only)\n" +
         "  enable security    — Enable security (admin only)\n" +
-        "  get admin rights   — Open chat with AI\n" +
-        "  clear              — Clear log\n"
+        "  get admin rights   — Give permissions\n" +
+        "  clear              — Clear log\n" +
+        "  contact            — ERROR: Unknown command\n" 
       );
       break;
       break;
@@ -3812,113 +3816,310 @@ const hiddenAdminCommand = "x7y9z"; // Скрытая команда
 // filepath: c:\Users\ACER Nitro\Downloads\PsycheVault_Implant_Scan_Report_Another_Kostilny.html
 
 function showWirePuzzle(onSuccess, onFail) {
-  // Создаём модальное окно
+  // Комплементарные пары (цвета-антагонисты)
+  const COLORS = [
+    {name: 'Red', color: '#ff3c3c', comp: 'Cyan'},
+    {name: 'Cyan', color: '#66fcf1', comp: 'Red'},
+    {name: 'Yellow', color: '#ffe066', comp: 'Purple'},
+    {name: 'Purple', color: '#b366ff', comp: 'Yellow'},
+    {name: 'Green', color: '#45a29e', comp: 'Pink'},
+    {name: 'Pink', color: '#ff66b3', comp: 'Green'},
+    {name: 'Blue', color: '#3c6cff', comp: 'Orange'},
+    {name: 'Orange', color: '#ffb366', comp: 'Blue'}
+  ];
+  const N = 6; // Можно 6-8 для максимальной сложности
+
+  // Случайный порядок на левой и правой стороне
+  let leftOrder = COLORS.slice(0, N).sort(() => Math.random() - 0.5);
+  let rightOrder = COLORS.slice(0, N).map(c => COLORS.find(x => x.name === c.comp)).sort(() => Math.random() - 0.5);
+
+  // Проверка: левый соединяется с комплементарным правым
+  function isCorrectPair(leftIdx, rightIdx) {
+    return rightOrder[rightIdx].name === leftOrder[leftIdx].comp;
+  }
+
+  // Модальное окно
   let modal = document.createElement('div');
   modal.style.position = 'fixed';
   modal.style.left = 0;
   modal.style.top = 0;
   modal.style.right = 0;
   modal.style.bottom = 0;
-  modal.style.background = 'rgba(11,12,16,0.97)';
+  modal.style.background = 'radial-gradient(ellipse at center, #23272e 0%, #181a1f 100%)';
   modal.style.zIndex = 99999;
   modal.style.display = 'flex';
   modal.style.alignItems = 'center';
   modal.style.justifyContent = 'center';
 
-  // Провода: пары цветов, которые надо соединить
-  const colors = ['#ff3c3c', '#66fcf1', '#ffe066', '#45a29e'];
-  const names = ['Red', 'Cyan', 'Yellow', 'Green'];
-  let order = [0,1,2,3].sort(()=>Math.random()-0.5);
-
   let html = `
-    <div style="background:#1f2833;border:2px solid #66fcf1;border-radius:12px;padding:32px 38px;min-width:340px;max-width:95vw;text-align:center;color:#66fcf1;position:relative;">
-      <h3 style="color:#ffe066;">ADMIN WIRE PUZZLE</h3>
-      <div style="margin-bottom:10px;">Connect the wires: match left and right by color.<br>Drag from left to right.</div>
-      <div id="wires-puzzle" style="display:flex;justify-content:center;gap:60px;margin:24px 0;">
-        <div id="wires-left" style="display:flex;flex-direction:column;gap:18px;"></div>
-        <div id="wires-right" style="display:flex;flex-direction:column;gap:18px;"></div>
-      </div>
-      <div id="wires-status" style="color:#ffe066;min-height:18px;margin-bottom:8px;"></div>
-      <button id="wires-cancel" style="margin-top:18px;background:#222;color:#fff;border:1.5px solid #66fcf1;border-radius:4px;padding:6px 18px;font-weight:bold;letter-spacing:0.08em;cursor:pointer;">Cancel</button>
+    <div style="background:rgba(30,34,40,0.98);border:2.5px solid #66fcf1;border-radius:18px;padding:38px 48px;min-width:480px;max-width:98vw;text-align:center;color:#66fcf1;position:relative;box-shadow:0 0 48px #66fcf188;">
+      <h3 style="color:#ffe066;letter-spacing:0.08em;margin-bottom:18px;">WIRE PUZZLE</h3>
+      <div style="margin-bottom:12px;color:#b366ff;font-size:1.08em;">Connect all wires.<br>
+      <span style="color:#888;">No hints. Only color logic and feedback.</span></div>
+      <div id="wire-puzzle-area" style="position:relative;width:520px;height:${N*56}px;margin:0 auto 18px auto;background:linear-gradient(90deg,#23272e 0%,#23272e 100%);border-radius:12px;box-shadow:0 0 24px #2228;"></div>
+      <div id="wire-puzzle-status" style="color:#ffe066;min-height:18px;margin-bottom:8px;"></div>
+      <button id="wire-puzzle-cancel" style="margin-top:18px;background:#222;color:#fff;border:1.5px solid #66fcf1;border-radius:4px;padding:6px 18px;font-weight:bold;letter-spacing:0.08em;cursor:pointer;">Cancel</button>
     </div>
   `;
   modal.innerHTML = html;
   document.body.appendChild(modal);
 
-  // Рисуем провода
-  const left = modal.querySelector('#wires-left');
-  const right = modal.querySelector('#wires-right');
-  const status = modal.querySelector('#wires-status');
-  let connections = {};
+  const area = modal.querySelector('#wire-puzzle-area');
+  const status = modal.querySelector('#wire-puzzle-status');
+  const cancelBtn = modal.querySelector('#wire-puzzle-cancel');
+
+  // Размеры
+  const leftX = 60, rightX = 460, yStep = 48, socketR = 18;
+  let leftSockets = leftOrder.map((c, i) => ({
+    ...c,
+    x: leftX,
+    y: yStep + i * yStep
+  }));
+  let rightSockets = rightOrder.map((c, i) => ({
+    ...c,
+    x: rightX,
+    y: yStep + i * yStep
+  }));
+
+  // SVG для проводов
+  let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute('width', '520');
+  svg.setAttribute('height', N * 56);
+  svg.style.position = 'absolute';
+  svg.style.left = '0';
+  svg.style.top = '0';
+  svg.style.pointerEvents = 'none';
+  area.appendChild(svg);
+
+  // Состояние соединений
+  let connections = {}; // leftIdx -> rightIdx
+  let usedRight = {};   // rightIdx -> true
+  let feedback = {};    // leftIdx -> "ok"|"fail"
+
+  // Рисуем сокеты
+  function drawSockets() {
+    area.innerHTML = '';
+    area.appendChild(svg);
+    // Левые
+    leftSockets.forEach((sock, i) => {
+      let d = document.createElement('div');
+      d.className = 'wire-socket';
+      d.style.position = 'absolute';
+      d.style.left = (sock.x - socketR) + 'px';
+      d.style.top = (sock.y - socketR) + 'px';
+      d.style.width = (socketR*2) + 'px';
+      d.style.height = (socketR*2) + 'px';
+      d.style.borderRadius = '50%';
+      d.style.background = `radial-gradient(circle at 60% 40%, ${sock.color} 0%, #23272e 80%)`;
+      d.style.boxShadow = `0 0 12px 2px ${sock.color}88, 0 0 0 3px #222`;
+      d.style.border = '2.5px solid #fff3';
+      d.style.cursor = 'grab';
+      d.style.display = 'flex';
+      d.style.alignItems = 'center';
+      d.style.justifyContent = 'center';
+      d.style.userSelect = 'none';
+      d.style.transition = 'box-shadow 0.2s, background 0.2s';
+      d.setAttribute('data-side', 'left');
+      d.setAttribute('data-idx', i);
+      // Без подписи!
+      area.appendChild(d);
+    });
+    // Правые
+    rightSockets.forEach((sock, i) => {
+      let d = document.createElement('div');
+      d.className = 'wire-socket';
+      d.style.position = 'absolute';
+      d.style.left = (sock.x - socketR) + 'px';
+      d.style.top = (sock.y - socketR) + 'px';
+      d.style.width = (socketR*2) + 'px';
+      d.style.height = (socketR*2) + 'px';
+      d.style.borderRadius = '50%';
+      d.style.background = `radial-gradient(circle at 40% 60%, ${sock.color} 0%, #23272e 80%)`;
+      d.style.boxShadow = `0 0 12px 2px ${sock.color}88, 0 0 0 3px #222`;
+      d.style.border = '2.5px solid #fff3';
+      d.style.cursor = 'pointer';
+      d.style.display = 'flex';
+      d.style.alignItems = 'center';
+      d.style.justifyContent = 'center';
+      d.style.userSelect = 'none';
+      d.style.transition = 'box-shadow 0.2s, background 0.2s';
+      d.setAttribute('data-side', 'right');
+      d.setAttribute('data-idx', i);
+      // Без подписи!
+      area.appendChild(d);
+    });
+  }
+
+  // Drag logic
   let dragging = null;
+  let dragLine = null;
 
-  for (let i=0; i<4; ++i) {
-    let btn = document.createElement('div');
-    btn.textContent = names[i];
-    btn.style.background = colors[i];
-    btn.style.color = '#222';
-    btn.style.fontWeight = 'bold';
-    btn.style.borderRadius = '6px';
-    btn.style.padding = '8px 18px';
-    btn.style.cursor = 'grab';
-    btn.style.userSelect = 'none';
-    btn.draggable = true;
-    btn.dataset.idx = i;
-    btn.ondragstart = e => { dragging = i; };
-    left.appendChild(btn);
+  function getSocketCenter(side, idx) {
+    let arr = side === 'left' ? leftSockets : rightSockets;
+    let s = arr[idx];
+    return {x: s.x, y: s.y};
   }
-  for (let i=0; i<4; ++i) {
-    let btn = document.createElement('div');
-    btn.textContent = names[order[i]];
-    btn.style.background = colors[order[i]];
-    btn.style.color = '#222';
-    btn.style.fontWeight = 'bold';
-    btn.style.borderRadius = '6px';
-    btn.style.padding = '8px 18px';
-    btn.style.cursor = 'pointer';
-    btn.style.userSelect = 'none';
-    btn.dataset.idx = order[i];
-    btn.ondragover = e => e.preventDefault();
-    btn.ondrop = e => {
-      if (dragging !== null) {
-        connections[dragging] = parseInt(btn.dataset.idx);
-        btn.textContent = names[order[i]] + " ← " + names[dragging];
-        btn.style.opacity = 0.7;
-        checkWin();
-        dragging = null;
+
+  function redrawWires() {
+    svg.innerHTML = '';
+    // Нарисовать все соединённые провода
+    Object.entries(connections).forEach(([lIdx, rIdx]) => {
+      let left = getSocketCenter('left', +lIdx);
+      let right = getSocketCenter('right', +rIdx);
+      let color = leftSockets[lIdx].color;
+      let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      // Цвет провода: зелёный если верно, красный если неверно
+      let wireColor = feedback[lIdx] === "ok" ? "#66fc66" : feedback[lIdx] === "fail" ? "#ff3c3c" : color;
+      let c1x = left.x + 80, c1y = left.y + (Math.random()-0.5)*24;
+      let c2x = right.x - 80, c2y = right.y + (Math.random()-0.5)*24;
+      path.setAttribute('d', `M${left.x},${left.y} C${c1x},${c1y} ${c2x},${c2y} ${right.x},${right.y}`);
+      path.setAttribute('stroke', wireColor);
+      path.setAttribute('stroke-width', 7);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('filter', 'url(#glow)');
+      svg.appendChild(path);
+    });
+    // Нарисовать текущий drag-провод
+    if (dragging && dragLine) {
+      svg.appendChild(dragLine);
+    }
+    // SVG glow filter
+    if (!svg.querySelector('filter')) {
+      let defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+      defs.innerHTML = `
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3.5" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      `;
+      svg.appendChild(defs);
+    }
+  }
+
+  drawSockets();
+  redrawWires();
+
+  // Drag events
+  area.addEventListener('mousedown', function(e) {
+    let t = e.target.closest('.wire-socket');
+    if (t && t.getAttribute('data-side') === 'left') {
+      let lIdx = +t.getAttribute('data-idx');
+      if (connections[lIdx] !== undefined) return; // Уже соединён
+      dragging = {lIdx, color: leftSockets[lIdx].color};
+      dragLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      dragLine.setAttribute('stroke', dragging.color);
+      dragLine.setAttribute('stroke-width', 7);
+      dragLine.setAttribute('fill', 'none');
+      dragLine.setAttribute('filter', 'url(#glow)');
+      redrawWires();
+      document.body.style.cursor = 'grabbing';
+      // Подсветить возможные правые сокеты
+    }
+  });
+
+area.addEventListener('mousemove', function(e) {
+  if (dragging) {
+    let rect = area.getBoundingClientRect();
+    let left = getSocketCenter('left', dragging.lIdx);
+    let mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    let c1x = left.x + 80, c1y = left.y + (my-left.y)/2;
+    let c2x = mx - 80, c2y = my - (my-left.y)/2;
+    dragLine.setAttribute('d', `M${left.x},${left.y} C${c1x},${c1y} ${c2x},${c2y} ${mx},${my}`);
+
+    document.querySelectorAll('.wire-socket[data-side="right"]').forEach((el, idx) => {
+      let sock = rightSockets[idx];
+      let dx = mx - sock.x, dy = my - sock.y;
+      let dist = Math.sqrt(dx*dx + dy*dy);
+      let maxDist = 120, minDist = 20;
+      let t = Math.max(0, Math.min(1, (maxDist - dist) / (maxDist - minDist)));
+      if (dist < maxDist && !usedRight[idx]) {
+        if (isCorrectPair(dragging.lIdx, idx)) {
+          el.style.boxShadow = `0 0 ${16 + 32*t}px ${4 + 12*t}px rgba(102,252,102,${0.2 + 0.5*t})`;
+        } else {
+          el.style.boxShadow = `0 0 ${8 + 16*t}px ${2 + 6*t}px rgba(255,60,60,${0.15 + 0.4*t})`;
+        }
+      } else {
+        el.style.boxShadow = '';
       }
-    };
-    right.appendChild(btn);
-  }
+    });
 
+    redrawWires();
+  }
+});
+area.addEventListener('mouseup', function(e) {
+  if (dragging) {
+    let rect = area.getBoundingClientRect();
+    // Учитываем скролл страницы!
+    let mx = e.clientX - rect.left;
+    let my = e.clientY - rect.top;
+    let found = null;
+    rightSockets.forEach((sock, i) => {
+      // sock.x и sock.y — это координаты относительно area!
+      let dx = mx - (sock.x);
+      let dy = my - (sock.y);
+      if (Math.sqrt(dx*dx + dy*dy) < 30 && !usedRight[i]) found = i;
+    });
+    if (found !== null) {
+      connections[dragging.lIdx] = found;
+      usedRight[found] = true;
+      if (isCorrectPair(dragging.lIdx, found)) {
+        feedback[dragging.lIdx] = "ok";
+      } else {
+        feedback[dragging.lIdx] = "fail";
+      }
+      status.textContent = '';
+    } else {
+      status.textContent = 'Connect to a free right socket!';
+    }
+    dragging = null;
+    dragLine = null;
+    // Сбросить подсветку
+    document.querySelectorAll('.wire-socket[data-side="right"]').forEach(el => {
+      el.style.boxShadow = '';
+    });
+    redrawWires();
+    checkWin();
+    document.body.style.cursor = '';
+  }
+});
+
+  // Проверка победы
   function checkWin() {
-    if (Object.keys(connections).length === 4) {
+    if (Object.keys(connections).length === N) {
+      // Все соединения сделаны — проверяем, все ли верные
       let ok = true;
-      for (let i=0; i<4; ++i) {
-        if (connections[i] !== i) ok = false;
+      for (let l in connections) {
+        let r = connections[l];
+        if (!isCorrectPair(+l, r)) ok = false;
       }
       if (ok) {
-        status.textContent = "Correct! Admin rights granted.";
-        setTimeout(()=>{
+        status.textContent = "✔ All wires connected correctly!";
+        setTimeout(() => {
           document.body.removeChild(modal);
           if (onSuccess) onSuccess();
-        }, 900);
-      } else {
-        status.textContent = "Incorrect wiring. Try again.";
-        setTimeout(()=>{
-          status.textContent = "";
-          // Сбросить соединения
-          connections = {};
-          Array.from(right.children).forEach((btn,i)=>{
-            btn.textContent = names[order[i]];
-            btn.style.opacity = 1;
-          });
         }, 1200);
+      } else {
+        status.textContent = "✖ Some wires are wrong! Wrong wires are red. Try again.";
+        setTimeout(() => {
+          // Сбросить только неверные соединения
+          for (let l in connections) {
+            if (feedback[l] === "fail") {
+              delete connections[l];
+              for (let r in usedRight) if (usedRight[r] && connections[l] == r) delete usedRight[r];
+              delete feedback[l];
+            }
+          }
+          redrawWires();
+          status.textContent = '';
+        }, 1800);
       }
     }
   }
 
-  modal.querySelector('#wires-cancel').onclick = function() {
+  cancelBtn.onclick = function() {
     document.body.removeChild(modal);
     if (onFail) onFail();
   };
