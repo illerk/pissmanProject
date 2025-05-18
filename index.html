@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <title>PsycheVault Scan</title>
   <style>
+    body, * {
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
     body {
       font-family: 'Courier New', monospace;
       font-size: 10pt;
@@ -3853,9 +3858,8 @@ function showWirePuzzle(onSuccess, onFail) {
 
   let html = `
     <div style="background:rgba(30,34,40,0.98);border:2.5px solid #66fcf1;border-radius:18px;padding:38px 48px;min-width:480px;max-width:98vw;text-align:center;color:#66fcf1;position:relative;box-shadow:0 0 48px #66fcf188;">
-      <h3 style="color:#ffe066;letter-spacing:0.08em;margin-bottom:18px;">WIRE PUZZLE</h3>
-      <div style="margin-bottom:12px;color:#b366ff;font-size:1.08em;">Connect all wires.<br>
-      <span style="color:#888;">No hints. Only color logic and feedback.</span></div>
+      <h3 style="color:#ffe066;letter-spacing:0.08em;margin-bottom:18px;">WIRES</h3>
+      <div style="margin-bottom:12px;color:#b366ff;font-size:1.08em;">Connect all wires.<br></div>
       <div id="wire-puzzle-area" style="position:relative;width:520px;height:${N*56}px;margin:0 auto 18px auto;background:linear-gradient(90deg,#23272e 0%,#23272e 100%);border-radius:12px;box-shadow:0 0 24px #2228;"></div>
       <div id="wire-puzzle-status" style="color:#ffe066;min-height:18px;margin-bottom:8px;"></div>
       <button id="wire-puzzle-cancel" style="margin-top:18px;background:#222;color:#fff;border:1.5px solid #66fcf1;border-radius:4px;padding:6px 18px;font-weight:bold;letter-spacing:0.08em;cursor:pointer;">Cancel</button>
