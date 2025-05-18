@@ -1,31 +1,20 @@
-import OpenAI from "openai";
-import express from "express";
-import cors from "cors";
+// server.js
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({ port: 8080 });
 
-const client = new OpenAI({
-  apiKey: "zu-777b06f0d45675ad241ad4ce5d3f84d0",
-  baseURL: "https://zukijourney.com/v1"
-});
+let clients = [];
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-app.post("/api/chat", async (req, res) => {
-  try {
-    const { messages, model } = req.body;
-    const response = await client.chat.completions.create({
-      model: model || "gpt-4.1",
-      messages
+wss.on('connection', function connection(ws) {
+  clients.push(ws);
+  ws.on('message', function incoming(message) {
+    // Отправить всем, кроме отправителя (или только "оператору")
+    clients.forEach(client => {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
     });
-    res.json(response);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-const PORT = 3000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server listening on port ${PORT}`);
-  console.log("Server started!");
+  });
+  ws.on('close', () => {
+    clients = clients.filter(c => c !== ws);
+  });
 });

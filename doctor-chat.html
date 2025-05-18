@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+@font-face {
+  font-family: 'Determination Mono';
+  src: url('fonts/determinationmonoweb-webfont.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+</style>
+  <meta charset="UTF-8">
+  <title>PsycheVault | Doctor Terminal Chat</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #181818;
+    color: #cccccc;
+    font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace;
+    overflow: hidden;
+  }
+  #boot-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #111112;
+    color: #cccccc;
+    font-family: 'Fira Mono', 'Consolas', monospace;
+    font-size: 1.1em;
+    padding: 48px 8vw 0 8vw;
+    white-space: pre;
+    overflow: hidden;
+    z-index: 1000;
+    letter-spacing: 0.5px;
+    user-select: none;
+  }
+  .main-layout {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background: #181818;
+  }
+  .sidebar {
+    width: 300px;
+    background: #222224;
+    border-right: 2px solid #444444;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 36px 0 0 0;
+    box-sizing: border-box;
+    min-width: 180px;
+    position: relative;
+    z-index: 2;
+  }
+  .sidebar .avatar-big {
+    width: 80px;
+    height: 80px;
+    border-radius: 0;
+    border: 2px solid #888888;
+    margin-bottom: 14px;
+    object-fit: cover;
+    background: #181818;
+    box-shadow: none;
+    image-rendering: pixelated;
+  }
+  .sidebar .doctor-name {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #cccccc;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+  .sidebar .doctor-role {
+    font-size: 0.98em;
+    color: #888888;
+    opacity: 0.7;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .sidebar .status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 0;
+    background: #888888;
+    margin-right: 5px;
+    vertical-align: middle;
+    box-shadow: none;
+  }
+  .sidebar .status-text {
+    color: #888888;
+    font-size: 0.98em;
+    opacity: 0.8;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .sidebar .user-id {
+    color: #888888;
+    font-size: 0.95em;
+    opacity: 0.7;
+    margin-bottom: 18px;
+    text-align: center;
+    letter-spacing: 1.2px;
+    font-family: inherit;
+  }
+  .sidebar .encryption {
+    color: #888888;
+    font-size: 0.95em;
+    margin-bottom: 12px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    justify-content: center;
+    opacity: 0.8;
+  }
+  .sidebar .encryption-icon path {
+    fill: #888888 !important;
+  }
+  .sidebar .exit-btn {
+    margin-top: auto;
+    margin-bottom: 24px;
+    background: #181818;
+    color: #cccccc;
+    border: 2px solid #888888;
+    border-radius: 0;
+    padding: 10px 28px;
+    font-size: 1em;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+  }
+  .sidebar .exit-btn:hover {
+    background: #444444;
+    color: #fff;
+    border-color: #fff;
+  }
+  .chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #181818;
+    position: relative;
+    z-index: 1;
+  }
+  .chat-header {
+    background: #222224;
+    padding: 16px 32px;
+    border-bottom: 2px solid #444444;
+    font-size: 1.08em;
+    font-weight: bold;
+    color: #cccccc;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+    position: relative;
+    font-family: inherit;
+  }
+  .chat-header .encryption-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    vertical-align: middle;
+    filter: none;
+  }
+  .chat-header .encryption-icon path {
+    fill: #888888 !important;
+  }
+  .chat-header .header-status {
+    font-size: 0.98em;
+    color: #888888;
+    margin-left: 12px;
+    font-weight: normal;
+    opacity: 0.7;
+  }
+  .chat-log {
+    flex: 1;
+    padding: 32px 6vw 16px 6vw;
+    overflow-y: auto;
+    background: #181818;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: auto;
+    min-height: 0;
+  }
+  .msg-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    font-family: inherit;
+  }
+  .msg-row.user {
+    flex-direction: row-reverse;
+  }
+  .msg-bubble {
+    max-width: 60vw;
+    padding: 10px 18px;
+    border-radius: 0;
+    font-size: 1em;
+    line-height: 1.4;
+    background: #222224;
+    color: #cccccc;
+    border: 2px solid #444444;
+    box-shadow: none;
+    word-break: break-word;
+    position: relative;
+    opacity: 1;
+    min-width: 60px;
+    min-height: 24px;
+    display: flex;
+    align-items: flex-end;
+    font-family: inherit;
+  }
+  .msg-row.doctor .msg-bubble {
+    background: #222224;
+    color: #cccccc;
+    border-left: 4px solid #888888;
+    border-right: 2px solid #444444;
+  }
+  .msg-row.user .msg-bubble {
+    background: #181818;
+    color: #cccccc;
+    border-right: 4px solid #888888;
+    border-left: 2px solid #444444;
+    margin-left: auto;
+  }
+  .msg-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 0;
+    background: #181818;
+    object-fit: cover;
+    border: 2px solid #888888;
+    box-shadow: none;
+    image-rendering: pixelated;
+  }
+  .msg-time {
+    font-size: 0.92em;
+    color: #888888;
+    opacity: 0.5;
+    margin-left: 8px;
+    margin-right: 2px;
+    align-self: flex-end;
+    font-family: inherit;
+    min-width: 48px;
+    text-align: right;
+  }
+  .answer-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 16px 6vw 24px 6vw;
+    border-top: 2px solid #444444;
+    background: #222224;
+    min-height: 60px;
+  }
+  .answer-btn {
+    background: #181818;
+    color: #cccccc;
+    border: 2px solid #888888;
+    border-radius: 0;
+    padding: 10px 28px;
+    font-size: 1em;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+    font-weight: bold;
+  }
+  .answer-btn:hover {
+    background: #444444;
+    color: #fff;
+    border-color: #fff;
+  }
+  .typing-indicator {
+    color: #888888;
+    font-size: 1em;
+    margin: 0 0 0 40px;
+    opacity: 0.7;
+    font-style: italic;
+    font-family: inherit;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    background: #222224;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #444444;
+    border-radius: 0;
+  }
+  .sidebar .encryption-icon path,
+.chat-header .encryption-icon path,
+.sidebar .status-dot {
+  fill: #00ff00 !important;
+  background: #00ff00 !important;
+}
+.sidebar .status-dot {
+  box-shadow: 0 0 6px #00ff00;
+}
+.user-input-row {
+  display: flex;
+  border-top: 2px solid #444444;
+  background: #222224;
+  padding: 0 6vw 0 6vw;
+  height: 54px;
+  align-items: center;
+}
+.user-input {
+  flex: 1;
+  background: #181818;
+  color: #cccccc;
+  border: 2px solid #444444;
+  border-radius: 0;
+  font-size: 1em;
+  font-family: inherit;
+  padding: 10px 14px;
+  outline: none;
+  margin-right: 10px;
+}
+.user-input:disabled {
+  background: #222224;
+  color: #888888;
+}
+.send-btn {
+  background: #181818;
+  color: #cccccc;
+  border: 2px solid #888888;
+  border-radius: 0;
+  padding: 10px 24px;
+  font-size: 1em;
+  font-family: inherit;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.send-btn:disabled {
+  color: #888888;
+  border-color: #444444;
+  cursor: not-allowed;
+}
+.typing-indicator .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin: 0 2px;
+  background: #00ff00;
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: typingBlink 1.2s infinite both;
+}
+.typing-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBlink {
+  0%, 80%, 100% { opacity: 0.3; }
+  40% { opacity: 1; }
+}
+.sidebar .status-dot {
+  background: #888888 !important;
+  box-shadow: none !important;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.sidebar .status-dot.online {
+  background: #00ff00 !important;
+  box-shadow: 0 0 6px #00ff00 !important;
+}
+</style>
+</head>
+<body>
+  <div id="game-root"></div>
+  <audio id="bg-music" src="sound/Machine in the Walls (Mausoleum).mp3" loop></audio>
+  <audio id="boss-music" src="sound/Undertale OST_ 036 - Dummy!.mp3" loop></audio>
+  <div id="boot-screen"></div>
+  <div class="main-layout" id="main-layout" style="display:none;">
+    <div class="sidebar">
+      <img class="avatar-big" src="https://i.imgur.com/3QF1Q2Q.png" alt="Doctor">
+      <div>
+        <div class="doctor-name">Dr. K</div>
+        <div class="doctor-role">Corporate Psychotherapist</div>
+        <div class="status-text"><span class="status-dot"></span>Online</div>
+        <div class="user-id" id="user-id"></div>
+        <div class="encryption">
+          <svg class="encryption-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-7V7a6 6 0 1 0-12 0v3a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2zm-8-3a4 4 0 1 1 8 0v3H8V7z" fill="#00ff00"/></svg>
+          End-to-end encryption
+        </div>
+      </div>
+      <button class="exit-btn" onclick="window.close();">Exit</button>
+    </div>
+    <div class="chat-area">
+      <div class="chat-header">
+        <svg class="encryption-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6-7V7a6 6 0 1 0-12 0v3a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2zm-8-3a4 4 0 1 1 8 0v3H8V7z" fill="#00ff00"/></svg>
+        Doctor K.
+        <span class="header-status">[Secure Channel]</span>
+      </div>
+      <div class="chat-log" id="chat-log"></div>
+      <div class="answer-buttons" id="answer-buttons"></div>
+      <div class="user-input-row" id="user-input-row">
+  <input type="text" id="user-input" class="user-input" placeholder="Type your message..." autocomplete="off" />
+  <button id="send-btn" class="send-btn">Send</button>
+</div>
+    </div>
+  </div>
+  <script>
+    // --- Boot animation ---
+    const bootLines = [
+      "PsycheVault Secure Messenger v2.4.1",
+      "Loading encrypted kernel...",
+      "Checking channel integrity...",
+      "Initializing communication protocol...",
+      "Establishing secure connection...",
+      "Authenticating user...",
+      "Connecting to corporate server...",
+      "Dr. K is online.",
+      "Welcome to the secure corporate chat."
+    ];
+    let bootIndex = 0;
+    const bootScreen = document.getElementById('boot-screen');
+    function showBootLine() {
+      if (bootIndex < bootLines.length) {
+        bootScreen.textContent += bootLines[bootIndex] + "\n";
+        bootIndex++;
+        setTimeout(showBootLine, 400 + Math.random()*200);
+      } else {
+        setTimeout(() => {
+          bootScreen.style.display = 'none';
+          document.getElementById('main-layout').style.display = 'flex';
+          startChat();
+        }, 700);
+      }
+      
+    }
+
+    showBootLine();
+
+    // --- Generate pseudo user id ---
+    function genUserId() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let id = "";
+      for (let i = 0; i < 8; i++) id += chars[Math.floor(Math.random()*chars.length)];
+      return "ID-" + id;
+    }
+    document.getElementById('user-id').textContent = genUserId();
+
+    // --- Doctor chat logic ---
+document.body.addEventListener('click', function playMusicOnce() {
+  const music = document.getElementById('bg-music');
+  if (music && music.paused) {
+    music.volume = 0.7;
+    music.currentTime = 0;
+    music.play().catch(()=>{});
+  }
+  document.body.removeEventListener('click', playMusicOnce);
+});
+const chatLog = document.getElementById('chat-log');
+const userInput = document.getElementById('user-input');
+const sendBtn = document.getElementById('send-btn');
+const statusText = document.querySelector('.status-text');
+const statusDot = document.querySelector('.status-dot');
+const doctorAvatar = "https://i.imgur.com/3QF1Q2Q.png";
+let doctorOnline = false;
+let doctorResponding = false;
+let connectionLost = false;
+
+// Сообщения доктора для автоответа
+const doctorAutoReplies = [
+  "Thank you for your message. Please wait while I review your case.",
+  "Analyzing your data...",
+  "Initial diagnostics complete. Further instructions will follow.",
+  "Please remain calm and do not disconnect."
+];
+
+// --- Boot animation (оставьте как есть) ---
+
+// --- Генерация user id (оставьте как есть) ---
+
+// --- Основная логика чата ---
+function setDoctorStatus(online) {
+  doctorOnline = online;
+  if (online) {
+    statusText.innerHTML = '<span class="status-dot online"></span>Online';
+  } else {
+    statusText.innerHTML = '<span class="status-dot"></span>Offline';
+  }
+}
+
+function setInputEnabled(enabled) {
+  userInput.disabled = !enabled;
+  sendBtn.disabled = !enabled;
+}
+
+function addMessage(sender, text) {
+  const row = document.createElement('div');
+  row.className = 'msg-row ' + sender;
+  if (sender === "doctor") {
+    const avatar = document.createElement('img');
+    avatar.src = doctorAvatar;
+    avatar.className = 'msg-avatar';
+    row.appendChild(avatar);
+  }
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.textContent = text;
+  // Add time
+  const time = document.createElement('span');
+  time.className = 'msg-time';
+  time.textContent = getTime();
+  row.appendChild(bubble);
+  row.appendChild(time);
+  chatLog.appendChild(row);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+function getTime() {
+  const d = new Date();
+  return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+}
+
+function showTypingIndicator() {
+  let typing = document.getElementById('typing-indicator');
+  if (!typing) {
+    typing = document.createElement('div');
+    typing.id = 'typing-indicator';
+    typing.className = 'typing-indicator';
+    typing.innerHTML = `Doctor is typing <span class="dot"></span><span class="dot"></span><span class="dot"></span>`;
+    chatLog.appendChild(typing);
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+}
+function hideTypingIndicator() {
+  const typing = document.getElementById('typing-indicator');
+  if (typing) typing.remove();
+}
+
+// --- Сценарий: доктор оффлайн, пользователь может писать ---
+setDoctorStatus(false);
+setInputEnabled(true);
+
+sendBtn.onclick = onUserSend;
+
+function onUserSend() {
+  if (connectionLost) return;
+  const text = userInput.value.trim();
+  if (!text) return;
+  addMessage("user", text);
+  userInput.value = '';
+  setInputEnabled(false);
+  // Доктор становится онлайн и начинает отвечать
+  setTimeout(() => {
+    setDoctorStatus(true);
+    doctorResponding = true;
+    doctorAutoReplySequence(0);
+  }, 1200);
+}
+
+
+
+// --- После автоответа пользователь может снова писать ---
+// --- После следующего сообщения пользователя — connection lost ---
+
+let userSentAfterDoctor = false;
+
+userInput.addEventListener('input', function() {
+  if (doctorResponding || connectionLost) userInput.value = '';
+});
+
+function onUserSendAfterDoctor() {
+  if (connectionLost) return;
+  const text = userInput.value.trim();
+  if (!text) return;
+  addMessage("user", text);
+  userInput.value = '';
+  setInputEnabled(false);
+  // Доктор начинает печатать, но соединение обрывается
+  setDoctorStatus(true);
+  showTypingIndicator();
+  setTimeout(connectionLostScreen, 1800);
+}
+
+// Переопределяем обработчик после первого цикла
+function enableSecondUserInput() {
+  sendBtn.onclick = onUserSendAfterDoctor;
+}
+
+// После автоответа разрешаем второй ввод
+function doctorAutoReplySequence(idx) {
+  if (idx >= doctorAutoReplies.length) {
+    doctorResponding = false;
+    setInputEnabled(true);
+    enableSecondUserInput();
+    return;
+  }
+  showTypingIndicator();
+  setTimeout(() => {
+    hideTypingIndicator();
+    addMessage("doctor", doctorAutoReplies[idx]);
+    doctorAutoReplySequence(idx + 1);
+  }, 1800 + Math.random()*800);
+}
+
+// --- Экран "connection lost" ---
+function connectionLostScreen() {
+  connectionLost = true;
+  const music = document.getElementById('bg-music');
+  if (music) music.pause();
+  document.getElementById('game-root').innerHTML = `
+    <div id="ut-boss-bg" style="background:#000;position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;">
+      <span id="conn-lost" style="color:#fff;font-family:'Fira Mono',monospace;font-size:2.5em;letter-spacing:0.1em;animation:blink 1s steps(2, start) infinite;">
+        connection lost
+      </span>
+    </div>
+    <style>
+      @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+    </style>
+  `;
+  setTimeout(bossBattle, 2000);
+}
+function bossBattle() {
+  document.getElementById('game-root').innerHTML = `
+    <div id="ut-boss-bg" style="background:#000;position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;">
+      <div id="ut-boss-box" style="background:#111;border:4px solid #fff;max-width:600px;width:90vw;min-height:220px;padding:32px 28px 24px 28px;color:#fff;font-family: 'Determination Mono', 'Fira Mono', monospace;font-size:1.25em;box-shadow:0 0 32px #0f08;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+        <div id="ut-boss-hp-wrap" style="width:100%;margin-bottom:18px;">
+          <div style="font-size:0.9em;margin-bottom:2px;">SECURITY SYSTEM HP</div>
+          <div style="background:#222;border:2px solid #fff;height:18px;width:100%;position:relative;">
+            <div id="ut-boss-hp" style="height:100%;background:#0f0;width:100%;transition:width 0.5s;"></div>
+            <span id="ut-boss-hp-label" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;font-size:0.9em;">300 / 300</span>
+          </div>
+        </div>
+        <div id="ut-boss-text" style="min-height:60px;text-align:center;"></div>
+        <div id="ut-boss-actions" style="margin-top:32px;display:flex;gap:18px;flex-wrap:wrap;justify-content:center;"></div>
+        <canvas id="ut-boss-arena" width="320" height="120" style="display:none;margin-top:24px;border:2px solid #fff;background:#222;"></canvas>
+        <div id="ut-player-hp-wrap" style="width:100%;margin-top:18px;display:none;">
+          <div style="font-size:0.9em;margin-bottom:2px;">YOUR HP</div>
+          <div style="background:#222;border:2px solid #fff;height:18px;width:100%;position:relative;">
+            <div id="ut-player-hp" style="height:100%;background:#0ff;width:100%;transition:width 0.5s;"></div>
+            <span id="ut-player-hp-label" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;font-size:0.9em;">20 / 20</span>
+          </div>
+        </div>
+        <div id="ut-boss-flash" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;background:#fff;opacity:0.7;z-index:10;"></div>
+      </div>
+      <style>
+        #ut-boss-actions button {
+          background:#111;color:#fff;border:2px solid #fff;
+          border-radius:0;padding:10px 28px;font-size:1em;
+          font-family: 'Determination Mono', 'Fira Mono', monospace;cursor:pointer;
+          margin:0 8px 0 0;transition:background 0.2s,color 0.2s;
+          outline:none;
+        }
+        #ut-boss-actions button:focus { background:#fff;color:#111; }
+        #ut-boss-actions button:hover { background:#fff;color:#111; }
+        #ut-boss-arena { image-rendering:pixelated; }
+        .shake { animation: shake 0.4s; }
+        @keyframes shake {
+          0% { transform: translate(0, 0);}
+          20% { transform: translate(-8px, 2px);}
+          40% { transform: translate(7px, -2px);}
+          60% { transform: translate(-4px, 4px);}
+          80% { transform: translate(4px, -4px);}
+          100% { transform: translate(0, 0);}
+        }
+      </style>
+    </div>
+  `;
+  const chatMusic = document.getElementById('bg-music');
+  if (chatMusic) chatMusic.pause();
+  const bossMusic = document.getElementById('boss-music');
+  if (bossMusic) {
+    bossMusic.currentTime = 0;
+    bossMusic.volume = 0.7;
+    bossMusic.play().catch(()=>{});
+  }
+
+  startBossBattle();
+}
+
+function startBossBattle() {
+  let fightMinigameActive = false;
+  let bossHP = 300;
+  let playerHP = 20;
+  let phase = 0;
+  let canAct = true;
+  let fightCount = 0;
+  function playHeartBreakEffect(canvas, player) {
+  const ctx = canvas.getContext('2d');
+  const pieces = [];
+  const heartX = player.x, heartY = player.y, heartW = player.w;
+  // Разбиваем сердце на 8 кусочков
+  for (let i = 0; i < 8; i++) {
+    pieces.push({
+      x: heartX + heartW/2,
+      y: heartY + heartW/2,
+      vx: Math.cos((i/8)*Math.PI*2) * (2 + Math.random()*2),
+      vy: -3 - Math.random()*2,
+      rot: Math.random()*Math.PI*2,
+      vr: (Math.random()-0.5)*0.2,
+      color: "#f44"
+    });
+  }
+  let t = 0;
+  function drawPiece(p) {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(0, 0, 4, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+  function animate() {
+    ctx.clearRect(0,0,320,120);
+    // Осколки
+    pieces.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.25; // гравитация
+      p.rot += p.vr;
+      drawPiece(p);
+    });
+    t++;
+    if (t < 60) {
+      requestAnimationFrame(animate);
+    }
+  }
+  animate();
+  }
+
+  const bossMaxHP = 300;
+  const playerMaxHP = 20;
+  const phases = [
+    {
+    text: "SECURITY SYSTEM blocks your way.<br>Accused of implant misuse.",
+    actions: ["FIGHT", "ACT", "HEAL", "MERCY"]
+    },
+    {
+      text: "You try to FIGHT.<br>Press FIGHT again to attack.",
+      actions: ["FIGHT", "Back"]
+    },
+    {
+      text: "You attack the system!",
+      actions: [],
+      fight: true
+    },
+    {
+      text: "SECURITY SYSTEM: Countermeasures deployed.",
+      actions: [],
+      arena: true
+    },
+    {
+    text: "You survived the attack!",
+    actions: ["FIGHT", "ACT", "HEAL", "MERCY"]
+    },
+    {
+      text: "Mercy denied.<br>SECURITY SYSTEM: Threat level unchanged.",
+      actions: ["Continue"]
+    }
+  ];
+
+  function setBossHP(val) {
+    bossHP = Math.max(0, Math.min(bossMaxHP, val));
+    document.getElementById('ut-boss-hp').style.width = (bossHP/bossMaxHP*100) + '%';
+    document.getElementById('ut-boss-hp-label').textContent = `${bossHP} / ${bossMaxHP}`;
+    document.getElementById('ut-boss-hp').style.background = bossHP > bossMaxHP*0.6 ? '#0f0' : bossHP > bossMaxHP*0.3 ? '#ff0' : '#f00';
+  }
+  function setPlayerHP(val) {
+    playerHP = Math.max(0, Math.min(playerMaxHP, val));
+    document.getElementById('ut-player-hp').style.width = (playerHP/playerMaxHP*100) + '%';
+    document.getElementById('ut-player-hp-label').textContent = `${playerHP} / ${playerMaxHP}`;
+    document.getElementById('ut-player-hp').style.background = playerHP > playerMaxHP/2 ? '#0ff' : '#f00';
+  }
+
+  function playHitEffect() {
+    const box = document.getElementById('ut-boss-box');
+    const flash = document.getElementById('ut-boss-flash');
+    box.classList.add('shake');
+    flash.style.display = 'block';
+    setTimeout(() => {
+      box.classList.remove('shake');
+      flash.style.display = 'none';
+    }, 350);
+  }
+
+function typeText(text, cb) {
+  const el = document.getElementById('ut-boss-text');
+  el.innerHTML = '';
+  let i = 0;
+  function nextChar() {
+    if (i < text.length) {
+      // Не проигрывать звук на тегах <br>
+      if (text.substr(i,4) === '<br>') {
+        el.innerHTML += '<br>';
+        i += 4;
+      } else {
+        el.innerHTML += text[i];
+        // Проигрывать звук только на видимых символах (не пробелах и не тегах)
+        if (text[i] !== ' ' && text[i] !== '\n') {
+          new Audio("sound/SND_TXT1.wav").play();
+        }
+        i++;
+      }
+      setTimeout(nextChar, 18 + Math.random()*30);
+    } else if (cb) cb();
+  }
+  nextChar();
+}
+
+function renderPhase() {
+  canAct = true;
+  const p = phases[phase];
+  typeText(p.text, () => {
+    const actions = document.getElementById('ut-boss-actions');
+    actions.innerHTML = '';
+    let btns = [];
+    let selected = 0;
+    if (p.actions.length) {
+      p.actions.forEach((act, idx) => {
+        const btn = document.createElement('button');
+        btn.textContent = act;
+        btn.onclick = () => handleAction(act);
+        btn.onmouseenter = () => {
+          new Audio("sound/snd_select.wav").play();
+          selected = idx;
+        };
+        btn.onmousedown = () => {
+          new Audio("sound/snd_select.wav").play();
+        };
+        btn.onkeydown = (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            new Audio("sound/snd_select.wav").play();
+          }
+          // Стрелки работают и на кнопках
+          if (e.key === "ArrowRight") {
+            selected = (selected + 1) % btns.length;
+            btns[selected].focus();
+            new Audio("sound/snd_select.wav").play();
+            e.preventDefault();
+          }
+          if (e.key === "ArrowLeft") {
+            selected = (selected - 1 + btns.length) % btns.length;
+            btns[selected].focus();
+            new Audio("sound/snd_select.wav").play();
+            e.preventDefault();
+          }
+        };
+        actions.appendChild(btn);
+        btns.push(btn);
+      });
+      // Фокус на первую кнопку (самую левую)
+      btns[0].focus();
+    }
+    if (p.fight) {
+      setTimeout(() => {
+        doFight();
+      }, 600);
+    }
+    if (p.arena) {
+      setTimeout(startArena, 600);
+    }
+  });
+  document.getElementById('ut-boss-arena').style.display = p.arena ? 'block' : 'none';
+  document.getElementById('ut-player-hp-wrap').style.display = p.arena ? 'block' : 'none';
+}
+function handleAction(act) {
+  if (!canAct) return;
+  if (phase === 0 || phase === 4) {
+    if (act === "FIGHT") phase = 1;
+    else if (act === "ACT") { typeText("You try to reason with the system.<br>It ignores you.", () => { phase = 3; renderPhase(); }); return; }
+    else if (act === "HEAL") {
+    if (playerHP < playerMaxHP) {
+    let heal = 5 + Math.floor(Math.random() * 10); 
+    setPlayerHP(Math.min(playerHP + heal, playerMaxHP));
+    typeText(`You used a medkit. Restored ${heal} HP!`, () => { phase = 3; renderPhase(); });
+    } else {
+    typeText("You are already at full health.", () => { phase = 3; renderPhase(); });
+  }
+  return;
+}
+    else if (act === "MERCY") phase = 5;
+  } else if (phase === 1) {
+    if (act === "FIGHT") phase = 2;
+    else phase = 0;
+  } else if (phase === 5) {
+    phase = 3; // После Mercy снова атака!
+  }
+  renderPhase();
+}
+
+  function doFight() {
+   if (fightMinigameActive) return; // Блок повторного запуска
+  fightMinigameActive = true;
+  showFightMinigame();
+}
+
+function showFightMinigame() {
+  const box = document.getElementById('ut-boss-box');
+  let minigame = document.createElement('div');
+  minigame.id = 'fight-minigame';
+  minigame.style.cssText = `
+    width: 320px; height: 60px; margin: 24px auto 0 auto; position:relative; background:#181818; border:2px solid #fff; display:flex;align-items:center;justify-content:center; z-index:20;
+  `;
+  minigame.innerHTML = `
+    <div id="fight-bar" style="position:absolute;left:20px;top:28px;width:280px;height:8px;background:#333;border:1px solid #fff;">
+      <div id="fight-zone" style="position:absolute;left:120px;top:-4px;width:40px;height:16px;background:#ff0;opacity:0.3;border-radius:2px;"></div>
+      <div id="fight-crit" style="position:absolute;left:150px;top:-8px;width:10px;height:24px;background:#f44;opacity:0.5;border-radius:2px;"></div>
+      <div id="fight-pointer" style="position:absolute;left:0;top:-6px;width:8px;height:20px;background:#fff;border-radius:2px;box-shadow:0 0 8px #fff;"></div>
+    </div>
+    <div id="fight-msg" style="position:absolute;top:0;left:0;width:100%;text-align:center;color:#fff;font-size:1.1em;font-family:'Determination Mono',monospace;"></div>
+  `;
+  box.appendChild(minigame);
+
+  let pointer = minigame.querySelector('#fight-pointer');
+  let msg = minigame.querySelector('#fight-msg');
+  let pos = 0, dir = 1, running = true, result = null;
+  function animate() {
+    if (!running) return;
+    pos += dir * 6;
+    if (pos > 272) { dir = -1; pos = 272; }
+    if (pos < 0) { dir = 1; pos = 0; }
+    pointer.style.left = pos + 'px';
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  function finish() {
+  if (!fightMinigameActive) return;
+  fightMinigameActive = false;
+  running = false;
+  // Определяем урон
+  let dmg;
+  let quality;
+  let sound = "snd_damage.wav";
+  if (pos >= 150 && pos <= 158) { dmg = 40 + fightCount*10; quality = "CRIT!"; sound = "snd_damage_c.wav"; }
+  else if (pos >= 120 && pos <= 180) { dmg = 20 + fightCount*10; quality = "GOOD"; }
+  else if (pos >= 80 && pos <= 220) { dmg = 10 + fightCount*10; quality = "OK"; }
+  else { dmg = 5 + fightCount*10; quality = "BAD"; }
+  msg.textContent = quality + "!";
+  // Воспроизвести звук урона боссу
+  new Audio("sound/" + sound).play();
+  setTimeout(() => {
+    minigame.remove();
+    setBossHP(bossHP - dmg);
+    playHitEffect();
+    typeText(`You dealt ${dmg} damage!`, () => {
+      fightCount++;
+      if (bossHP <= 0) {
+        setTimeout(() => {
+          typeText("SECURITY SYSTEM: ...<br>System integrity compromised.", () => {
+            setTimeout(() => { bossWin(); }, 800);
+          });
+        }, 600);
+        return;
+      }
+      setTimeout(() => {
+        phase = 3;
+        renderPhase();
+      }, 800);
+    });
+  }, 700);
+}
+
+  function onPress(e) {
+    if (!running) return;
+    if (e.code === "Space" || e.type === "click") {
+      finish();
+      window.removeEventListener('keydown', onPress);
+      minigame.removeEventListener('click', onPress);
+    }
+  }
+  window.addEventListener('keydown', onPress);
+  minigame.addEventListener('click', onPress);
+}
+
+  // --- Разные паттерны атак с эффектами ---
+  function startArena() {
+    canAct = false;
+    const canvas = document.getElementById('ut-boss-arena');
+    const ctx = canvas.getContext('2d');
+    let player = {x:150, y:90, w:20, h:20};
+    let traps = [];
+    let t = 0;
+    let alive = true;
+    let attackType = Math.floor(Math.random()*4); // 0:wave, 1:rain, 2:lasers, 3:chaos
+    let arenaBg = "#222";
+    setPlayerHP(playerHP);
+
+    function drawHeart(x, y, size) {
+      ctx.save();
+      ctx.translate(x + size/2, y + size/2);
+      ctx.scale(size/32, size/32);
+      ctx.beginPath();
+      ctx.moveTo(0, 12);
+      ctx.bezierCurveTo(0, 0, 16, 0, 16, 12);
+      ctx.bezierCurveTo(16, 0, 32, 0, 32, 12);
+      ctx.bezierCurveTo(32, 24, 16, 32, 16, 32);
+      ctx.bezierCurveTo(16, 32, 0, 24, 0, 12);
+      ctx.closePath();
+      ctx.fillStyle = "#f44";
+      ctx.shadowColor = "#f44";
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function glitchEffect() {
+      // Быстрое мерцание фона арены
+      arenaBg = "#"+((1<<24)*Math.random()|0).toString(16).padStart(6,'0');
+      setTimeout(()=>{ arenaBg="#222"; }, 120);
+    }
+
+    function draw() {
+      ctx.clearRect(0,0,320,120);
+      // Эффект смены цвета фона арены
+      ctx.save();
+      ctx.fillStyle = arenaBg;
+      ctx.fillRect(0,0,320,120);
+      ctx.restore();
+      // Draw player heart
+      drawHeart(player.x, player.y, player.w);
+      // Draw traps
+      traps.forEach(trap => {
+        ctx.save();
+        // Эффект мерцания ловушек
+        if (trap.type === 'laser') {
+          ctx.globalAlpha = 0.5 + 0.5*Math.sin(t/4);
+          ctx.strokeStyle = '#0ff';
+          ctx.lineWidth = 6 + 2*Math.sin(t/8);
+          ctx.beginPath();
+          ctx.moveTo(trap.x, 0);
+          ctx.lineTo(trap.x, 120);
+          ctx.stroke();
+        } else {
+          ctx.globalAlpha = 0.7 + 0.3*Math.sin((t+trap.x+trap.y)/10);
+          ctx.fillStyle = trap.color;
+          ctx.fillRect(trap.x, trap.y, trap.w, trap.h);
+        }
+        ctx.restore();
+      });
+    }
+    let keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false };
+
+    function update() {
+
+      let speed = 4;
+      if (keys.ArrowLeft) player.x = Math.max(0, player.x - speed);
+      if (keys.ArrowRight) player.x = Math.min(300, player.x + speed);
+      if (keys.ArrowUp) player.y = Math.max(0, player.y - speed);
+      if (keys.ArrowDown) player.y = Math.min(100, player.y + speed);
+
+      if (!alive) return;
+      t++;
+      // --- PATTERN 1: WAVE ---
+      if (attackType === 0 && t % 26 === 0 && traps.length < 8) { // реже и меньше
+        let y = 20 + Math.sin(t/14)*40 + Math.random()*30;
+        traps.push({
+          x: 0,
+          y: y,
+          w: 20, h: 20,
+          vx: 1.5 + Math.random()*1.0, // медленнее
+          vy: 0,
+          color: '#f00',
+          type: 'wave'
+        });
+        if (t % 52 === 0) { arenaBg = "#330"; setTimeout(()=>arenaBg="#222", 120); }
+      }
+      // --- PATTERN 2: RAIN ---
+      if (attackType === 1 && t % 18 === 0 && traps.length < 10) {
+       let x = Math.random()*300;
+       traps.push({
+         x: x,
+          y: 0,
+          w: 18, h: 18,
+         vx: 0,
+          vy: 1.2 + Math.random()*1.2, // медленнее
+          color: '#ff0',
+          type: 'rain'
+       });
+       if (t % 36 === 0) { arenaBg = "#223"; setTimeout(()=>arenaBg="#222", 120); }
+      } 
+      // --- PATTERN 3: LASERS ---
+      if (attackType === 2 && t % 60 === 0 && traps.length < 4) {
+        let x = 40 + Math.random()*240;
+        traps.push({
+          x: x,
+          y: 0,
+          w: 6, h: 120,
+          vx: 0,
+          vy: 0,
+          color: '#0ff',
+          type: 'laser'
+        });
+        if (t % 120 === 0) { arenaBg = "#033"; setTimeout(()=>arenaBg="#222", 120); }
+      }
+      // --- PATTERN 4: CHAOS ---
+      if (attackType === 3 && t % 14 === 0 && traps.length < 14) {
+        let side = Math.random() > 0.5 ? 'left' : 'right';
+        let y = Math.random()*100;
+        traps.push({
+          x: side === 'left' ? 0 : 300,
+          y: y,
+          w: 18, h: 18,
+          vx: side === 'left' ? 2+Math.random()*2 : -2-Math.random()*2,
+          vy: (Math.random()-0.5)*2,
+          color: '#fff',
+          type: 'chaos'
+        });
+        if (t % 28 === 0) { arenaBg = "#322"; setTimeout(()=>arenaBg="#222", 120); }
+      }
+      // Move traps
+      traps.forEach(trap => {
+        trap.x += trap.vx;
+        trap.y += trap.vy;
+      });
+      // Remove offscreen
+      traps = traps.filter(trap => trap.x > -30 && trap.x < 330 && trap.y > -30 && trap.y < 130);
+      // Collision
+      traps.forEach(trap => {
+        let px = player.x + player.w/2, py = player.y + player.h/2;
+        let tx = trap.x + trap.w/2, ty = trap.y + trap.h/2;
+        let dist = Math.abs(px-tx) < (player.w+trap.w)/2 && Math.abs(py-ty) < (player.h+trap.h)/2;
+        if (dist) {
+        setPlayerHP(playerHP-1);
+        glitchEffect();
+        // Воспроизвести звук урона игроку
+        new Audio("sound/snd_damage.wav").play();
+        trap.x = -1000; // Remove trap
+      }
+      });
+      draw();
+if (playerHP <= 0) {
+  alive = false;
+  const bossMusic = document.getElementById('boss-music');
+  if (bossMusic) bossMusic.pause();
+  // Эффект разбитого сердца
+  playHeartBreakEffect(canvas, player);
+  setTimeout(() => {
+    document.getElementById('game-root').innerHTML = `
+      <div style="background:#000;position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;">
+        <span id="conn-lost" style="color:#fff;font-family:'Fira Mono',monospace;font-size:2.5em;letter-spacing:0.1em;animation:blink 1s steps(2, start) infinite;">
+        connection lost
+        </span>
+      </div>
+      <style>
+      @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+      </style>
+    `;
+  }, 1200); // Даем анимации проиграться ~1.2 сек
+  return;
+}
+      if (t > 400) {
+        alive = false;
+        setTimeout(() => { phase = 4; renderPhase(); }, 800);
+        return;
+      }
+      requestAnimationFrame(update);
+    }
+
+    draw();
+    document.onkeydown = function(e) {
+    if (!alive) return;
+    if (e.key in keys) keys[e.key] = true;
+    };
+    document.onkeyup = function(e) {
+    if (!alive) return;
+    if (e.key in keys) keys[e.key] = false;
+};
+    update();
+  }
+
+  setBossHP(bossHP);
+  setPlayerHP(playerHP);
+  renderPhase();
+}
+
+function bossWin() {
+  const bossMusic = document.getElementById('boss-music');
+  if (bossMusic) bossMusic.pause();
+  document.getElementById('game-root').innerHTML = `
+    <div style="background:#000;position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;">
+      <span id="win-msg" style="color:#fff;font-family:'Fira Mono',monospace;font-size:2.5em;letter-spacing:0.1em;animation:blink 1s steps(2, start) infinite;">
+        ACCESS GRANTED
+      </span>
+    </div>
+    <style>
+      @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+    </style>
+  `;
+  setTimeout(() => {
+    window.location.href = "doctor-chat-continue.html";
+  }, 2500);
+}
+</script>
+</body>
+</html>
