@@ -983,6 +983,13 @@ function showFightMinigame() {
     typeText(`You dealt ${dmg} damage!`, () => {
       fightCount++;
       if (bossHP <= 0) {
+
+          // Меняем спрайт босса на "мертвый"
+  const bossImg = document.getElementById('boss-img');
+  if (bossImg) {
+    bossImg.src = "https://wiki.taucetistation.org/images/c/c5/Malf_AI.gif";
+    bossImg.style.filter = "grayscale(1) contrast(1.2) brightness(0.7)";
+  }
         setTimeout(() => {
           typeText("SECURITY SYSTEM: ...<br>System integrity compromised.", () => {
             setTimeout(() => { bossWin(); }, 800);
@@ -1233,22 +1240,29 @@ function showFightMinigame() {
   renderPhase();
 }
 
+// Найдите функцию bossWin() и замените её на следующую:
+
 function bossWin() {
   const bossMusic = document.getElementById('boss-music');
   if (bossMusic) bossMusic.pause();
-  document.getElementById('game-root').innerHTML = `
-    <div style="background:#000;position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;">
-      <span id="win-msg" style="color:#fff;font-family:'Fira Mono',monospace;font-size:2.5em;letter-spacing:0.1em;animation:blink 1s steps(2, start) infinite;">
-        ACCESS GRANTED
-      </span>
-    </div>
-    <style>
-      @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
-    </style>
-  `;
+
+
+  // Мигаем и ждем, затем показываем ACCESS GRANTED
   setTimeout(() => {
-    window.location.href = "doctor-chat-continue.html";
-  }, 2500);
+    document.getElementById('game-root').innerHTML = `
+      <div style="background:#000;position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;">
+        <span id="win-msg" style="color:#fff;font-family:'Fira Mono',monospace;font-size:2.5em;letter-spacing:0.1em;animation:blink 1s steps(2, start) infinite;">
+          ACCESS GRANTED
+        </span>
+      </div>
+      <style>
+        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+      </style>
+    `;
+    setTimeout(() => {
+      window.location.href = "doctor-chat-continue.html";
+    }, 2500);
+  }, 1200); // 1.2 секунды показываем "мертвого" босса
 }
 </script>
 </body>
