@@ -346,7 +346,7 @@ html, body {
     document.getElementById('user-id').textContent = genUserId();
 
     // WebSocket чат
-    const ws = new WebSocket("ws://immersivethingsforsierra.ru:3000"); 
+    const ws = new WebSocket("wss://immersivethingsforsierra.ru:3000"); 
     const chatLog = document.getElementById('chat-log');
     const userInput = document.getElementById('user-input');
     const sendBtn = document.getElementById('send-btn');
