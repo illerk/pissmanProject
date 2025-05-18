@@ -634,6 +634,15 @@ function connectionLostScreen() {
 function bossBattle() {
   document.getElementById('game-root').innerHTML = `
     <div id="ut-boss-bg" style="background:#000;position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;">
+      <div style="position:relative;display:flex;flex-direction:column;align-items:center;">
+        <img 
+          id="boss-img"
+          src="https://sierra.ss220.space/images/a/a0/MalfAi_128_gf.gif" 
+          alt="Boss" 
+          style="width:256px;height:256px;image-rendering:pixelated;filter: grayscale(1) contrast(1.2) brightness(1.1);margin-bottom:24px;transition:filter 0.1s;"
+        />
+        <div id="boss-img-flash" style="display:none;position:absolute;left:0;top:0;width:256px;height:256px;background:rgba(255,255,255,0.7);pointer-events:none;"></div>
+      </div>
       <div id="ut-boss-box" style="background:#111;border:4px solid #fff;max-width:600px;width:90vw;min-height:220px;padding:32px 28px 24px 28px;color:#fff;font-family: 'Determination Mono', 'Fira Mono', monospace;font-size:1.25em;box-shadow:0 0 32px #0f08;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;">
         <div id="ut-boss-hp-wrap" style="width:100%;margin-bottom:18px;">
           <div style="font-size:0.9em;margin-bottom:2px;">SECURITY SYSTEM HP</div>
@@ -666,12 +675,21 @@ function bossBattle() {
         #ut-boss-actions button:hover { background:#fff;color:#111; }
         #ut-boss-arena { image-rendering:pixelated; }
         .shake { animation: shake 0.4s; }
+        .boss-shake { animation: boss-shake 0.3s; }
         @keyframes shake {
           0% { transform: translate(0, 0);}
           20% { transform: translate(-8px, 2px);}
           40% { transform: translate(7px, -2px);}
           60% { transform: translate(-4px, 4px);}
           80% { transform: translate(4px, -4px);}
+          100% { transform: translate(0, 0);}
+        }
+        @keyframes boss-shake {
+          0% { transform: translate(0, 0);}
+          20% { transform: translate(-16px, 4px);}
+          40% { transform: translate(14px, -4px);}
+          60% { transform: translate(-8px, 8px);}
+          80% { transform: translate(8px, -8px);}
           100% { transform: translate(0, 0);}
         }
       </style>
@@ -785,16 +803,22 @@ function startBossBattle() {
     document.getElementById('ut-player-hp').style.background = playerHP > playerMaxHP/2 ? '#0ff' : '#f00';
   }
 
-  function playHitEffect() {
-    const box = document.getElementById('ut-boss-box');
-    const flash = document.getElementById('ut-boss-flash');
-    box.classList.add('shake');
-    flash.style.display = 'block';
-    setTimeout(() => {
-      box.classList.remove('shake');
-      flash.style.display = 'none';
-    }, 350);
-  }
+function playHitEffect() {
+  const box = document.getElementById('ut-boss-box');
+  const flash = document.getElementById('ut-boss-flash');
+  const bossImg = document.getElementById('boss-img');
+  const bossImgFlash = document.getElementById('boss-img-flash');
+  box.classList.add('shake');
+  flash.style.display = 'block';
+  if (bossImg) bossImg.classList.add('boss-shake');
+  if (bossImgFlash) bossImgFlash.style.display = 'block';
+  setTimeout(() => {
+    box.classList.remove('shake');
+    flash.style.display = 'none';
+    if (bossImg) bossImg.classList.remove('boss-shake');
+    if (bossImgFlash) bossImgFlash.style.display = 'none';
+  }, 350);
+}
 
 function typeText(text, cb) {
   const el = document.getElementById('ut-boss-text');
