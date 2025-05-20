@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Интерактивная карта</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    svg {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+<svg
+   height="800"
+   version="1.1"
+   width="800"
+   id="svg1"
+   sodipodi:docname="interactive_maptest.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="2.768323"
+     inkscape:cx="526.49202"
+     inkscape:cy="111.80054"
+     inkscape:window-width="1920"
+     inkscape:window-height="1001"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g1" />
+<defs id="defs1">
+  <style type="text/css" id="style1">
+    .fade-on-hover { opacity: 0; transition: opacity 0.3s ease; }
+    .fade-on-hover:hover { opacity: 0.3; }
+  </style>
+</defs>
+
+  <image
+     height="800"
+     width="800"
+     x="0"
+     xlink:href="Baymap.png"
+     y="0"
+     id="image1"
+     style="fill:#f5f5f5;fill-opacity:1"
+     onmouseover="" />
+  <path
+     class="fade-on-hover"
+     style="fill:#0285e5; cursor:pointer"
+     d="m 286.71775,467.68838 h 46.99873 l 26.2931,26.67624 c 28.79115,-0.49628 57.95968,0.98154 86.74488,0.22471 l 27.01116,-26.91742 h 12.65755 v -1.39019 l -5.00558,-5.96879 5.65893,-5.85977 v -7.41948 L 467.0817,427.33081 v -27.01149 l 26.46871,-26.46871 h 6.51341 l 6.86462,-6.86463 v -39.84674 l 13.96871,-13.96871 V 299.7446 l -6.71296,-6.71296 H 467.3052 l -40.03433,-40.03432 h -13.35009 l -33.20363,-33.20363 h -47.44771 l -19.86052,19.86052 h -26.62735 l -7.17293,7.17292 v 20.66336 l 20.02843,20.02843 v 79.37742 l -46.5182,46.5182 v 20.8511 z"
+     id="path4"
+     sodipodi:nodetypes="ccccccccccccccccccccccccccccccccc"
+     onmouseover="cursor: pointer;"
+     onclick="window.open('https://sierra.ss220.space/index.php/%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B5_%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE_%D0%A1%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D0%BE%D0%B9_%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B', '_blank');" />
+  <path
+     class="fade-on-hover"
+     style="fill:#ea002f; cursor: pointer;"
+     d="m 479.77195,587.63888 h 34.33742 l 20.17101,-20.171 V 554.125 l 20.09418,-20.09419 v -13.46764 l 13.23473,-13.23473 v -46.73469 l 6.75786,-6.75785 v -53.8984 l -39.9492,-39.9492 v -19.47219 l 6.54078,-6.54079 v -14.07579 l -6.81975,-6.81976 -13.24183,0.0908 -13.96871,13.96871 v 39.84674 l -6.86462,6.86463 h -6.51341 l -26.46871,26.46871 v 27.01149 l 19.99482,19.70283 v 7.41948 h 6.0641 l 5.90879,5.90879 -5.91977,5.91977 h -6.70647 l 0,1.39019 -12.65755,0 -27.01116,26.91742 26.35937,26.45312 h 33.60492 l 12.54129,12.5413 -19.32152,19.32152 h -33.33643 l -6.99224,6.99224 v 7.59992 z"
+     id="path5"
+     sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccccccc"
+     onclick="window.open('https://sierra.ss220.space/index.php/%D0%93%D0%B8%D0%BB%D1%8C%D0%B3%D0%B0%D0%BC%D0%B5%D1%88%D1%81%D0%BA%D0%B0%D1%8F_%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F_%D0%9A%D0%BE%D0%BD%D1%84%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F', '_blank');" />
+  <path
+     class="fade-on-hover"
+     style="fill:#8357fb; cursor: pointer;"
+     d="m 594.51107,327.00374 h 20.18569 l 6.77828,6.77828 h 20.44533 l 17.75778,-17.75777 v -13.993 l -3.62033,-3.62032 h -17.27657 l -6.03359,-6.03359 h -39.52891 l -5.60821,5.6082 v 22.15705 z"
+     id="path6"
+     onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BD%D1%84%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%BE%D0%B5_%D0%A1%D0%BE%D0%B4%D1%80%D1%83%D0%B6%D0%B5%D1%81%D1%82%D0%B2%D0%BE_%D0%90%D0%B4%D0%BE%D0%BC%D0%B0%D1%8F', '_blank');" />
+  <path
+     id="path6-4-2-4"
+     style="fill:#03ec1e; cursor: pointer;"
+     class="fade-on-hover"
+     d="m 389.40546,168.95647 -0.007,11.43181 -9.87362,5.69202 -0.008,12.87992 21.06469,-12.14352 -0.0272,-24.28741 z m -33.09983,-6.42718 -0.0272,24.28741 21.06469,12.14352 -0.008,-12.87992 -9.87362,-5.69202 -0.007,-11.43181 z m 43.18426,-1.64152 -21.05682,-12.15716 -21.01241,12.18022 11.1447,6.43439 9.90024,-5.7159 9.86994,5.69841 z m -20.96941,3.78573 8.26333,4.77084 v 9.42071 l -8.0981,4.67544 -8.04165,-4.68672 v -9.63282 z"
+     onclick="window.open('https://sierra.ss220.space/index.php/%D0%98%D0%9F%D0%A1#%D0%9F%D0%BE%D0%B7%D0%B8%D1%82%D1%80%D0%BE%D0%BD%D0%BD%D1%8B%D0%B9_%D0%A1%D0%BE%D1%8E%D0%B7', '_blank');" />
+  <path
+     class="fade-on-hover"
+     style="fill:#fbfb5c; cursor: pointer;"
+     d="m 643.75,258.28125 h 69.79687 l 28.57032,-28.57031 h 5.36718 l 4.59895,-4.59895 h 3.19511 L 760.31,220.08042 V 208 l 14.68875,-14.68875 V 153.2212 l 25.00904,-25.00904 V 0 H 405.70252 v 13.375 l -15.3433,15.343296 v 6.859829 l 7.29305,7.293046 v 31.419235 l 55.91147,55.911474 v 8.42419 l 13.40242,13.40242 v 14.80452 l 14.31365,14.31365 H 535.375 l 15.36417,15.36417 h 13.39946 l 17.89402,17.89402 h 17.95172 z"
+     id="path7"
+     onclick="window.open('https://sierra.ss220.space/index.php/%D0%9E%D0%B1%D1%89%D0%B5%D1%81%D1%82%D0%B2%D0%BE_%D1%81%D0%BA%D1%80%D0%B5%D0%BB%D0%BB%D0%BE%D0%B2#%D0%9F%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D0%B0_%D1%81%D0%BA%D1%80%D0%B5%D0%BB%D0%BB%D0%BE%D0%B2', '_blank');" />
+  <path
+     class="fade-on-hover"
+     style="fill:#006f33; cursor: pointer;"
+     d="M 151.77344 252.30469 L 80.378906 323.69922 L 51.927734 323.69922 L 8.328125 367.30078 L 8.328125 384.9043 L 103.65625 480.23438 L 103.65625 505.4707 L 109.9668 511.7793 L 138.04688 511.7793 L 185.6875 464.14062 L 185.6875 453.20312 L 235.89844 402.99219 L 256.5 402.99219 L 273.70508 385.64844 L 273.70508 365.25 L 243.66602 335.21094 L 243.66602 280.46875 L 228.27148 265.07227 L 196.61914 265.07227 L 183.85156 252.30469 L 151.77344 252.30469 z M 129.98047 406.4375 L 155.34375 406.4375 L 166.98633 418.08008 L 166.98633 442.69336 L 157.36914 452.31055 L 128.38477 452.31055 L 117.7168 441.64258 C 117.7287 433.99409 117.72266 426.34416 117.72266 418.69531 L 129.98047 406.4375 z "
+     id="path1"
+     onclick="window.open('https://sierra.ss220.space/index.php/%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0', '_blank');" />
+  <path
+     class="fade-on-hover "
+     style="fill:#ea002f; cursor: pointer;"
+     d="m 196.32157,178.34559 v 14.53988 l 25.29564,25.29564 v 30.85014 h 14.97654 l 32.4375,-32.4375 v -15.3125 l -22.86719,-22.86719 z"
+     id="path9"
+     onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BD%D1%84%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D1%8B%D0%B5_%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B8', '_blank');" />
+  <path
+     class="fade-on-hover"
+     style="fill:#0091fb; cursor: pointer;"
+     d="m 221.61721,249.03125 -18.38284,-0.008 -42.28098,-42.28098 V 193.3125 l 14.9608,-14.96081 20.40738,-0.006 v 14.53998 l 25.29564,25.29564 z"
+     id="path10"
+     sodipodi:nodetypes="ccccccccc"
+     onclick="window.open('https://sierra.ss220.space/index.php/%D0%92%D1%82%D0%BE%D1%80%D0%B0%D1%8F_%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA%D0%B0', '_blank');" />
+  <path
+     class="fade-on-hover"
+     style="fill:#660e02; cursor: pointer;"
+     d="m 328.3125,35.3125 1.82031,1.820312 h 7.39844 l 6.55333,6.553334 h 5.11854 l 5.81318,5.813177 2.01386,3.4881 2.68652,2.686522 h 12.30987 l 3.23776,-3.237757 h 2.03256 l 2.70247,-2.702469 h 4.95401 l 4.23371,-4.233705 V 40.25 l 2.92202,-2.922018 -1.74986,-1.749857 V 28.718296 L 405.70252,13.375 V 0 h -79.26226 l -6.09879,6.098796 v 14.009553 l 7.81132,7.81132 z"
+     id="path11"
+     sodipodi:nodetypes="ccccccccccccccccccccccccc"
+     onclick="window.open('https://sierra.ss220.space/index.php/%D0%92%D0%BE%D1%81%D1%85%D0%BE%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5#%D0%9A%D1%80%D0%B0%D1%82%D0%BA%D0%B8%D0%B9_%D0%BE%D0%B1%D0%B7%D0%BE%D1%80', '_blank');" />
+  <path
+     class="fade-on-hover"
+     style="fill:#c3c3c3; cursor: pointer;"
+     d="M 789.60156,389.35937 H 800 l 0.008,-261.14721 -25.00904,25.00904 v 40.09005 L 760.31,208 v 12.08042 l -5.03157,5.03157 h -3.19511 l -4.59895,4.59895 h -5.36718 l -28.57032,28.57031 h -4.03906 l -5.8789,5.87891 v 23.28979 l 36.17932,36.17932 h 20.76989 l 3.68537,3.68537 v 8.65411 l 4.01253,4.01253 v 34.18869 l 12.76986,12.76987 h 6.28224 z"
+     id="path12"
+     onclick="window.open('https://sierra.ss220.space/index.php/%D0%93%D0%BE%D1%81%D1%83%D0%B4%D0%B0%D1%80%D1%81%D1%82%D0%B2%D0%BE_%D1%80%D0%B5%D0%B7%D0%BE%D0%BC%D0%B8_%D0%B8_%D0%B8%D1%85_%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B', '_blank');" />
+  <g
+     id="g1"
+     inkscape:label="Systems">
+    <rect
+       class="fade-on-hover"
+       style="fill:#ff6a00;"
+       id="rect12"
+       width="25.75"
+       height="47.375"
+       x="273.5"
+       y="519.75" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13"
+       width="26.4375"
+       height="6.287158"
+       x="155.15625"
+       y="146.51266"
+       inkscape:label="Orelbyn" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-8"
+       width="26.4375"
+       height="6.287158"
+       x="218.13258"
+       y="151.76517"
+       inkscape:label="Piscium" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-5"
+       width="27.125"
+       height="6.450654"
+       x="297.1875"
+       y="138.98076"
+       inkscape:label="Locutus" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-1"
+       width="20.51548"
+       height="6.287158"
+       x="235.12131"
+       y="71.806763"
+       inkscape:label="Joron" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-7"
+       width="26.438"
+       height="6.287158"
+       x="221.8125"
+       y="170.5"
+       inkscape:label="Miuolnir"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-2"
+       width="47.024025"
+       height="6.287158"
+       x="407.1875"
+       y="119.06251"
+       inkscape:label="Sincalair`s Star" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-6"
+       width="35.055363"
+       height="6.287158"
+       x="296.49219"
+       y="192.58578"
+       inkscape:label="Alexander" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-16"
+       width="22.375"
+       height="6.287158"
+       x="297.875"
+       y="177.9375"
+       inkscape:label="Trajan" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-27"
+       width="40.800606"
+       height="6.287158"
+       x="309.26602"
+       y="204.51387"
+       inkscape:label="Gracie`s Star" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-3"
+       width="32.845654"
+       height="6.287158"
+       x="250.59705"
+       y="299.14386"
+       inkscape:label="D. Pavonis" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-34"
+       width="26.4375"
+       height="6.287158"
+       x="252.54678"
+       y="310.32062"
+       inkscape:label="Kestalia" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-87"
+       width="21.8855"
+       height="6.287158"
+       x="271.65164"
+       y="319.16031"
+       inkscape:label="Phiros"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%A2%D0%B0%D1%80%D1%82%D0%B5%D1%81%D1%81%D0%BE%D1%81%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%BD%D0%B0%D1%83%D1%87%D0%BD%D1%8B%D0%B9_%D0%B4%D0%B8%D1%80%D0%B5%D0%BA%D1%82%D0%BE%D1%80%D0%B0%D1%82', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79"
+       width="33"
+       height="6.287158"
+       x="125.8125"
+       y="422.375"
+       inkscape:label="Orelbyn" />
+    <rect
+       class="fade-on-hover"
+       style="opacity:0;fill:#f5f5f5;stroke-width:0.845006"
+       id="rect13-79-8"
+       width="23.066189"
+       height="6.4226189"
+       x="261.1409"
+       y="235.86453"
+       inkscape:label="D. Irosi" />
+    <rect
+       class="fade-on-hover"
+       style="opacity:0;fill:#f5f5f5;stroke-width:0.837288"
+       id="rect13-79-5"
+       width="22.016603"
+       height="6.6064429"
+       x="281.7254"
+       y="229"
+       inkscape:label="Wythe" />
+    <rect
+       class="fade-on-hover"
+       style="opacity:0;fill:#f5f5f5;stroke-width:0.942957"
+       id="rect13-79-1"
+       width="29.342552"
+       height="6.287158"
+       x="95.670685"
+       y="244.50993"
+       inkscape:label="R. Cancri" />
+    <rect
+       class="fade-on-hover"
+       style="opacity:0;fill:#f5f5f5;stroke-width:0.837274; cursor: pointer;"
+       id="rect13-79-6"
+       width="23.133919"
+       height="6.287158"
+       x="19.815487"
+       y="360.66135"
+       inkscape:label="Al Kidr"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%9B%D0%B0%D1%81%D1%82_%D0%A1%D1%82%D0%BE%D0%BF', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="opacity:0;fill:#f5f5f5;stroke-width:0.724709"
+       id="rect13-79-7"
+       width="17.331671"
+       height="6.287158"
+       x="70.443741"
+       y="272.41302"
+       inkscape:label="Tauri" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-2"
+       width="53.114944"
+       height="6.287158"
+       x="71.782883"
+       y="559.85059"
+       inkscape:label="T. Usae Majoris" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-4"
+       width="24.570881"
+       height="6.287158"
+       x="187.06512"
+       y="550.57471"
+       inkscape:label="I. Persei" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-3"
+       width="31.275862"
+       height="6.287158"
+       x="207.13155"
+       y="575.83142"
+       inkscape:label="Ava`s Star" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-13"
+       width="30.318008"
+       height="6.287158"
+       x="288.80841"
+       y="703.10596"
+       inkscape:label="Swehead" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-27"
+       width="35.93742"
+       height="6.287158"
+       x="295.70242"
+       y="744.55298"
+       inkscape:label="Alderamin" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-19"
+       width="25.911877"
+       height="6.287158"
+       x="469.68201"
+       y="685.7663"
+       inkscape:label="I. Pegasi" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-0"
+       width="28.394323"
+       height="6.287158"
+       x="537.16077"
+       y="681.27753"
+       inkscape:label="Roboute" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-02"
+       width="36.521988"
+       height="6.287158"
+       x="612.49127"
+       y="694.45813"
+       inkscape:label="A. Herculis" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-50"
+       width="33"
+       height="6.287158"
+       x="613.80841"
+       y="630.54279"
+       inkscape:label="B. Aquilae" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-61"
+       width="30.561701"
+       height="6.287158"
+       x="709.12885"
+       y="604.54846"
+       inkscape:label="Tristram" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-34"
+       width="31.978289"
+       height="6.287158"
+       x="583.12769"
+       y="526.55298"
+       inkscape:label="Arcturus" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-66"
+       width="29.232439"
+       height="6.287158"
+       x="591.08685"
+       y="498.48914"
+       inkscape:label="Barstow" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-9"
+       width="23.996168"
+       height="6.287158"
+       x="614.34229"
+       y="421.80844"
+       inkscape:label="Bedran" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-88"
+       width="24.060026"
+       height="6.287158"
+       x="727.04346"
+       y="487.16986"
+       inkscape:label="Scorpii" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-79-07"
+       width="33"
+       height="6.287158"
+       x="591.7254"
+       y="296.48914"
+       inkscape:label="Zamsiin-Ir"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%90%D0%B4%D0%BE%D0%BC%D0%B0%D0%B9', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-79-15"
+       width="33.812767"
+       height="6.287158"
+       x="619.84589"
+       y="306.54846"
+       inkscape:label="Sii`rahn-Ir"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D0%B8%E2%80%99%D0%A0%D0%B0%D1%85%D0%BD-%D0%98%D1%80', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-97"
+       width="38.418442"
+       height="6.287158"
+       x="535.11017"
+       y="272.45816"
+       inkscape:label="Novoslavia" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-79-60"
+       width="28.466156"
+       height="6.287158"
+       x="515.06512"
+       y="289.10599"
+       inkscape:label="Klaudof"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B8,_%D0%BE%D1%82_%D0%B3%D0%BE%D1%80%D0%BD%D0%BE%D0%B4%D0%BE%D0%B1%D1%8B%D0%B2%D0%B0%D1%8E%D1%89%D0%B8%D1%85_%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%BE%D0%B2_%D0%B4%D0%BE_%D0%9D%D1%8C%D1%8E-%D0%9D%D1%8C%D1%8E-%D0%99%D0%BE%D1%80%D0%BA%D0%B0!#%D0%94%D1%80%D1%83%D0%B3%D0%B8%D0%B5_%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-79-75"
+       width="16.113001"
+       height="6.287158"
+       x="557.66949"
+       y="308.54846"
+       inkscape:label="Ursa"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9C%D0%B0%D0%B3%D0%BD%D0%B0%D1%80%D1%81%D0%BA%D0%B0%D1%8F_%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA%D0%B0', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-00"
+       width="13.970626"
+       height="6.287158"
+       x="519.02551"
+       y="318.40356"
+       inkscape:label="Valy" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-071"
+       width="34.085567"
+       height="6.287158"
+       x="495.08557"
+       y="339.23373"
+       inkscape:label="Kvasvezda" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-73"
+       width="38.427841"
+       height="6.287158"
+       x="495.19031"
+       y="370.42529"
+       inkscape:label="Providence" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-98"
+       width="26.949406"
+       height="6.287158"
+       x="491.07709"
+       y="413.18726"
+       inkscape:label="Gagarin" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-660"
+       width="39.704983"
+       height="6.287158"
+       x="471.89145"
+       y="425.76498"
+       inkscape:label="Miracallie" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-12"
+       width="22.016603"
+       height="6.287158"
+       x="480.40613"
+       y="451.7663"
+       inkscape:label="Galilei" />
+    <rect
+       class="fade-on-hover "
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-79-47"
+       width="35.167"
+       height="6.287158"
+       x="532.49786"
+       y="437"
+       inkscape:label="Gilgamesh"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%A2%D0%B5%D1%80%D1%80%D0%B0', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-120"
+       width="22.885574"
+       height="6.287158"
+       x="516.87"
+       y="459.73569"
+       inkscape:label="Sestris" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-06"
+       width="19.18297"
+       height="6.287158"
+       x="516.50214"
+       y="475.27094"
+       inkscape:label="Bratis" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-84"
+       width="19.453894"
+       height="6.287158"
+       x="472.23782"
+       y="482.46478"
+       inkscape:label="Altair" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-988"
+       width="37.605675"
+       height="6.287158"
+       x="525.11017"
+       y="503.00662"
+       inkscape:label="Fomalhaut" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-78"
+       width="38.147522"
+       height="6.287158"
+       x="490.48462"
+       y="512.43829"
+       inkscape:label="B. Berenices" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-71"
+       width="20.266659"
+       height="6.287158"
+       x="531.0506"
+       y="528.46478"
+       inkscape:label="Belaya" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-49"
+       width="32.548462"
+       height="6.287158"
+       x="494.99338"
+       y="563.73572"
+       inkscape:label="Kopeychik" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-09"
+       width="16.564056"
+       height="6.287158"
+       x="480.30167"
+       y="573.73572"
+       inkscape:label="Vega" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-348"
+       width="31.826004"
+       height="6.287158"
+       x="462.52859"
+       y="558.47137"
+       inkscape:label="Antarova" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-25"
+       width="26.039591"
+       height="6.287158"
+       x="449.66156"
+       y="544.55298"
+       inkscape:label="Notrius" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-79-37"
+       width="24.872335"
+       height="6.287158"
+       x="438.88321"
+       y="579.00659"
+       inkscape:label="Tullius" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5"
+       id="rect13-88"
+       width="27.385727"
+       height="6.287158"
+       x="591.63214"
+       y="247.83263"
+       inkscape:label="Roebust" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-1"
+       width="26.619444"
+       height="6.287158"
+       x="524.97955"
+       y="260.39337"
+       inkscape:label="Renenet" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-6"
+       width="33.005138"
+       height="6.287158"
+       x="535.12646"
+       y="239.18135"
+       inkscape:label="B. Virgins" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-3"
+       width="22.012438"
+       height="6.287158"
+       x="547.08368"
+       y="253.05177"
+       inkscape:label="XX-168"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%A2%D0%B0%D1%83-%D0%92%D0%B8%D0%BB%D0%BE', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-68"
+       width="25.489271"
+       height="6.287158"
+       x="511.0253"
+       y="249.14207"
+       inkscape:label="B. Hidri" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-18"
+       width="11.804628"
+       height="6.287158"
+       x="500.39719"
+       y="230.54279"
+       inkscape:label="Ran" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-9"
+       width="33.842705"
+       height="6.287158"
+       x="509.04752"
+       y="221.80615"
+       inkscape:label="Ecergreen" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5"
+       id="rect13-88-12"
+       width="21.774612"
+       height="6.287158"
+       x="515.7384"
+       y="207.84196"
+       inkscape:label="Adriel" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-11"
+       width="35.048561"
+       height="6.287158"
+       x="528.52875"
+       y="199.74457"
+       inkscape:label="Z. Tucanae" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-4"
+       width="48.458523"
+       height="6.287158"
+       x="413.10217"
+       y="415.14816"
+       inkscape:label="Barnard`s Star" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-4-8"
+       width="31.025574"
+       height="6.287158"
+       x="484.96167"
+       y="358.49042"
+       inkscape:label="Paetheno" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-4-9"
+       width="41.866085"
+       height="6.287158"
+       x="493.77966"
+       y="301.27753"
+       inkscape:label="Victor`s Star" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-4-5"
+       width="15.252903"
+       height="6.287158"
+       x="503.02811"
+       y="272.40356"
+       inkscape:label="Rose" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-93"
+       width="12.756"
+       height="6.287158"
+       x="394.13428"
+       y="389.13004"
+       inkscape:label="Sol"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B8,_%D0%BE%D1%82_%D0%B3%D0%BE%D1%80%D0%BD%D0%BE%D0%B4%D0%BE%D0%B1%D1%8B%D0%B2%D0%B0%D1%8E%D1%89%D0%B8%D1%85_%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%BE%D0%B2_%D0%B4%D0%BE_%D0%9D%D1%8C%D1%8E-%D0%9D%D1%8C%D1%8E-%D0%99%D0%BE%D1%80%D0%BA%D0%B0!#%D0%A1%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D0%B0%D1%8F_%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D0%B0', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="opacity:0;fill:#f5f5f5;stroke-width:0.932216; cursor: pointer;"
+       id="rect13-88-93-9"
+       width="11.085"
+       height="6.287158"
+       x="193.19658"
+       y="459.84195"
+       inkscape:label="Nyx"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9D%D0%B8%D0%BA%D1%81', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-65"
+       width="36.453415"
+       height="6.287158"
+       x="403.82629"
+       y="371.95786"
+       inkscape:label="A. Centauri"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%A2%D0%B8%D0%B0%D0%BC%D0%B0%D1%82', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-60"
+       width="18.318039"
+       height="6.287158"
+       x="331.29886"
+       y="432.21201"
+       inkscape:label="T. Ceti"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%AD%D0%BF%D1%81%D0%B8%D0%BB%D0%BE%D0%BD_%D0%9A%D0%B8%D1%82%D0%B0', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-650"
+       width="23.750854"
+       height="6.287158"
+       x="367.12772"
+       y="475.91443"
+       inkscape:label="Kruger" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-61"
+       width="46.485737"
+       height="6.287158"
+       x="275.71902"
+       y="447.07407"
+       inkscape:label="Groombridge" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-34"
+       width="17.993759"
+       height="6.287158"
+       x="260.42505"
+       y="412.96146"
+       inkscape:label="Theia" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-66"
+       width="27.130299"
+       height="6.287158"
+       x="340.47891"
+       y="363.20178"
+       inkscape:label="Lalande" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-96"
+       width="20.553032"
+       height="6.287158"
+       x="422.99741"
+       y="321.84195"
+       inkscape:label="Helios"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%93%D0%B0%D1%83%D1%81%D1%81', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-8"
+       width="33.616936"
+       height="6.287158"
+       x="415.16193"
+       y="296.54184"
+       inkscape:label="Innes` Star" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-35"
+       width="19.167755"
+       height="6.287158"
+       x="346.38651"
+       y="345.75827"
+       inkscape:label="Sirius" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-0"
+       width="28.279724"
+       height="6.287158"
+       x="316.68201"
+       y="341.16986"
+       inkscape:label="Procyon" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-615"
+       width="41.689686"
+       height="6.287158"
+       x="301.14816"
+       y="353.02045"
+       inkscape:label="Luyten`s Star" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-97"
+       width="45.712673"
+       height="6.287158"
+       x="328.42017"
+       y="302.40356"
+       inkscape:label="Kapteyn`s Star" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-601"
+       width="21.702"
+       height="6.287158"
+       x="314.41635"
+       y="260.31927"
+       inkscape:label="Unathi"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%A3%D0%BD%D0%B0%D1%82%D0%B8#%D0%93%D0%B5%D0%B3%D0%B5%D0%BC%D0%BE%D0%BD%D0%B8%D1%8F', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-5"
+       width="25.760195"
+       height="6.287158"
+       x="313.18723"
+       y="244.45816"
+       inkscape:label="Moghes" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-00"
+       width="23.412203"
+       height="6.287158"
+       x="284.98676"
+       y="247.7357"
+       inkscape:label="B. Wilo" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-07"
+       width="31.728001"
+       height="6.287158"
+       x="331.78671"
+       y="227.11761"
+       inkscape:label="Quanrain" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-7"
+       width="26.49173"
+       height="6.287158"
+       x="239.06386"
+       y="457.87228"
+       inkscape:label="Mirania"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B8,_%D0%BE%D1%82_%D0%B3%D0%BE%D1%80%D0%BD%D0%BE%D0%B4%D0%BE%D0%B1%D1%8B%D0%B2%D0%B0%D1%8E%D1%89%D0%B8%D1%85_%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%BE%D0%B2_%D0%B4%D0%BE_%D0%9D%D1%8C%D1%8E-%D0%9D%D1%8C%D1%8E-%D0%99%D0%BE%D1%80%D0%BA%D0%B0!#%D0%94%D1%80%D1%83%D0%B3%D0%B8%D0%B5_%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-98"
+       width="26.031116"
+       height="6.287158"
+       x="248.90308"
+       y="483.78085"
+       inkscape:label="Lohikar" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-603"
+       width="29.191875"
+       height="6.287158"
+       x="213.71584"
+       y="484.5033"
+       inkscape:label="Rowtree" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-50"
+       width="44.182899"
+       height="6.287158"
+       x="215.96927"
+       y="234.36784"
+       inkscape:label="Nouveaulyon"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-351"
+       width="29.767584"
+       height="6.287158"
+       x="219.79408"
+       y="220.54846"
+       inkscape:label="Tyannani"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-40"
+       width="31.696072"
+       height="6.287158"
+       x="245.15532"
+       y="203.22577"
+       inkscape:label="Denebola"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-84"
+       width="19.574139"
+       height="6.287158"
+       x="229.14752"
+       y="194.63876"
+       inkscape:label="Visser"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-88"
+       width="33.005138"
+       height="6.287158"
+       x="221.14687"
+       y="181.31929"
+       inkscape:label="Chardaan"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-073"
+       width="31.697905"
+       height="6.287158"
+       x="195.20047"
+       y="248.55508"
+       inkscape:label="Gessshire"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%93%D0%B5%D1%81%D1%81%D1%88%D0%B8%D1%80', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-10"
+       width="21.741516"
+       height="6.287158"
+       x="175.16075"
+       y="227.65201"
+       inkscape:label="Yuklid"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%AE%D0%BA%D0%BB%D0%B8%D0%B4%D1%81%D0%BA%D0%B0%D1%8F_%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA%D0%B0', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-348"
+       width="31.133484"
+       height="6.287158"
+       x="187.10355"
+       y="209.81938"
+       inkscape:label="Lordania"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-55"
+       width="29.109865"
+       height="6.287158"
+       x="163.77779"
+       y="201.25542"
+       inkscape:label="Lucinaer"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA%D0%B0_%D0%A6%D0%B8%D0%BD%D1%83', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-43"
+       width="17.63253"
+       height="6.287158"
+       x="169.10899"
+       y="189.27092"
+       inkscape:label="Gavil"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%A2%D0%B5%D1%80%D1%81%D1%82%D0%B5%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA%D0%B0', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-06"
+       width="19.912792"
+       height="6.287158"
+       x="657.01959"
+       y="266.53168"
+       inkscape:label="Ciocie" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-972"
+       width="21.154518"
+       height="6.287158"
+       x="739.04785"
+       y="327.15805"
+       inkscape:label="Gaunt" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-90"
+       width="37.59"
+       height="6.287158"
+       x="151.84805"
+       y="366.54108"
+       inkscape:label="Copernicus"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B8,_%D0%BE%D1%82_%D0%B3%D0%BE%D1%80%D0%BD%D0%BE%D0%B4%D0%BE%D0%B1%D1%8B%D0%B2%D0%B0%D1%8E%D1%89%D0%B8%D1%85_%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%BE%D0%B2_%D0%B4%D0%BE_%D0%9D%D1%8C%D1%8E-%D0%9D%D1%8C%D1%8E-%D0%99%D0%BE%D1%80%D0%BA%D0%B0!#%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-86"
+       width="22.372955"
+       height="6.287158"
+       x="141.10153"
+       y="382.53705"
+       inkscape:label="Castor"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%A3%D1%80%D0%B8%D0%BC', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-58"
+       width="25.62966"
+       height="6.287158"
+       x="109.86454"
+       y="499.12613"
+       inkscape:label="Capella" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-39"
+       width="19.148178"
+       height="6.287158"
+       x="113.75159"
+       y="331.87228"
+       inkscape:label="Lyncis"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B8,_%D0%BE%D1%82_%D0%B3%D0%BE%D1%80%D0%BD%D0%BE%D0%B4%D0%BE%D0%B1%D1%8B%D0%B2%D0%B0%D1%8E%D1%89%D0%B8%D1%85_%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%BE%D0%B2_%D0%B4%D0%BE_%D0%9D%D1%8C%D1%8E-%D0%9D%D1%8C%D1%8E-%D0%99%D0%BE%D1%80%D0%BA%D0%B0!#%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-82"
+       width="23.075382"
+       height="6.287158"
+       x="141.81992"
+       y="303.29758"
+       inkscape:label="Pollux"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%A1%D0%B0%D0%BD%D1%81%D0%B5%D1%82', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-62"
+       width="11.853"
+       height="6.287158"
+       x="252.40521"
+       y="381.14871"
+       inkscape:label="Cor"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%97%D0%B0%D1%80%D0%BA%D0%BE%D0%B7', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-03"
+       width="26.934191"
+       height="6.287158"
+       x="209.86453"
+       y="275.87115"
+       inkscape:label="Senavus"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%9C%D0%B8%D1%80_%D0%9C%D0%B0%D0%BA%D1%81%D0%B8%D0%BC%D0%B0/%D0%95-14%D0%B1', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-95"
+       width="28.153339"
+       height="6.287158"
+       x="154.58699"
+       y="254.45816"
+       inkscape:label="Porrima"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%9A%D0%B0%D0%B4%D0%B7%D0%B5', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-586"
+       width="29.237579"
+       height="6.287158"
+       x="287.70114"
+       y="499.81641"
+       inkscape:label="Baldulys" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-94"
+       width="59.760921"
+       height="6.287158"
+       x="260.41507"
+       y="512.51086"
+       inkscape:label="Van Maanen`s Star" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-825"
+       width="51.204372"
+       height="6.287158"
+       x="254.3627"
+       y="523.91443"
+       inkscape:label="B. Venaticorum" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-2"
+       width="34.409992"
+       height="6.287158"
+       x="215.78545"
+       y="496.55301"
+       inkscape:label="Dartactur" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-939"
+       width="33.643707"
+       height="6.287158"
+       x="269.80716"
+       y="533.72284"
+       inkscape:label="Parslevist" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-76"
+       width="22.78005"
+       height="6.287158"
+       x="367.57376"
+       y="169.7357"
+       inkscape:label="Kernel"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%A0%D1%83%D1%82', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5"
+       id="rect13-88-76-4"
+       width="29.677"
+       height="6.287158"
+       x="671.18903"
+       y="237.91443"
+       inkscape:label="Qarr`Go`I" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-76-4-6"
+       width="21.865013"
+       height="6.287158"
+       x="677.6839"
+       y="222.45433"
+       inkscape:label="Qo`lqo"
+       onclick="" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-8"
+       width="23.851776"
+       height="6.287158"
+       x="678.46088"
+       y="209.80614"
+       inkscape:label="Xi`Krro" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-2"
+       width="27.824749"
+       height="6.287158"
+       x="648.36145"
+       y="213.80843"
+       inkscape:label="Qrri`Vol" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-4"
+       width="29.812063"
+       height="6.287158"
+       x="719.08557"
+       y="207.106"
+       inkscape:label="Qela`Oga" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-3"
+       width="24.438774"
+       height="6.287158"
+       x="736.48352"
+       y="140.59361"
+       inkscape:label="Vol`Ogi" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5"
+       id="rect13-88-76-4-7"
+       width="22.000475"
+       height="6.287158"
+       x="620.24445"
+       y="192.41299"
+       inkscape:label="Go`Kal" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-25"
+       width="29.676601"
+       height="6.287158"
+       x="585.70245"
+       y="169.25543"
+       inkscape:label="Garra`Koa" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-76-4-29"
+       width="21.822195"
+       height="6.287158"
+       x="565.11877"
+       y="177.80843"
+       inkscape:label="Qoa`Lo"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9C%D0%B8%27%D1%82%D0%BE%D1%80%27%D0%BA%D1%83%D0%B8', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-76-4-32"
+       width="34.465874"
+       height="6.287158"
+       x="504.49936"
+       y="167.16986"
+       inkscape:label="Harr`Kelm"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B8,_%D0%BE%D1%82_%D0%B3%D0%BE%D1%80%D0%BD%D0%BE%D0%B4%D0%BE%D0%B1%D1%8B%D0%B2%D0%B0%D1%8E%D1%89%D0%B8%D1%85_%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%BE%D0%B2_%D0%B4%D0%BE_%D0%9D%D1%8C%D1%8E-%D0%9D%D1%8C%D1%8E-%D0%99%D0%BE%D1%80%D0%BA%D0%B0!#%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B8_%D0%B8%D0%BD%D1%8B%D1%85_%D1%80%D0%B0%D1%81', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-5"
+       width="32.295517"
+       height="6.287158"
+       x="476.50992"
+       y="151.2643"
+       inkscape:label="A. Mensae" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-22"
+       width="24.443539"
+       height="6.287158"
+       x="518.51514"
+       y="136.55367"
+       inkscape:label="Xal`Kla" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-0"
+       width="17.259336"
+       height="6.287158"
+       x="472.42505"
+       y="132.36784"
+       inkscape:label="Kel`Xi" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-53"
+       width="26.579538"
+       height="6.287158"
+       x="507.62836"
+       y="115.31928"
+       inkscape:label="Loga`Qa" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-50"
+       width="26.515842"
+       height="6.287158"
+       x="468.49005"
+       y="74.322693"
+       inkscape:label="Me`Xrro" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-9"
+       width="30.570599"
+       height="6.287158"
+       x="527.06384"
+       y="101.80843"
+       inkscape:label="Qerr`Ogo" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-21"
+       width="20.481199"
+       height="6.287158"
+       x="532.4917"
+       y="71.638573"
+       inkscape:label="Qal`Ixi" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-48"
+       width="30.442884"
+       height="6.287158"
+       x="534.53259"
+       y="148.61685"
+       inkscape:label="Qolo`Do`I" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-48-7"
+       width="30.171963"
+       height="6.287158"
+       x="552"
+       y="164"
+       inkscape:label="Garr`Qol" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-70"
+       width="21.278015"
+       height="6.287158"
+       x="574.96692"
+       y="142.7357"
+       inkscape:label="Kal`Oa" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-56"
+       width="22.396908"
+       height="6.287158"
+       x="595.17114"
+       y="111.894"
+       inkscape:label="Xo`Qla" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-92"
+       width="17.981796"
+       height="6.287158"
+       x="613.81824"
+       y="154.59361"
+       inkscape:label="Mo`Gi" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5; cursor: pointer;"
+       id="rect13-88-76-4-45"
+       width="34.529732"
+       height="6.287158"
+       x="650.44446"
+       y="135.894"
+       inkscape:label="Qerrbalk"
+       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%B2%D0%B5%D1%80%D1%80%D0%B1%D0%B0%D0%BB%D0%B0%D0%BA', '_blank');" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-02"
+       width="317.27151"
+       height="6.287158"
+       x="469.06769"
+       y="43.872288"
+       inkscape:label="PIZDEC" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-1"
+       width="24.440331"
+       height="6.287158"
+       x="727.08557"
+       y="248.06386"
+       inkscape:label="M. Arae" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-26"
+       width="10.455656"
+       height="6.287158"
+       x="766.49298"
+       y="208.55299"
+       inkscape:label="Set" />
+    <rect
+       class="fade-on-hover"
+       style="fill:#f5f5f5;"
+       id="rect13-88-76-4-17"
+       width="27.057688"
+       height="6.287158"
+       x="753.74774"
+       y="279.21915"
+       inkscape:label="A`Neech" />
+  </g>
+</svg>
+</body>
+</html>
