@@ -8,15 +8,87 @@
       margin: 0;
       padding: 0;
       height: 100%;
+      width: 100%;
+      background-color: black; /* 🖤 Черный фон */
+      overflow: hidden;
     }
+
+    #svg-container {
+      width: 100%;
+      height: 100%;
+    }
+
     svg {
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       display: block;
+      cursor: grab;
+      background-color: transparent;
+    }
+
+    svg:active {
+      cursor: grabbing;
     }
   </style>
 </head>
 <body>
+  <div id="svg-container">
+    <!-- Вставь сюда свой SVG -->
+    <svg id="map" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+      <defs>
+        <style>
+          .fade-on-hover { opacity: 0; transition: opacity 0.3s ease; }
+          .fade-on-hover:hover { opacity: 0.3; }
+        </style>
+      </defs>
+      <rect x="0" y="0" width="800" height="600" fill="lightblue"/>
+      <circle cx="400" cy="300" r="100" fill="tomato" class="fade-on-hover"/>
+    </svg>
+  </div>
+
+  <script>
+    // 🐾 Простая реализация масштабирования и перемещения
+    const svg = document.getElementById('map');
+    let viewBox = svg.viewBox.baseVal;
+    let isPanning = false;
+    let startPoint = { x: 0, y: 0 };
+
+    svg.addEventListener('mousedown', (e) => {
+      isPanning = true;
+      startPoint = { x: e.clientX, y: e.clientY };
+    });
+
+    svg.addEventListener('mouseup', () => {
+      isPanning = false;
+    });
+
+    svg.addEventListener('mouseleave', () => {
+      isPanning = false;
+    });
+
+    svg.addEventListener('mousemove', (e) => {
+      if (!isPanning) return;
+      const dx = (e.clientX - startPoint.x) * (viewBox.width / svg.clientWidth);
+      const dy = (e.clientY - startPoint.y) * (viewBox.height / svg.clientHeight);
+      viewBox.x -= dx;
+      viewBox.y -= dy;
+      startPoint = { x: e.clientX, y: e.clientY };
+    });
+
+    svg.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const scale = 1.1;
+      const direction = e.deltaY < 0 ? 1 / scale : scale;
+      const mouseX = e.offsetX / svg.clientWidth;
+      const mouseY = e.offsetY / svg.clientHeight;
+      const x = viewBox.x + viewBox.width * mouseX;
+      const y = viewBox.y + viewBox.height * mouseY;
+      viewBox.width *= direction;
+      viewBox.height *= direction;
+      viewBox.x = x - viewBox.width * mouseX;
+      viewBox.y = y - viewBox.height * mouseY;
+    });
+  </script>
 
 <svg
    height="800"
