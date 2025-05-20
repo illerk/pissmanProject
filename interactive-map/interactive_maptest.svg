@@ -11,6 +11,19 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
+  
+      <foreignObject id="popup" x="0" y="0" width="200" height="100" style="display:none;">
+        <body xmlns="http://www.w3.org/1999/xhtml" style="margin:0; background-color: #333; color: #fff; border-radius: 5px; padding: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 id="popup-title" style="font-size: 16px; margin: 0;">Заголовок</h3>
+                <button style="background: none; border: none; color: #fff; font-size: 16px; cursor: pointer;" onclick="closePopup()">✖</button>
+            </div>
+            <div id="popup-content" style="margin-top: 10px; font-size: 14px;">
+                Содержимое окна.
+            </div>
+        </body>
+    </foreignObject>
+  
   <sodipodi:namedview
      id="namedview1"
      pagecolor="#ffffff"
@@ -31,6 +44,7 @@
      inkscape:current-layer="svg1" />
   <defs
      id="defs1">
+     
     <style
        type="text/css"
        id="style1"><![CDATA[.fade-on-hover { opacity: 0;           transition: opacity 0.3s ease; }
@@ -501,15 +515,15 @@
      y="451.7663"
      inkscape:label="Galilei" />
   <rect
-     class="fade-on-hover "
-     style="fill:#f5f5f5"
-     id="rect13-79-47"
-     width="35.167"
-     height="6.287158"
-     x="532.49786"
-     y="437"
-     inkscape:label="Gilgamesh"
-     onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B8,_%D0%BE%D1%82_%D0%B3%D0%BE%D1%80%D0%BD%D0%BE%D0%B4%D0%BE%D0%B1%D1%8B%D0%B2%D0%B0%D1%8E%D1%89%D0%B8%D1%85_%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%BE%D0%B2_%D0%B4%D0%BE_%D0%9D%D1%8C%D1%8E-%D0%9D%D1%8C%D1%8E-%D0%99%D0%BE%D1%80%D0%BA%D0%B0!#%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D0%B0_%D0%93%D0%B8%D0%BB%D1%8C%D0%B3%D0%B0%D0%BC%D0%B5%D1%88', '_blank');" />
+        class="fade-on-hover"
+        style="fill:#f5f5f5"
+        id="rect13-79-47"
+        width="35.167"
+        height="6.287158"
+        x="532.49786"
+        y="437"
+        inkscape:label="Gilgamesh"
+        onclick="showPopup(evt, 'Gilgamesh', 'Описание для Gilgamesh')" />
   <rect
      class="fade-on-hover"
      style="fill:#f5f5f5;"
@@ -609,4 +623,27 @@
      x="438.88321"
      y="579.00659"
      inkscape:label="Tullius" />
+
+        <script type="text/javascript">
+        <![CDATA[
+        function showPopup(evt, title, content) {
+            var popup = document.getElementById('popup');
+            var popupTitle = document.getElementById('popup-title');
+            var popupContent = document.getElementById('popup-content');
+
+            popupTitle.textContent = title;
+            popupContent.textContent = content;
+
+            // Используйте evt.clientX и evt.clientY для установки позиции
+            popup.setAttribute('x', evt.clientX - 100); // Центрируем по X
+            popup.setAttribute('y', evt.clientY - 50);  // Центрируем по Y
+            popup.style.display = 'block';
+        }
+
+        function closePopup() {
+            var popup = document.getElementById('popup');
+            popup.style.display = 'none';
+        }
+        ]]>
+    </script>
 </svg>
