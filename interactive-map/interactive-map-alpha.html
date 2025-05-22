@@ -4,7 +4,18 @@
   <meta charset="UTF-8">
   <title>Интерактивная карта</title>
   <style>
+    
+      * {
+    user-select: none;
+  }
 
+  svg text {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    pointer-events: none;
+  }
   @font-face {
     font-family: 'Futura Md BT [Rus by me]';
     src: url('fonts/FUTURAMDBTRUSBYME_MEDIUM.OTF') format('truetype');
