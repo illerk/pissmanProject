@@ -4,7 +4,28 @@
   <meta charset="UTF-8">
   <title>Интерактивная карта</title>
   <style>
-    
+
+
+
+  .glitch-text {
+    font-family: monospace;
+    color: #00d5ff;
+    letter-spacing: 0.1em;
+    user-select: none;
+    pointer-events: none;
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+
+
+    #tooltip a {
+  color: #00d5ff;
+  text-decoration: underline;
+}
+#tooltip a:hover {
+  color: #44faff;
+}
       * {
     user-select: none;
   }
@@ -16,6 +37,7 @@
     -ms-user-select: none;
     pointer-events: none;
   }
+
   @font-face {
     font-family: 'Futura Md BT [Rus by me]';
     src: url('fonts/FUTURAMDBTRUSBYME_MEDIUM.OTF') format('truetype');
@@ -25,7 +47,7 @@
       padding: 0;
       height: 100%;
       width: 100%;
-      background-color: black;
+      background-color: black; /* 🖤 Черный фон */
       overflow: hidden;
     }
 
@@ -121,6 +143,11 @@
     .fade-on-hover:hover { opacity: 0.3; }
   </style>
 </defs>
+
+       <g id="easter-ship" visibility="hidden">
+  <line id="aim-line" x1="0" y1="0" x2="0" y2="-10000" stroke="#ff6a00" stroke-width="2" opacity="0" />
+  <polygon id="ship-body" points="0,-15 10,10 -10,10" fill="#00fafa" />
+</g>
 <image
      height="1200.9788"
      width="1200.0117"
@@ -149,11 +176,11 @@
        d="m 487.07652,454.45316 h 6.0641 l 5.90879,5.90879 -5.91977,5.91977 h -6.70647"
        id="path23"
        inkscape:label="Gilgamesh points" /><path
-       style="display:inline;opacity:1;fill:none;fill-opacity:1;stroke:#313b9e;stroke-width:3;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
+       style="display:inline;opacity:1;fill:none;fill-opacity:1;stroke:#0091fb;stroke-width:3;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
        d="M 520.89715,313.17053 V 299.7446 l -6.71296,-6.71296 H 467.3052 l -40.03433,-40.03432 h -13.35009 l -33.20363,-33.20363 h -47.44771 l -19.86052,19.86052 h -26.62735 l -7.17293,7.17292 v 20.66336 l 20.02843,20.02843 v 79.37742 l -46.5182,46.5182 v 20.8511 l 33.59888,33.42274 h 46.99873 l 26.2931,26.67624 86.74488,0.22471"
        id="path22"
        inkscape:label="SG borders" /><path
-       style="opacity:1;fill:none;fill-opacity:1;stroke:#313b9e;stroke-width:3;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:3, 3;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
+       style="opacity:1;fill:none;fill-opacity:1;stroke:#0091fb;stroke-width:3;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:3, 3;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
        d="m 446.75446,494.58933 27.01116,-26.91742 h 12.65755 v -1.39019 l -5.00558,-5.96879 5.65893,-5.85977 v -7.41948 L 467.0817,427.33081 v -27.01149 l 26.46871,-26.46871 h 6.51341 l 6.86462,-6.86463 v -39.84674 l 13.96871,-13.96871"
        id="path4-8"
        inkscape:label="SG points" /><path
@@ -161,7 +188,6 @@
        style="opacity:1;fill:none;stroke:#8357fb;stroke-width:3;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
        d="m 594.51107,327.00374 h 20.18569 l 6.77828,6.77828 h 20.44533 l 17.75778,-17.75777 v -13.993 l -3.62033,-3.62032 h -17.27657 l -6.03359,-6.03359 h -39.52891 l -5.60821,5.6082 v 22.15705 z"
        id="path26"
-       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BD%D1%84%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%BE%D0%B5_%D0%A1%D0%BE%D0%B4%D1%80%D1%83%D0%B6%D0%B5%D1%81%D1%82%D0%B2%D0%BE_%D0%90%D0%B4%D0%BE%D0%BC%D0%B0%D1%8F', '_blank');"
        inkscape:label="Adomai Borders" /><path
        style="opacity:1;fill:none;stroke:#660e02;stroke-width:3;stroke-dasharray:6, 3, 1.5, 3;stroke-dashoffset:0;stroke-opacity:1"
        d="m 326.44026,0 -6.09879,6.098796 v 14.009553 l 7.81132,7.81132 0.15971,7.392831 1.82031,1.820312 h 7.39844 l 6.55333,6.553334 h 5.11854 l 5.81318,5.813177 2.01386,3.4881 2.68652,2.686522 h 12.30987 l 3.23776,-3.237757 h 2.03256 l 2.70247,-2.702469 h 4.95401 l 4.23371,-4.233705 V 40.25"
@@ -187,13 +213,11 @@
        style="opacity:1;fill:none;stroke:#006f33;stroke-width:3;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
        d="M 151.77344,252.30469 80.378906,323.69922 H 51.927734 L 8.328125,367.30078 v 17.60352 l 95.328125,95.33008 v 25.23632 l 6.31055,6.3086 h 28.08008 l 47.64062,-47.63868 v -10.9375 l 50.21094,-50.21093 H 256.5 l 17.20508,-17.34375 V 365.25 L 243.66602,335.21094 V 280.46875 L 228.27148,265.07227 H 196.61914 L 183.85156,252.30469 Z M 129.98047,406.4375 h 25.36328 l 11.64258,11.64258 v 24.61328 l -9.61719,9.61719 H 128.38477 L 117.7168,441.64258 c 0.0119,-7.64849 0.006,-15.29842 0.006,-22.94727 z"
        id="path32"
-       onclick="window.open('https://sierra.ss220.space/index.php/%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0', '_blank');"
        inkscape:label="Frontier borders" /><path
        class="fade-on-hover "
        style="opacity:1;fill:none;stroke:#ea002f;stroke-width:3;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
        d="m 196.32157,178.34559 v 14.53988 l 25.29564,25.29564 v 30.85014 h 14.97654 l 32.4375,-32.4375 v -15.3125 l -22.86719,-22.86719 z"
        id="path37"
-       onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BD%D1%84%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D1%8B%D0%B5_%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B8', '_blank');"
        inkscape:label="Bad Lordania borders" /><path
        style="opacity:1;fill:none;stroke:#0091fb;stroke-width:3;stroke-linejoin:bevel;stroke-dasharray:3, 3;stroke-dashoffset:0;stroke-opacity:1"
        d="m 196.32157,178.34569 v 14.53998 l 25.29564,25.29564 v 30.84994"
@@ -268,49 +292,43 @@
      d="m 430.08083,701.60765 h 70.49878 l 39.44002,40.04702 c 43.18715,-0.74503 86.94039,1.4735 130.11861,0.33733 l 40.51713,-40.40906 h 18.9865 v -2.08699 l -7.50843,-8.96049 8.48847,-8.7968 V 670.60034 L 700.6294,641.02193 v -40.55029 l 39.70344,-39.73545 h 9.77023 l 10.29702,-10.30534 v -59.81887 l 20.95326,-20.97015 V 449.48652 L 771.28383,439.40887 H 700.96466 L 640.91257,379.30839 H 620.88726 L 571.0813,329.46232 h -71.17225 l -29.79107,29.81508 h -39.94142 l -10.7595,10.76814 v 31.02032 l 30.04293,30.06715 v 119.16328 l -69.77797,69.83422 v 31.30213 z"
      id="path4"
      sodipodi:nodetypes="ccccccccccccccccccccccccccccccccc"
-     onclick="window.open('https://sierra.ss220.space/index.php/%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B5_%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE_%D0%A1%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D0%BE%D0%B9_%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B', '_blank');"
      inkscape:label="SG" /><path
      class="fade-on-hover"
      style="fill:#ea002f;stroke-width:1.50063"
      d="m 730.62191,681.73866 h 9.09623 l 8.86329,8.87038 -8.87975,8.88691 h -10.05981 m 0,0 v 2.08699 h -18.9865 l -40.51713,40.40906 39.53943,39.71203 h 50.4079 l 18.8121,18.8273 -28.98257,29.00593 h -50.00514 l -10.48846,10.49693 v 11.40918 l 30.24345,30.2368 h 51.50664 l 30.25682,-30.28116 v -20.03065 l 30.14154,-30.16588 v -20.21794 l 19.85231,-19.86829 v -70.15921 l 10.13687,-10.14506 v -80.91352 l -59.92438,-59.97268 v -29.23213 l 9.81128,-9.81919 v -21.13091 l -10.22974,-10.23797 -19.86294,0.13635 -20.95326,20.97016 v 59.81887 l -10.29702,10.30533 h -9.77023 l -39.70344,39.73545 v 40.55029 l 29.99251,29.57836 v 11.13832"
      id="path5"
      sodipodi:nodetypes="cccccccccccccccccccccccccccccccccccccccc"
-     onclick="window.open('https://sierra.ss220.space/index.php/%D0%93%D0%B8%D0%BB%D1%8C%D0%B3%D0%B0%D0%BC%D0%B5%D1%88%D1%81%D0%BA%D0%B0%D1%8F_%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F_%D0%9A%D0%BE%D0%BD%D1%84%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F', '_blank');"
-     inkscape:label="Gilgamesh" /><path
+     inkscape:label="Gilgamesh1" /><path
      class="fade-on-hover"
      style="fill:#8357fb;stroke-width:1.50063"
      d="m 891.77532,490.40856 h 30.27881 l 10.16754,10.17573 h 30.6683 l 26.6369,-26.65838 v -21.00664 l -5.43053,-5.4349 h -25.91509 l -9.05048,-9.05776 h -59.29396 l -8.41239,8.41915 v 33.26268 z"
      id="path6"
-     onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BD%D1%84%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%BE%D0%B5_%D0%A1%D0%BE%D0%B4%D1%80%D1%83%D0%B6%D0%B5%D1%81%D1%82%D0%B2%D0%BE_%D0%90%D0%B4%D0%BE%D0%BC%D0%B0%D1%8F', '_blank');"
      inkscape:label="Tajara" /><path
      class="fade-on-hover"
      style="fill:#fbfb5c;stroke-width:1.50063"
      d="m 965.63445,387.24074 h 104.69635 l 42.856,-42.89042 h 8.0507 l 6.8985,-6.90403 h 4.7927 l 7.5473,-7.55352 v -18.1354 l 22.0336,-22.05112 v -60.18411 l 37.5139,-37.54419 V -0.49713476 H 608.55972 V 19.58173 l -23.01516,23.033716 v 10.298139 l 10.93968,10.948492 v 47.167303 l 83.86803,83.93562 v 12.64656 l 20.10382,20.12006 v 22.22488 l 21.47068,21.48798 h 81.14358 l 23.04647,23.06506 h 20.09939 l 26.84128,26.86292 h 26.92785 z"
      id="path7"
-     onclick="window.open('https://sierra.ss220.space/index.php/%D0%9E%D0%B1%D1%89%D0%B5%D1%81%D1%82%D0%B2%D0%BE_%D1%81%D0%BA%D1%80%D0%B5%D0%BB%D0%BB%D0%BE%D0%B2#%D0%9F%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D0%B0_%D1%81%D0%BA%D1%80%D0%B5%D0%BB%D0%BB%D0%BE%D0%B2', '_blank');"
      inkscape:label="Skrell" /><path
      class="fade-on-hover"
      style="fill:#006f33;stroke-width:1.50063"
      d="M 227.66239,378.2686 120.56954,485.44774 H 77.892361 L 12.49231,550.90343 v 26.42682 L 155.4859,720.44201 v 37.88535 l 9.46593,9.47062 h 42.12052 l 71.46163,-71.5163 v -16.41963 l 75.31713,-75.37782 h 30.90264 l 25.80787,-26.03686 V 547.82476 L 365.5026,502.72942 V 420.54916 L 342.41056,397.43559 H 294.9316 L 275.78004,378.2686 Z m -32.68978,231.38779 h 38.0453 l 17.46404,17.47813 v 36.95005 l -14.42594,14.43754 h -43.47698 l -16.00211,-16.01503 c 0.0178,-11.48209 0.009,-22.96633 0.009,-34.44895 z"
      id="path1"
-     onclick="window.open('https://sierra.ss220.space/index.php/%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0', '_blank');"
      inkscape:label="Frontier" /><path
      class="fade-on-hover "
      style="fill:#ea002f;stroke-width:1.50063"
      d="m 294.48522,267.23945 v 21.82761 l 37.94384,37.97441 v 46.31295 h 22.46504 l 48.65672,-48.69594 V 301.671 L 369.2497,267.34226 Z"
      id="path9"
-     onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BD%D1%84%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D1%8B%D0%B5_%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B8', '_blank');" /><path
+     /><path
      class="fade-on-hover"
      style="fill:#0091fb;stroke-width:1.50063"
      d="m 332.42906,373.35442 -27.57453,-0.012 -63.42208,-63.4732 v -20.1611 l 22.44143,-22.45953 30.61134,-0.009 v 21.82776 l 37.94384,37.97442 z"
      id="path10"
      sodipodi:nodetypes="ccccccccc"
-     onclick="window.open('https://sierra.ss220.space/index.php/%D0%92%D1%82%D0%BE%D1%80%D0%B0%D1%8F_%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA%D0%B0', '_blank');" /><path
+      inkscape:label="Lordania1"/><path
      id="path6-4-2-4"
      style="fill:#03ec1e"
      class="fade-on-hover"
      d="m 389.40546,168.95647 -0.007,11.43181 -9.87362,5.69202 -0.008,12.87992 21.06469,-12.14352 -0.0272,-24.28741 z m -33.09983,-6.42718 -0.0272,24.28741 21.06469,12.14352 -0.008,-12.87992 -9.87362,-5.69202 -0.007,-11.43181 z m 43.18426,-1.64152 -21.05682,-12.15716 -21.01241,12.18022 11.1447,6.43439 9.90024,-5.7159 9.86994,5.69841 z m -20.96941,3.78573 8.26333,4.77084 v 9.42071 l -8.0981,4.67544 -8.04165,-4.68672 v -9.63282 z"
-     onclick="window.open('https://sierra.ss220.space/index.php/%D0%98%D0%9F%D0%A1#%D0%9F%D0%BE%D0%B7%D0%B8%D1%82%D1%80%D0%BE%D0%BD%D0%BD%D1%8B%D0%B9_%D0%A1%D0%BE%D1%8E%D0%B7', '_blank');"
      inkscape:label="PU"
      transform="matrix(1.5000148,0,0,1.5012235,0,-0.49713464)" /><path
      class="fade-on-hover"
@@ -318,12 +336,12 @@
      d="m 492.47357,52.514823 2.73047,2.732692 h 11.09778 l 9.83009,9.83802 h 7.67787 l 8.71987,8.726879 3.02084,5.236418 4.02979,4.033071 h 18.46499 l 4.85672,-4.860597 h 3.04885 l 4.05374,-4.057011 h 7.43107 l 6.35065,-6.355739 v -7.881442 l 4.38308,-4.386602 -2.62482,-2.626927 V 42.615447 L 608.55972,19.58173 V -0.49713476 H 489.66518 L 480.51689,8.6585218 V 29.689993 l 11.71709,11.726538 z"
      id="path11"
      sodipodi:nodetypes="ccccccccccccccccccccccccc"
-     onclick="window.open('https://sierra.ss220.space/index.php/%D0%92%D0%BE%D1%81%D1%85%D0%BE%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5#%D0%9A%D1%80%D0%B0%D1%82%D0%BA%D0%B8%D0%B9_%D0%BE%D0%B1%D0%B7%D0%BE%D1%80', '_blank');" /><path
+     /><path
      class="fade-on-hover"
      style="fill:#c3c3c3;stroke-width:1.50063"
      d="m 1184.414,584.01831 h 15.5978 l 0.012,-392.04036 -37.5139,37.54419 v 60.18411 l -22.0339,22.05112 v 18.1354 l -7.5473,7.55352 h -4.7927 l -6.8985,6.90403 h -8.0507 l -42.856,42.89042 h -6.0586 l -8.8185,8.82557 v 34.9632 l 54.2694,54.31321 h 31.1552 l 5.528,5.53258 v 12.99176 l 6.019,6.02369 v 51.32488 l 19.155,19.17044 h 9.4235 z"
      id="path12"
-     onclick="window.open('https://sierra.ss220.space/index.php/%D0%93%D0%BE%D1%81%D1%83%D0%B4%D0%B0%D1%80%D1%81%D1%82%D0%B2%D0%BE_%D1%80%D0%B5%D0%B7%D0%BE%D0%BC%D0%B8_%D0%B8_%D0%B8%D1%85_%D0%BF%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B', '_blank');" /><path
+     /><path
      id="path41"
      style="fill:none;fill-opacity:1;stroke:#f30000;stroke-width:1.50063;stroke-linecap:butt;stroke-linejoin:bevel;stroke-dasharray:1.50063, 3.00124;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
      d="m 535.55212,532.55449 -135.11853,-70.22911 88.00869,-78.97843 m 278.01835,20.99367 -109.39644,-8.86758 m -256.6306,66.85234 -142.92266,101.24551 m 44.96249,-235.22739 97.96017,133.98188 -9.9328,-144.13271"
@@ -394,24 +412,31 @@
      id="g59"
      transform="matrix(1.5000148,0,0,1.5012235,0,-0.49713464)"
      inkscape:label="PU_flag"
-     style="pointer-events:none;display:inline;opacity:0.3;"><path
-       style="fill:#15ab90;fill-opacity:1;stroke:none;stroke-width:0.333196;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
+     style="pointer-events:none;display:inline;"><path
+       style="fill:#15ab90;fill-opacity:0.3;stroke:none;stroke-width:0.333196;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
        d="m 357.42066,160.91083 21.01241,-12.18022 21.05682,12.15716 -11.15435,6.43996 -9.86994,-5.69841 -9.90024,5.7159 z"
        id="path56" /><path
-       style="fill:#2962a0;fill-opacity:1;stroke:none;stroke-width:0.333196;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
+       style="fill:#2962a0;fill-opacity:0.3;stroke:none;stroke-width:0.333196;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
        d="m 356.30563,162.52929 11.14887,6.42718 0.007,11.43181 9.87362,5.69202 0.008,12.87992 -21.06469,-12.14352 z"
        id="path57" /><path
-       style="fill:#eb6a3d;fill-opacity:1;stroke:none;stroke-width:0.333196;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
+       style="fill:#eb6a3d;fill-opacity:0.3;stroke:none;stroke-width:0.333196;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
        d="m 379.51684,198.96022 0.008,-12.87992 9.87362,-5.69202 0.007,-11.43181 11.14887,-6.42718 0.0272,24.28741 z"
        id="path58" /><path
-       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.333196;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
+       style="fill:#ffffff;fill-opacity:0.3;stroke:none;stroke-width:0.333196;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
        d="m 386.78381,178.86505 v -9.42071 l -8.26333,-4.77084 -7.87642,4.54745 v 9.63282 l 8.04165,4.68672 z"
        id="path59" /></g><path
      style="pointer-events:none;paint-order:normal;stroke-opacity:1;stroke-dashoffset:0;stroke-dasharray:none;stroke-linejoin:miter;stroke-linecap:butt;stroke-width:0.5;stroke:none;fill-opacity:1;fill:#647f53;display:inline;"
      d="M 977.08899,153.75153 H 961.5367 c -1.75127,0.92119 -1.45038,2.01147 0,3.18198 h 3.57567 c 2.21462,0.20585 2.95972,42.95394 0.0225,83.31772 -0.48305,6.63814 0.39237,13.25492 0.73612,19.60778 0.53887,9.95885 9.51283,17.23348 13.11836,19.09462 1.20188,0.6204 10.06095,5.40256 21.58085,5.21755 15.7029,-0.25219 22.1798,-7.28481 22.1798,-7.28481 6.54,-5.80603 10.7574,-13.49171 11.7203,-21.62121 -1.3918,-32.4592 -2.4623,-65.70942 0.1547,-98.46423 h 4.6595 c 2.5531,-2.13145 -0.4132,-3.1883 -0.094,-3.09359 h -16.6259 l 5.613,3.24065 c 1.5466,23.47483 2.4638,56.3498 0.2411,81.21534 -1.4876,16.64277 -1.7367,30.0017 -7.3661,34.43306 -5.5327,4.22018 -9.9252,9.65412 -20.3656,8.65003 -6.84572,-0.184 -13.11757,-2.00771 -18.79665,-5.52503 -2.3547,-2.88019 -7.77456,-6.34246 -8.21341,-10.3206 -3.84845,-34.8857 -5.11581,-72.68621 -0.78659,-109.17439 z"
      id="path55"
      sodipodi:nodetypes="ccccsssscccccccscccscc"
-     inkscape:label="Skrell_flag" /><g
+     inkscape:label="Skrell_flag" />
+     <path
+     style="pointer-events:none; fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.264902;stroke-opacity:1"
+     d="m 1147.8104,380.93977 c 0,0 23.2762,0 34.8026,0 3.0616,0 8.8718,2.37719 8.8718,2.37719 0,0 -6.5273,6.12674 -10.6118,6.12674 -2.9431,0 -8.8891,0 -8.8891,0 0,0 3.0156,2.07697 3.6794,3.67945 0.6172,1.49003 0.6172,3.34835 0,4.83839 -0.6485,1.56556 -2.3964,4.79293 -3.5947,3.59469 -3.0271,-3.02709 -7.7835,-7.78345 -7.7835,-7.78345 l -2.5901,5.75785 2.6576,2.6575 v 2.13103 l -5.9029,5.9029 -7.0861,7.0861 v -17.22741 h -7.7241 c -2.3591,-1.49218 -3.5744,-3.94222 -5.2318,-5.99339 -0.5632,-0.69442 -0.2059,-2.47627 0,-2.68213 0.1639,-0.16386 4.1721,0 4.1721,0 l 1.5895,-1.58941 c 0.1465,0.038 -0.052,-3.50573 0,-5.29801 0.049,-1.70095 1.9395,-3.57804 3.6411,-3.57804 z"
+     id="path184"
+     sodipodi:nodetypes="sscscssscccccccsssccss"
+     inkscape:label="Rezomi_flag" />
+     <g
      id="g1"
      inkscape:label="Systems"
      transform="matrix(1.5000148,0,0,1.5012235,0,-0.49713464)"><g
@@ -425,7 +450,7 @@
          x="591.7254"
          y="296.48914"
          inkscape:label="Zamsiin-Ir"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%90%D0%B4%D0%BE%D0%BC%D0%B0%D0%B9', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-79-15"
@@ -434,7 +459,7 @@
          x="619.84589"
          y="306.54846"
          inkscape:label="Sii`rahn-Ir"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D0%B8%E2%80%99%D0%A0%D0%B0%D1%85%D0%BD-%D0%98%D1%80', '_blank');" /></g><g
+         /></g><g
        id="g8"
        inkscape:label="Unathis"><rect
          class="fade-on-hover"
@@ -463,7 +488,7 @@
          x="557.66949"
          y="308.54846"
          inkscape:label="Ursa"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9C%D0%B0%D0%B3%D0%BD%D0%B0%D1%80%D1%81%D0%BA%D0%B0%D1%8F_%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA%D0%B0', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-79-00"
@@ -512,7 +537,7 @@
          x="532.49786"
          y="437"
          inkscape:label="Gilgamesh"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%A2%D0%B5%D1%80%D1%80%D0%B0', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-79-120"
@@ -609,7 +634,7 @@
          x="239.06386"
          y="457.87228"
          inkscape:label="Mirania"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B8,_%D0%BE%D1%82_%D0%B3%D0%BE%D1%80%D0%BD%D0%BE%D0%B4%D0%BE%D0%B1%D1%8B%D0%B2%D0%B0%D1%8E%D1%89%D0%B8%D1%85_%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%BE%D0%B2_%D0%B4%D0%BE_%D0%9D%D1%8C%D1%8E-%D0%9D%D1%8C%D1%8E-%D0%99%D0%BE%D1%80%D0%BA%D0%B0!#%D0%94%D1%80%D1%83%D0%B3%D0%B8%D0%B5_%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-50"
@@ -618,7 +643,7 @@
          x="215.96927"
          y="234.36784"
          inkscape:label="Nouveaulyon"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-351"
@@ -627,7 +652,7 @@
          x="219.79408"
          y="220.54846"
          inkscape:label="Tyannani"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-40"
@@ -636,7 +661,7 @@
          x="245.15532"
          y="203.22577"
          inkscape:label="Denebola"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-84"
@@ -645,7 +670,7 @@
          x="229.14752"
          y="194.63876"
          inkscape:label="Visser"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-88"
@@ -654,7 +679,7 @@
          x="221.14687"
          y="181.31929"
          inkscape:label="Chardaan"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80', '_blank');" /></g><g
+         /></g><g
        id="g4"
        inkscape:label="SGs"><rect
          class="fade-on-hover"
@@ -681,7 +706,7 @@
          x="331.29886"
          y="432.37445"
          inkscape:label="T. Ceti"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%AD%D0%BF%D1%81%D0%B8%D0%BB%D0%BE%D0%BD_%D0%9A%D0%B8%D1%82%D0%B0', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-4-5"
@@ -698,7 +723,7 @@
          x="193.19658"
          y="459.84195"
          inkscape:label="Nyx"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9D%D0%B8%D0%BA%D1%81', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-825"
@@ -723,7 +748,7 @@
          x="394.13428"
          y="389.13004"
          inkscape:label="Sol"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B8,_%D0%BE%D1%82_%D0%B3%D0%BE%D1%80%D0%BD%D0%BE%D0%B4%D0%BE%D0%B1%D1%8B%D0%B2%D0%B0%D1%8E%D1%89%D0%B8%D1%85_%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%BE%D0%B2_%D0%B4%D0%BE_%D0%9D%D1%8C%D1%8E-%D0%9D%D1%8C%D1%8E-%D0%99%D0%BE%D1%80%D0%BA%D0%B0!#%D0%A1%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D0%B0%D1%8F_%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D0%B0', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-27"
@@ -748,7 +773,7 @@
          x="403.82629"
          y="371.95786"
          inkscape:label="A. Centauri"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%A2%D0%B8%D0%B0%D0%BC%D0%B0%D1%82', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="display:inline;fill:#f5f5f5;stroke-width:1.05548"
          id="rect13-88-650"
@@ -781,7 +806,7 @@
          x="422.99741"
          y="321.84195"
          inkscape:label="Helios"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%93%D0%B0%D1%83%D1%81%D1%81', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-8"
@@ -846,7 +871,7 @@
          x="195.20047"
          y="248.55508"
          inkscape:label="Gessshire"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%93%D0%B5%D1%81%D1%81%D1%88%D0%B8%D1%80', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-10"
@@ -855,7 +880,7 @@
          x="175.16075"
          y="227.65201"
          inkscape:label="Yuklid"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%AE%D0%BA%D0%BB%D0%B8%D0%B4%D1%81%D0%BA%D0%B0%D1%8F_%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA%D0%B0', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-348"
@@ -864,7 +889,7 @@
          x="187.10355"
          y="209.81938"
          inkscape:label="Lordania"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-43"
@@ -873,7 +898,7 @@
          x="169.10899"
          y="189.27092"
          inkscape:label="Gavil"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%A2%D0%B5%D1%80%D1%81%D1%82%D0%B5%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA%D0%B0', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-4"
@@ -898,7 +923,7 @@
          x="163.77779"
          y="201.25542"
          inkscape:label="Lucinaer"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA%D0%B0_%D0%A6%D0%B8%D0%BD%D1%83', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-4-8"
@@ -917,7 +942,7 @@
          x="19.815487"
          y="360.66135"
          inkscape:label="Al Kidr"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%9B%D0%B0%D1%81%D1%82_%D0%A1%D1%82%D0%BE%D0%BF', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-90"
@@ -926,7 +951,7 @@
          x="151.84805"
          y="366.54108"
          inkscape:label="Copernicus"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B8,_%D0%BE%D1%82_%D0%B3%D0%BE%D1%80%D0%BD%D0%BE%D0%B4%D0%BE%D0%B1%D1%8B%D0%B2%D0%B0%D1%8E%D1%89%D0%B8%D1%85_%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%BE%D0%B2_%D0%B4%D0%BE_%D0%9D%D1%8C%D1%8E-%D0%9D%D1%8C%D1%8E-%D0%99%D0%BE%D1%80%D0%BA%D0%B0!#%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-86"
@@ -935,7 +960,7 @@
          x="141.10153"
          y="382.53705"
          inkscape:label="Castor"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%A3%D1%80%D0%B8%D0%BC', '_blank');" /><rect
+        /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-58"
@@ -952,7 +977,7 @@
          x="113.75159"
          y="331.87228"
          inkscape:label="Lyncis"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B8,_%D0%BE%D1%82_%D0%B3%D0%BE%D1%80%D0%BD%D0%BE%D0%B4%D0%BE%D0%B1%D1%8B%D0%B2%D0%B0%D1%8E%D1%89%D0%B8%D1%85_%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%BE%D0%B2_%D0%B4%D0%BE_%D0%9D%D1%8C%D1%8E-%D0%9D%D1%8C%D1%8E-%D0%99%D0%BE%D1%80%D0%BA%D0%B0!#%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-82"
@@ -961,7 +986,7 @@
          x="141.81992"
          y="303.29758"
          inkscape:label="Pollux"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%A1%D0%B0%D0%BD%D1%81%D0%B5%D1%82', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-62"
@@ -970,7 +995,7 @@
          x="252.40521"
          y="381.14871"
          inkscape:label="Cor"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%97%D0%B0%D1%80%D0%BA%D0%BE%D0%B7', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-03"
@@ -979,7 +1004,7 @@
          x="209.86453"
          y="275.87115"
          inkscape:label="Senavus"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%9C%D0%B8%D1%80_%D0%9C%D0%B0%D0%BA%D1%81%D0%B8%D0%BC%D0%B0/%D0%95-14%D0%B1', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-95"
@@ -988,7 +1013,7 @@
          x="154.58699"
          y="254.45816"
          inkscape:label="Porrima"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%9A%D0%B0%D0%B4%D0%B7%D0%B5', '_blank');" /></g><g
+         /></g><g
        id="g5"
        inkscape:label="Neutrals"
        style="fill:#ffffff;fill-opacity:1"><rect
@@ -1032,7 +1057,7 @@
          x="221.8125"
          y="170.5"
          inkscape:label="Miuolnir"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#ffffff;fill-opacity:1"
          id="rect13-2"
@@ -1065,7 +1090,7 @@
          x="271.65164"
          y="319.16031"
          inkscape:label="Phiros"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%A2%D0%B0%D1%80%D1%82%D0%B5%D1%81%D1%81%D0%BE%D1%81%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9_%D0%BD%D0%B0%D1%83%D1%87%D0%BD%D1%8B%D0%B9_%D0%B4%D0%B8%D1%80%D0%B5%D0%BA%D1%82%D0%BE%D1%80%D0%B0%D1%82', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="opacity:0;fill:#ffffff;stroke-width:0.845006;fill-opacity:1"
          id="rect13-79-8"
@@ -1226,7 +1251,7 @@
          x="547.08368"
          y="253.05177"
          inkscape:label="XX-168"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%A2%D0%B0%D1%83-%D0%92%D0%B8%D0%BB%D0%BE', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#ffffff;fill-opacity:1"
          id="rect13-88-68"
@@ -1339,7 +1364,7 @@
          x="515.06512"
          y="289.10599"
          inkscape:label="Klaudof"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B8,_%D0%BE%D1%82_%D0%B3%D0%BE%D1%80%D0%BD%D0%BE%D0%B4%D0%BE%D0%B1%D1%8B%D0%B2%D0%B0%D1%8E%D1%89%D0%B8%D1%85_%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%BE%D0%B2_%D0%B4%D0%BE_%D0%9D%D1%8C%D1%8E-%D0%9D%D1%8C%D1%8E-%D0%99%D0%BE%D1%80%D0%BA%D0%B0!#%D0%94%D1%80%D1%83%D0%B3%D0%B8%D0%B5_%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#ffffff;fill-opacity:1"
          id="rect13-79-7"
@@ -1384,7 +1409,7 @@
          x="367.57376"
          y="169.7357"
          inkscape:label="Kernel"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%A0%D1%83%D1%82', '_blank');" /></g><g
+         /></g><g
        id="g2"
        inkscape:label="Skrellss"><rect
          class="fade-on-hover"
@@ -1460,7 +1485,7 @@
          x="565.11877"
          y="177.80843"
          inkscape:label="Qoa`Lo"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9C%D0%B8%27%D1%82%D0%BE%D1%80%27%D0%BA%D1%83%D0%B8', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-76-4-32"
@@ -1469,7 +1494,7 @@
          x="504.49936"
          y="167.16986"
          inkscape:label="Harr`Kelm"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B8,_%D0%BE%D1%82_%D0%B3%D0%BE%D1%80%D0%BD%D0%BE%D0%B4%D0%BE%D0%B1%D1%8B%D0%B2%D0%B0%D1%8E%D1%89%D0%B8%D1%85_%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%BE%D0%B2_%D0%B4%D0%BE_%D0%9D%D1%8C%D1%8E-%D0%9D%D1%8C%D1%8E-%D0%99%D0%BE%D1%80%D0%BA%D0%B0!#%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B8_%D0%B8%D0%BD%D1%8B%D1%85_%D1%80%D0%B0%D1%81', '_blank');" /><rect
+         /><rect
          class="fade-on-hover"
          style="fill:#f5f5f5"
          id="rect13-88-76-4-5"
@@ -1574,7 +1599,7 @@
          x="650.44446"
          y="135.894"
          inkscape:label="Qerrbalk"
-         onclick="window.open('https://sierra.ss220.space/index.php/%D0%9A%D0%B2%D0%B5%D1%80%D1%80%D0%B1%D0%B0%D0%BB%D0%B0%D0%BA', '_blank');" /></g><g
+        /></g><g
        id="g12"
        inkscape:label="Dionas"><rect
          class="fade-on-hover"
@@ -2049,10 +2074,10 @@
        d="m 535.11017,278.74533 h 38.41846"
        id="path177"
        transform="matrix(1.5000148,0,0,1.5012235,0,-0.49713464)" /><path
-       style="fill:none;fill-opacity:1;stroke:#b5fe00;stroke-opacity:1"
+       style="fill:none;fill-opacity:1;stroke:#fbfb5c;stroke-opacity:1"
        d="m 892.76552,176.91919 h 33.5957"
        id="path179" /><path
-       style="fill:none;fill-opacity:1;stroke:#b5fe00;stroke-opacity:1"
+       style="fill:none;fill-opacity:1;stroke:#fbfb5c;stroke-opacity:1"
        d="m 798.74543,116.4868 h 30.7221"
        id="path180" /><path
        style="fill:#8357fb;fill-opacity:1;stroke:#8357fb;stroke-opacity:1"
@@ -2063,7 +2088,10 @@
        id="path182" /><path
        style="fill:#689857;fill-opacity:1;stroke:#689857;stroke-opacity:1"
        d="M 703.60847,74.803406 H 1179.5205"
-       id="path183" /></g><g
+       id="path183" /><path
+       style="fill:#fbfb5c;stroke:#fbfb5c;fill-opacity:1;stroke-opacity:1"
+       d="m 862.45889,223.21948 h 31.91734"
+       id="path185" /></g><g
      id="g16"
      inkscape:label="Stars"><path
        sodipodi:type="star"
@@ -3954,16 +3982,39 @@
        transform="matrix(0.86574191,0,0,0.86574192,-33.171103,365.01723)" /><path
        style="fill:#a65b00;fill-opacity:1;stroke:#a65b00;stroke-width:0.5;stroke-linejoin:miter;stroke-dasharray:0.5,1;stroke-opacity:1;stroke-dashoffset:0"
        d="M 46.399213,537.44341 0,508.43187"
-       id="path15" /><path
+       id="path15" />
+       
+       <path
        style="fill:#0091fb;fill-opacity:1;stroke:#0091fb;stroke-opacity:1"
        d="m 619.65937,632.17149 h 72.68851"
-       id="path29" /></g></svg>
-
+       id="path29" />
+      </g>
+      </svg>
 
 
   </div>
 
+<div id="tooltip" style="
+  position: absolute;
+  background: none;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 1000;">
+  <div id="tooltipContent" style="
+    background: #111;
+    color: white;
+    padding: 10px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    font-family: 'Futura Md BT [Rus by me]', sans-serif;
+    font-size: 14px;
+    pointer-events: auto;
+    max-width: 350px;">
+  </div>
+
   <script>
+    // 🐾 Простая реализация масштабирования и перемещения
     const svg = document.getElementById('svg1');
     let viewBox = svg.viewBox.baseVal;
     let isPanning = false;
@@ -4016,7 +4067,26 @@ const path53 = document.getElementById("path53");
 const path54 = document.getElementById("path54");
 const path55 = document.getElementById("path55");
 const path7 = document.getElementById("path7");
+const path184 = document.getElementById("path184");
+const path12 = document.getElementById("path12");
 
+
+if (path12 && path184) {
+    if (!path184.style.opacity) {
+        path184.style.opacity = '0.3';
+    }
+    path184.style.transition = 'opacity 0.3s ease';
+
+    path12.addEventListener('mouseover', function() {
+        path184.style.opacity = '1';
+    });
+
+    path12.addEventListener('mouseout', function() {
+        path184.style.opacity = '0.3';
+    });
+} else {
+    console.error("path12 или path184 не найдены.");
+}
 
 if (path4 && path47 && path44) {
     [path47, path44].forEach(el => {
@@ -4039,6 +4109,7 @@ if (path4 && path47 && path44) {
     console.error("path4, path47 или path44 не найдены.");
 }
 
+// path5 → path51
 if (path5 && path51) {
     if (!path51.style.opacity) {
         path51.style.opacity = '0.3';
@@ -4056,6 +4127,7 @@ if (path5 && path51) {
     console.error("path5 или path51 не найдены.");
 }
 
+// path1 → path53 + path54
 if (path1 && path53 && path54) {
     [path53, path54].forEach(el => {
         if (!el.style.opacity) {
@@ -4077,6 +4149,7 @@ if (path1 && path53 && path54) {
     console.error("path1, path53 или path54 не найдены.");
 }
 
+// path5 → path51
 if (path7 && path55) {
     if (!path55.style.opacity) {
         path55.style.opacity = '0.3';
@@ -4133,6 +4206,7 @@ if (path7 && path55) {
         const cx = x + width / 2;
         const cy = y + height / 2;
 
+        // Вставим временный элемент
         const tempText = document.createElementNS(SVG_NS, "text");
         tempText.setAttribute("x", cx);
         tempText.setAttribute("y", cy);
@@ -4141,10 +4215,11 @@ if (path7 && path55) {
         tempText.setAttribute("pointer-events", "none");
         tempText.setAttribute("fill", color);
         tempText.setAttribute("font-family", fontFamily);
-        tempText.setAttribute("font-size", height);
+        tempText.setAttribute("font-size", height); // стартуем с максимальной высоты
         tempText.textContent = label;
         svg.appendChild(tempText);
 
+        // Подбираем минимально подходящий font-size
         let fontSize = height;
         while (fontSize > 1) {
           tempText.setAttribute("font-size", fontSize);
@@ -4153,6 +4228,7 @@ if (path7 && path55) {
           fontSize -= 0.5;
         }
 
+        // Теперь растягиваем по ширине — letter-spacing
         let letterSpacing = 0;
         tempText.setAttribute("font-size", fontSize);
         tempText.setAttribute("letter-spacing", `${letterSpacing}px`);
@@ -4161,7 +4237,7 @@ if (path7 && path55) {
           tempText.setAttribute("letter-spacing", `${letterSpacing}px`);
           const box = tempText.getBBox();
           if (box.width > width) {
-            letterSpacing -= 0.5;
+            letterSpacing -= 0.5; // шаг назад
             break;
           }
           letterSpacing += 0.1;
@@ -4169,6 +4245,7 @@ if (path7 && path55) {
 
         svg.removeChild(tempText);
 
+        // Финальный текст
         const finalText = document.createElementNS(SVG_NS, "text");
         finalText.setAttribute("x", cx);
         finalText.setAttribute("y", cy);
@@ -4185,6 +4262,388 @@ if (path7 && path55) {
       });
     });
   });
+
+  window.addEventListener("load", () => {
+    const svg = document.querySelector("svg");
+    const tooltip = document.getElementById("tooltip");
+
+    const systemData = {
+      "Galilei": `
+        <strong>Галилея</strong><br><br>
+        Нейтральная система на границе ЦПСС и ГКК. Место действий <a href="https://sierra.ss220.space/index.php/%D0%93%D0%B0%D0%B9%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BE%D0%BD%D1%84%D0%BB%D0%B8%D0%BA%D1%82" target="_blank">Гайского Конфликта</a><br><br>
+        <strong>Заселенные планеты:</strong><br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%93%D0%B0%D0%B9%D1%8F" target="_blank">Гайя</a>
+      `,
+      "Sol": `
+        <strong>Солнце</strong><br><br>
+        Солнечная система. Колыбель человеческой цивилизации и центр метрополии <a href="https://sierra.ss220.space/index.php/%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B5_%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE_%D0%A1%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D0%BE%D0%B9_%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B" target="_blank">ЦПСС</a><br><br>
+        <strong>Заселенные планеты:</strong><br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%9C%D0%B0%D1%80%D1%81" target="_blank">Марс</a><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%97%D0%B5%D0%BC%D0%BB%D1%8F" target="_blank">Земля</a><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%9B%D1%83%D0%BD%D0%B0" target="_blank">Луна</a><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%92%D0%B5%D0%BD%D0%B5%D1%80%D0%B0" target="_blank">Венера</a><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%9F%D0%BB%D1%83%D1%82%D0%BE%D0%BD" target="_blank">Плутон</a><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%A4%D0%BE%D0%B1%D0%BE%D1%81" target="_blank">Фобос</a><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%A6%D0%B5%D1%80%D0%B5%D1%80%D0%B0" target="_blank">Церера</a><br>
+      `,
+      "Nyx": `
+        <strong>Никс</strong><br><br>
+        Одна из важнейших систем. Тут находится единственный известный фороновый гигант. Система сразу стала магнитом для капитала, авантюристов и преступности. Из-за невероятной ценности и столкновения интересов корпораций - она стала местом действий <a href="https://sierra.ss220.space/index.php/%D0%9D%D0%B8%D0%BA%D1%81#%D0%9A%D0%BE%D1%80%D0%BF%D0%BE%D1%80%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F_%D0%B2%D0%BE%D0%B9%D0%BD%D0%B0" target="_blank">Корпоративной войны</a><br><br>
+        <strong>Заселенные планеты:</strong>:<br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%91%D1%80%D0%B8%D0%BD%D0%BA%D0%B1%D1%91%D1%80%D0%BD" target="_blank">Бринкбёрн</a><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%9A%D0%B0%D0%BB%D0%B4%D0%B0%D1%80%D0%BA" target="_blank">Калдарк</a><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%A0%D0%BE%D0%B0%D0%BD%D0%BE%D0%BA" target="_blank">Роанок</a><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%99%D1%83%D0%BA%D0%BB%D0%B8%D1%82" target="_blank">Йуклит</a><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%9A%D0%B0%D1%81%D1%81%D0%B5%D1%80" target="_blank">Кассер</a><br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%9D%D0%B8%D0%BA%D1%81" target="_blank">Подробнее →</a>
+      `,
+      "Gilgamesh": `
+        <strong>Гильгамеш</strong><br><br>
+        Столичная система <a href="https://sierra.ss220.space/index.php/%D0%93%D0%B8%D0%BB%D1%8C%D0%B3%D0%B0%D0%BC%D0%B5%D1%88%D1%81%D0%BA%D0%B0%D1%8F_%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F_%D0%9A%D0%BE%D0%BD%D1%84%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F" target="_blank">ГКК</a>
+        и самая старая система всей Конфедерации.<br><br>
+        <strong>Заселенные планеты:</strong><br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%A2%D0%B5%D1%80%D1%80%D0%B0" target="_blank">Терра</a><br>
+        Новая земля<br>
+      `,
+      "Copernicus": `
+        <strong>Коперник</strong><br><br>
+        Бывшая система <a href="https://sierra.ss220.space/index.php/%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B5_%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE_%D0%A1%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D0%BE%D0%B9_%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B" target="_blank">ЦПСС</a>.
+         10 сентября 2310 года система вышла из ее состава и уже в 2311 году Иолайская конфедеративная республика основала Альянс Фронтира, наряду с Браге и другими системами Фронтира.<br><br>
+        <strong>Заселенные планеты:</strong>:<br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%98%D0%BE%D0%BB%D0%B0%D0%B9" target="_blank">Иолай</a><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%91%D1%80%D0%B0%D0%B3%D0%B5" target="_blank">Браге</a><br>
+      `,
+      "Castor": `
+        <strong>Кастор</strong><br><br>
+        Слабо заселенная система с заброшенной колонией, на которой уже почти никого не осталось.<br><br>
+        <strong>Заселенные планеты:</strong><br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%A3%D1%80%D0%B8%D0%BC" target="_blank">Урим</a><br>
+      `,
+      "Senavus": `
+        <strong>Сенавус</strong><br><br>
+        Место нахождения загадочной планеты, которую изучает <a href="https://sierra.ss220.space/index.php/%D0%AD%D0%BA%D1%81%D0%BF%D0%B5%D0%B4%D0%B8%D1%86%D0%B8%D0%BE%D0%BD%D0%BD%D1%8B%D0%B9_%D0%BA%D0%BE%D1%80%D0%BF%D1%83%D1%81" target="_blank">ЭК ЦПСС</a>.<br><br>
+        <strong>Заселенные планеты:</strong>:<br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%9C%D0%B8%D1%80_%D0%9C%D0%B0%D0%BA%D1%81%D0%B8%D0%BC%D0%B0/%D0%95-14%D0%B1" target="_blank">Мир Максима/Е-14б</a><br>
+      `,
+      "Porrima": `
+        <strong>Поррима</strong><br><br>
+        Название этой системы стало синонимом хорошего отдыха. Благодаря океанической планете с приятным климатом и отсутствием загрязнения - Поррима привлекает много туристов со всей галактики.<br><br>
+        <strong>Заселенные планеты:</strong><br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%9A%D0%B0%D0%B4%D0%B7%D0%B5" target="_blank">Кадзе</a><br>
+      `,
+      "Al Kidr": `
+        <strong>Аль Кидр</strong><br><br>
+        известна своими заброшенными и нестабильным гейтвеем со времён Терранского Содружества. Никто не знает куда он ведет, но отправляясь туда - назад еще никто не возвращался. В ту сторону гейтвея периодически отправляют припасы для странников, что осмелились отправиться в один конец.<br><br>
+        <strong>Заселенные планеты:</strong><br><br>
+        Станция <a href="https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%9B%D0%B0%D1%81%D1%82_%D0%A1%D1%82%D0%BE%D0%BF" target="_blank">Ласт Стоп</a><br>
+      `,
+      "Pollux": `
+        <strong>Поллукс</strong><br><br>
+        Бывшая система Терранского содружества. Тут находится уникальная фермерская община.<br><br>
+        <strong>Заселенные планеты:</strong><br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%A1%D0%B0%D0%BD%D1%81%D0%B5%D1%82" target="_blank">Сансет</a><br>
+      `,
+      "Cor": `
+        <strong>Кор</strong><br><br>
+        Столица криминала на Фронтире. Наркотики, азартные игры и различные преступные дела. Удивительно, что все это происходит так близко к границам <a href="https://sierra.ss220.space/index.php/%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B5_%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE_%D0%A1%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D0%BE%D0%B9_%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B" target="_blank">ЦПСС</a>.<br><br>
+        <strong>Заселенные планеты:</strong><br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B_%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81%D0%B0_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0#%D0%97%D0%B0%D1%80%D0%BA%D0%BE%D0%B7" target="_blank">Заркоз</a><br>
+      `,
+      "Qerrbalk": `
+        <strong>Кьерр'Валис</strong><br><br>
+        Родная система скреллов.<br><br>
+        <strong>Заселенные планеты:</strong><br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%9A%D0%B2%D0%B5%D1%80%D1%80%D0%B1%D0%B0%D0%BB%D0%B0%D0%BA" target="_blank">Кверрбалк</a><br>
+      `,
+      "Harr`Kelm": `
+        <strong>Харр'келм</strong><br><br>
+        В этой системе есть планета с гигантскими залежами алмазов.<br><br>
+        <strong>Заселенные планеты:</strong><br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%9A%D0%B2%D0%B5%D1%80%D1%80%D0%BD%D0%B0-%D0%9B%D0%B0%D0%BA%D0%B8%D1%80%D1%80" target="_blank">Кверрна-Лакирр</a><br>
+      `,
+      "Qoa`Lo": `
+        <strong>Куа'ло</strong><br><br>
+        Сильное влияние человеческой культуры и специализация на торговле с <a href="https://sierra.ss220.space/index.php/%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B5_%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE_%D0%A1%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D0%BE%D0%B9_%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B" target="_blank">ЦПСС</a>
+        изменило культуру Скреллов в городах-государствах в этой системе. <br><br>
+        <strong>Заселенные планеты:</strong><br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%9C%D0%B8%27%D1%82%D0%BE%D1%80%27%D0%BA%D1%83%D0%B8" target="_blank">Ми'тор'куи</a><br>
+      `,
+      "Moghes": `
+        <strong>Юэо-Эса</strong><br><br>
+        Родная и единственная система, подконтрольная <a href="https://sierra.ss220.space/index.php/%D0%A3%D0%BD%D0%B0%D1%82%D0%B8" target="_blank">Унати</a>.<br><br>
+        <strong>Заселенные планеты:</strong><br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%9C%D0%BE%D0%B3%D0%B5%D1%81" target="_blank">Могес</a><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%9E%D1%83%D1%8D%D1%80" target="_blank">Оуэр</a><br>
+      `,
+
+
+
+
+      "SG": `
+        <strong>Центральное Правительство Солнечной Системы</strong><br>
+        Федеративная республика, состоящая из множества государств, контролирующая большую часть центральных человеческих систем. Считается сильнейшим государством галактики<br><br>
+        <strong>Раса:</strong> <a href="https://sierra.ss220.space/index.php/%D0%A7%D0%B5%D0%BB%D0%BE%D0%B2%D0%B5%D1%87%D0%B5%D1%81%D1%82%D0%B2%D0%BE" target="_blank">Люди</a><br>
+        <strong>Форма правления:</strong> Федеративная республика<br>
+        <strong>Численность населения:</strong> ~60 млрд<br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B5_%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE_%D0%A1%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D0%BE%D0%B9_%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B" target="_blank">Подробнее →</a>
+      `,
+      "PU": `
+        <strong>Позитронный Союз</strong><br>
+        Небольшое государство, владеющее территорией на краю контролируемого <a href="https://sierra.ss220.space/index.php/%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B5_%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE_%D0%A1%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D0%BE%D0%B9_%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B" target="_blank">ЦПСС</a>. пространства, население которого состоит исклфючительно из <a href="https://sierra.ss220.space/index.php/%D0%98%D0%9F%D0%A1" target="_blank">позитроников</a>.
+        второго поколения. Союз был образован свободными машинами для того, чтобы поддержать свои притязания на индивидуальность и право собственности<br><br>
+        <strong>Раса:</strong> <a href="https://sierra.ss220.space/index.php/%D0%98%D0%9F%D0%A1" target="_blank">ИПС</a><br>
+        <strong>Форма правления:</strong> Демократическая республика<br>
+        <strong>Численность населения:</strong> ~10300000<br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%98%D0%9F%D0%A1#%D0%9F%D0%BE%D0%B7%D0%B8%D1%82%D1%80%D0%BE%D0%BD%D0%BD%D1%8B%D0%B9_%D0%A1%D0%BE%D1%8E%D0%B7" target="_blank">Подробнее →</a>
+      `,
+      "Frontier": `
+        <strong>Альянс Фронтира</strong><br>
+        Слабо организованная политическая организация аффилированных планет на рубеже <a href="https://sierra.ss220.space/index.php/%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B5_%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE_%D0%A1%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D0%BE%D0%B9_%D0%A1%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B" target="_blank">ЦПСС.</a><br><br>
+        <strong>Раса:</strong> <a href="https://sierra.ss220.space/index.php/%D0%A7%D0%B5%D0%BB%D0%BE%D0%B2%D0%B5%D1%87%D0%B5%D1%81%D1%82%D0%B2%D0%BE" target="_blank">Люди</a><br>
+        <strong>Форма правления:</strong> Отсутствует<br>
+        <strong>Численность населения:</strong>~135000000<br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%90%D0%BB%D1%8C%D1%8F%D0%BD%D1%81_%D0%A4%D1%80%D0%BE%D0%BD%D1%82%D0%B8%D1%80%D0%B0" target="_blank">Подробнее →</a>
+      `,
+      "Gilgamesh1": `
+        <strong>Гильгамешская Колониальная Конфедерация</strong><br>
+        Гочударство, сформированное из отделившихся человеческих колоний <a href="https://sierra.ss220.space/index.php/%D0%93%D0%B8%D0%BB%D1%8C%D0%B3%D0%B0%D0%BC%D0%B5%D1%88%D1%81%D0%BA%D0%B0%D1%8F_%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F_%D0%9A%D0%BE%D0%BD%D1%84%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F#%D0%9D%D0%B5%D0%B7%D0%B0%D0%B2%D0%B8%D1%81%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C" target="_blank">после основания ЦПСС</a>. Представляет собой псевдократическую конфедерацию с премьер-министром. Второе по силе государство в галактике<br><br>
+        <strong>Раса:</strong> <a href="https://sierra.ss220.space/index.php/%D0%A7%D0%B5%D0%BB%D0%BE%D0%B2%D0%B5%D1%87%D0%B5%D1%81%D1%82%D0%B2%D0%BE" target="_blank">Люди</a><br>
+        <strong>Форма правления:</strong> Псевдократический конфедеративный директорат<br>
+        <strong>Численность населения:</strong>~40 млрд<br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%93%D0%B8%D0%BB%D1%8C%D0%B3%D0%B0%D0%BC%D0%B5%D1%88%D1%81%D0%BA%D0%B0%D1%8F_%D0%9A%D0%BE%D0%BB%D0%BE%D0%BD%D0%B8%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F_%D0%9A%D0%BE%D0%BD%D1%84%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F" target="_blank">Подробнее →</a>
+      `,
+      "Lordania1": `
+        <strong>Вторая Лорданианская Республика (ЦПСС)</strong><br>
+        Сектор, <br><br>
+        <strong>Раса:</strong> <a href="https://sierra.ss220.space/index.php/%D0%A7%D0%B5%D0%BB%D0%BE%D0%B2%D0%B5%D1%87%D0%B5%D1%81%D1%82%D0%B2%D0%BE" target="_blank">Люди</a><br>
+        <strong>Форма правления:</strong> Автократическая федеративная республика<br>
+        <strong>Численность населения:</strong><span class="glitch-text">~00000000</span> <br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%92%D1%82%D0%BE%D1%80%D0%B0%D1%8F_%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA%D0%B0" target="_blank">Подробнее →</a>
+      `,
+      "Tajara": `
+        <strong>Конфедиративное Содружество Адомая</strong><br>
+        Конфедеративное Содружество Адомая, сокращенно КСА, межзвездное государство, расположенное более чем в 34 световых годах от Марса. Государство состоит из двух крупных обитаемых систем и еще трех звезд, не обитаемых на 2307 год.<br><br>
+        <strong>Раса:</strong> <a href="https://sierra.ss220.space/index.php/%D0%A2%D0%B0%D1%8F%D1%80%D0%B0" target="_blank">Таяра</a><br>
+        <strong>Форма правления:</strong> Смешанная конфедеративная республика<br>
+        <strong>Численность населения:</strong>13.7 млрд <br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%9A%D0%BE%D0%BD%D1%84%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%BE%D0%B5_%D0%A1%D0%BE%D0%B4%D1%80%D1%83%D0%B6%D0%B5%D1%81%D1%82%D0%B2%D0%BE_%D0%90%D0%B4%D0%BE%D0%BC%D0%B0%D1%8F" target="_blank">Подробнее →</a>
+      `,
+      "Skrell": `
+        <strong>Скреллианская империя</strong><br>
+        Объединение целой ассамблеи различных городов-государств, планет-государств, а также небольших королевств. Самое древнее межзвёздное государство, из существующих на данный момент.<br><br>
+        <strong>Раса:</strong> <a href="https://sierra.ss220.space/index.php/%D0%A1%D0%BA%D1%80%D0%B5%D0%BB%D0%BB%D1%8B" target="_blank">Скреллы</a><br>
+        <strong>Форма правления:</strong> Конституционная монархия<br>
+        <strong>Численность населения:</strong>~90 млрд<br><br>
+        <a href="https://sierra.ss220.space/index.php/%D0%92%D1%82%D0%BE%D1%80%D0%B0%D1%8F_%D0%9B%D0%BE%D1%80%D0%B4%D0%B0%D0%BD%D0%B8%D0%B0%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA%D0%B0" target="_blank">Подробнее →</a>
+      `,
+
+
+
+    };
+
+svg.querySelectorAll("[inkscape\\:label]").forEach(el => {
+  const label = el.getAttribute("inkscape:label");
+  if (!label || !systemData[label]) return;
+
+  el.style.cursor = "pointer";
+
+el.addEventListener("click", (e) => {
+  const mouseX = e.clientX;
+  const mouseY = e.clientY;
+
+  tooltip.style.left = `${mouseX + 15}px`; 
+  tooltip.style.top = `${mouseY + 15 + window.scrollY}px`; 
+
+  tooltip.querySelector("#tooltipContent").innerHTML = systemData[label];
+  glitchifyText(tooltipContent);
+
+  tooltip.style.opacity = 1;
+  tooltipContent.style.pointerEvents = "auto";
+});
+});
+
+
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[inkscape\\:label]");
+  if (!el || !systemData[el.getAttribute("inkscape:label")]) {
+    tooltip.style.opacity = 0;
+    tooltipContent.style.pointerEvents = "none";
+  }
+});
+});
+(function() {
+  let svg, shipGroup, aimLine;
+  let position = { x: 600, y: 600 }; // центр карты
+  let velocity = { x: 0, y: 0 };
+  let angle = 0;
+  let angularVelocity = 0;
+  let spawned = false;
+  let keysPressed = {}; // Объект для отслеживания нажатых клавиш
+
+  // Параметры корабля
+  const accelerationBase = 0.05;
+  const rotationSpeed = 0.005;
+  const damping = 0.99;
+  const angularDamping = 0.95;
+
+  // Параметры камеры
+  // Убираем плавные параметры, оставляем только целевой зум
+  const targetCameraZoom = 5; // Целевой уровень масштабирования при спавне
+
+
+  // Обработчик нажатия клавиш
+  window.addEventListener("keydown", (e) => {
+    // Активация корабля по Ctrl+Shift+K
+    if (e.ctrlKey && e.shiftKey && e.code === "KeyK" && !spawned) {
+      svg = document.getElementById("svg1");
+      shipGroup = svg.querySelector("#easter-ship");
+      aimLine = shipGroup.querySelector("#aim-line");
+
+      if (!svg || !shipGroup) {
+        console.warn("SVG или корабль не найдены");
+        return;
+      }
+
+      shipGroup.setAttribute("visibility", "visible");
+
+
+
+      spawned = true;
+
+
+      const viewBoxWidth = 1200 / targetCameraZoom;
+      const viewBoxHeight = 1200 / targetCameraZoom;
+      const viewBoxX = position.x - viewBoxWidth / 2;
+      const viewBoxY = position.y - viewBoxHeight / 2;
+      svg.setAttribute("viewBox", `${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`);
+
+
+      animateShip();
+    }
+
+
+    if (["KeyW", "KeyA", "KeyS", "KeyD"].includes(e.code)) {
+      keysPressed[e.code] = true;
+    }
+
+
+  });
+
+
+  window.addEventListener("keyup", (e) => {
+
+    if (["KeyW", "KeyA", "KeyS", "KeyD"].includes(e.code)) {
+      keysPressed[e.code] = false;
+    }
+ 
+  });
+
+
+
+  function animateShip() {
+    let ax = 0, ay = 0;
+    let angularAccel = 0;
+
+    if (keysPressed["KeyW"]) {
+      ax += Math.sin(angle) * accelerationBase;
+      ay += -Math.cos(angle) * accelerationBase;
+    }
+    if (keysPressed["KeyS"]) {
+      ax -= Math.sin(angle) * accelerationBase * 0.5; // Ускорение назад меньше
+      ay -= -Math.cos(angle) * accelerationBase * 0.5;
+    }
+    if (keysPressed["KeyA"]) {
+      angularAccel -= rotationSpeed;
+    }
+    if (keysPressed["KeyD"]) {
+      angularAccel += rotationSpeed;
+    }
+
+    angularVelocity += angularAccel;
+    angularVelocity *= angularDamping;
+    angle += angularVelocity;
+
+    velocity.x += ax;
+    velocity.y += ay;
+
+    velocity.x *= damping;
+    velocity.y *= damping;
+
+    position.x += velocity.x;
+    position.y += velocity.y;
+
+    const transform = `translate(${position.x}, ${position.y}) rotate(${angle * 180 / Math.PI})`;
+    shipGroup.setAttribute("transform", transform);
+
+    const lineLength = 10000;
+    const lx = Math.sin(angle) * lineLength;
+    const ly = -Math.cos(angle) * lineLength;
+    aimLine.setAttribute("x2", lx.toFixed(2));
+    aimLine.setAttribute("y2", ly.toFixed(2));
+
+    if (spawned) {
+        const viewBoxWidth = 1200 / targetCameraZoom;
+        const viewBoxHeight = 1200 / targetCameraZoom;
+        const viewBoxX = position.x - viewBoxWidth / 2;
+        const viewBoxY = position.y - viewBoxHeight / 2;
+
+        svg.setAttribute("viewBox", `${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`);
+    }
+
+
+    requestAnimationFrame(animateShip);
+  }
+})();
+(function() {
+  const CHARS = "░▒▓█▌▐░<>/\\|!@#$%^&*()_-=+[]{};:ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const INTERVAL = 60;
+
+  function randomChar() {
+    return CHARS[Math.floor(Math.random() * CHARS.length)];
+  }
+
+  function glitchifyText(element, realText) {
+    let tick = 0;
+    setInterval(() => {
+      const glitched = realText.split("").map((char, i) => {
+        if (char === " ") return " ";
+        // иногда показываем настоящую букву, чаще — рандом
+        return Math.random() < 0.05 + (tick % 10) / 100 ? char : randomChar();
+      }).join("");
+      element.textContent = glitched;
+      tick++;
+    }, INTERVAL);
+  }
+
+  document.querySelectorAll(".glitch-text").forEach(el => {
+    const original = el.getAttribute("data-text") || el.textContent;
+    el.setAttribute("data-text", original);
+    glitchifyText(el, original);
+  });
+})();
+
+function glitchifyText(container = document) {
+  const CHARS = "▒░▓█▌▐<>/\\|!@#$%^&*()_-=+[]{};:ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  container.querySelectorAll(".glitch-text").forEach(el => {
+    const original = el.getAttribute("data-text") || el.textContent;
+    el.setAttribute("data-text", original);
+
+    // Убираем возможные старые таймеры
+    if (el._glitchInterval) clearInterval(el._glitchInterval);
+
+    el._glitchInterval = setInterval(() => {
+      let glitched = "";
+      for (let i = 0; i < original.length; i++) {
+        const char = original[i];
+        glitched += (char === " ")
+          ? " "
+          : (Math.random() < 0.2 ? original[i] : CHARS[Math.floor(Math.random() * CHARS.length)]);
+      }
+      el.textContent = glitched;
+    }, 60);
+  });
+}
   </script>
 
 </body>
