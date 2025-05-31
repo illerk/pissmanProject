@@ -6,6 +6,61 @@
   <style>
 
 
+#legend-svg #legend-slide {
+  transition: transform 0.5s cubic-bezier(.7,0,.3,1);
+}
+#system-list-panel > div:first-child {
+  position: sticky;
+  top: 0;
+  background: #111;
+  z-index: 1;
+  font-family: 'Futura Md BT [Rus by me]', sans-serif;
+}
+#system-list-panel {
+  font-family: 'Futura Md BT [Rus by me]', sans-serif;
+}
+
+#system-list-panel.closed ul {
+  max-height: 0 !important;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s, opacity 0.3s;
+}
+#system-list-panel ul {
+  max-height: 60vh;
+  opacity: 1;
+  transition: max-height 0.3s, opacity 0.3s;
+  
+}
+#system-list-panel {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10010;
+  background: #111;
+  color: #fff;
+  border: 1px solid #00d5ff;
+  border-radius: 8px;
+  max-height: 80vh;
+  overflow-y: auto;
+  min-width: 220px;
+  font-size: 17px;
+  box-shadow: 0 2px 12px #000a;
+}
+#system-list-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+#system-list-panel li {
+  padding: 8px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #222;
+  transition: background 0.2s;
+}
+#system-list-panel li:hover {
+  background: #222;
+}
 
   .glitch-text {
     font-family: monospace;
@@ -47,13 +102,14 @@
       padding: 0;
       height: 100%;
       width: 100%;
-      background-color: black; /* 🖤 Черный фон */
+      background-color: black;
       overflow: hidden;
     }
 
     #svg-container {
       width: 100%;
       height: 100%;
+      position: relative;
     }
 
     svg {
@@ -91,6 +147,8 @@
   </style>
 </head>
 <body>
+
+  
   <div id="svg-container">
   <svg
    height="1200"
@@ -4023,10 +4081,93 @@
        x="540.42029"
        y="61.148373"
        id="tspan9"
-       style="text-align:center;text-anchor:middle;fill:none;stroke:#660e02;stroke-width:0.763843;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;paint-order:normal">!!!</tspan></text></svg>
+       style="text-align:center;text-anchor:middle;fill:none;stroke:#660e02;stroke-width:0.763843;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;paint-order:normal">!!!</tspan></text>
+
+</svg>
 
 
   </div>
+
+<svg id="legend-svg" width="360" height="540"
+     style="position: fixed; right: 0px; bottom: 10px; z-index: 9999; pointer-events: none; overflow: visible;"
+     xmlns="http://www.w3.org/2000/svg">
+
+  <g id="legend-slide" transform="translate(0,0)">
+    <g id="legend-body" font-family="monospace" font-size="20" fill="#ffffff" pointer-events="all">
+      <rect x="0" y="0" width="360" height="540" fill="black" fill-opacity="0.8" stroke="#00d5ff" stroke-width="2"/>
+      <text x="20" y="35" fill="#00d5ff">-----------ЛЕГЕНДА-----------</text>
+
+
+      <text x="20" y="60" fill="#44faff" font-weight="bold">Территории</text>
+      <rect x="20" y="75" width="18" height="18" fill="#0091fb"/><text x="50" y="90">ЦПСС</text>
+      <rect x="20" y="100" width="18" height="18" fill="#ea002f"/><text x="50" y="115">ГКК</text>
+      <rect x="20" y="125" width="18" height="18" fill="#8357fb"/><text x="50" y="140">Таяра</text>
+      <rect x="20" y="150" width="18" height="18" fill="#fbfb5c"/><text x="50" y="165">Скреллы</text>
+      <rect x="20" y="175" width="18" height="18" fill="#c3c3c3"/><text x="50" y="190">Резоми</text>
+      <rect x="20" y="200" width="18" height="18" fill="#006f33"/><text x="50" y="215">АФ</text>
+      <rect x="20" y="225" width="18" height="18" fill="#ff6a00"/><text x="50" y="240">Воксы</text>
+      <rect x="20" y="250" width="18" height="18" fill="#03ec1e"/><text x="50" y="265">ИПС</text>
+            <rect x="20" y="275" width="18" height="18" fill="#99ff00"/><text x="50" y="290">Унати</text>
+
+
+      <text x="20" y="310" fill="#44faff" font-weight="bold">Гейтвеи</text>
+      <line x1="20" y1="325" x2="50" y2="325" stroke="#6f00ff" stroke-width="3" stroke-dasharray="3,6"/>
+      <text x="60" y="331">Активные</text>
+      <line x1="20" y1="350" x2="50" y2="350" stroke="#f30000" stroke-width="3" stroke-dasharray="3,6"/>
+      <text x="60" y="356">Закрытые</text>
+      <line x1="20" y1="375" x2="50" y2="375" stroke="#ff6a00" stroke-width="3" stroke-dasharray="3,6"/>
+      <text x="60" y="381">Нестабильные</text>
+
+
+      <text x="20" y="400" fill="#44faff" font-weight="bold">Системы</text>
+      <circle cx="29" cy="420" r="7" fill="#ffffff"/><text x="50" y="426">Пустая</text>
+      <circle cx="29" cy="445" r="7" fill="#04ff00"/><text x="50" y="451">Известеая</text>
+      <circle cx="29" cy="470" r="7" fill="#ff6600"/><text x="50" y="476">Мертвая</text>
+      <circle cx="29" cy="495" r="7" fill="#c800ff"/><text x="50" y="501">Заселенная</text>
+    </g>
+
+<g id="legend-toggle" cursor="pointer" pointer-events="all">
+  <rect x="360" y="20" width="12" height="60" rx="2"
+        fill="black" stroke="#00d5ff" stroke-width="1" />
+
+  <circle cx="366" cy="30" r="2" fill="#00d5ff"/>
+  <circle cx="366" cy="40" r="2" fill="#00d5ff"/>
+  <circle cx="366" cy="50" r="2" fill="#00d5ff"/>
+</g>
+
+<defs>
+  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+    <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#00d5ff"/>
+  </filter>
+</defs>
+
+
+  </g>
+</svg>
+
+
+
+<script>
+  const toggle = document.getElementById("legend-toggle");
+  const slide = document.getElementById("legend-slide");
+  const icon = document.getElementById("toggle-icon");
+
+  let isOpen = true;
+
+  toggle.addEventListener("click", () => {
+    isOpen = !isOpen;
+    slide.setAttribute("transform", isOpen ? "translate(0,0)" : "translate(-361,0)");
+
+    icon.setAttribute("points", isOpen
+      ? "370,20 370,40 385,30"
+      : "385,20 385,40 370,30"
+    );
+  });
+</script>
+
+
+
+
 
 <div id="tooltip" style="
   position: absolute;
@@ -4048,9 +4189,21 @@
     max-height: 60vh;
     overflow-y: auto;">
   </div>
+  </div>
+
+<div id="system-list-panel">
+  <div style="padding:8px 16px;font-weight:bold;color:#00d5ff;display:flex;align-items:center;justify-content:space-between;">
+    Системы
+    <span id="system-list-toggle" style="cursor:pointer;display:inline-block;margin-left:8px;">
+      <svg width="18" height="40" style="vertical-align:middle;">
+        <polygon id="system-list-toggle-icon" points="8,12 8,28 16,20" fill="#00d5ff"/>
+      </svg>
+    </span>
+  </div>
+  <ul id="system-list"></ul>
+</div>
 
   <script>
-    // 🐾 Простая реализация масштабирования и перемещения
     const svg = document.getElementById('svg1');
     let viewBox = svg.viewBox.baseVal;
     let isPanning = false;
@@ -4145,7 +4298,6 @@ if (path4 && path47 && path44) {
     console.error("path4, path47 или path44 не найдены.");
 }
 
-// path5 → path51
 if (path5 && path51) {
     if (!path51.style.opacity) {
         path51.style.opacity = '0.3';
@@ -4163,7 +4315,6 @@ if (path5 && path51) {
     console.error("path5 или path51 не найдены.");
 }
 
-// path1 → path53 + path54
 if (path1 && path53 && path54) {
     [path53, path54].forEach(el => {
         if (!el.style.opacity) {
@@ -4185,7 +4336,6 @@ if (path1 && path53 && path54) {
     console.error("path1, path53 или path54 не найдены.");
 }
 
-// path5 → path51
 if (path7 && path55) {
     if (!path55.style.opacity) {
         path55.style.opacity = '0.3';
@@ -4242,7 +4392,6 @@ if (path7 && path55) {
         const cx = x + width / 2;
         const cy = y + height / 2;
 
-        // Вставим временный элемент
         const tempText = document.createElementNS(SVG_NS, "text");
         tempText.setAttribute("x", cx);
         tempText.setAttribute("y", cy);
@@ -4251,11 +4400,10 @@ if (path7 && path55) {
         tempText.setAttribute("pointer-events", "none");
         tempText.setAttribute("fill", color);
         tempText.setAttribute("font-family", fontFamily);
-        tempText.setAttribute("font-size", height); // стартуем с максимальной высоты
+        tempText.setAttribute("font-size", height);
         tempText.textContent = label;
         svg.appendChild(tempText);
 
-        // Подбираем минимально подходящий font-size
         let fontSize = height;
         while (fontSize > 1) {
           tempText.setAttribute("font-size", fontSize);
@@ -4264,7 +4412,6 @@ if (path7 && path55) {
           fontSize -= 0.5;
         }
 
-        // Теперь растягиваем по ширине — letter-spacing
         let letterSpacing = 0;
         tempText.setAttribute("font-size", fontSize);
         tempText.setAttribute("letter-spacing", `${letterSpacing}px`);
@@ -4273,7 +4420,7 @@ if (path7 && path55) {
           tempText.setAttribute("letter-spacing", `${letterSpacing}px`);
           const box = tempText.getBBox();
           if (box.width > width) {
-            letterSpacing -= 0.5; // шаг назад
+            letterSpacing -= 0.5;
             break;
           }
           letterSpacing += 0.1;
@@ -4281,7 +4428,6 @@ if (path7 && path55) {
 
         svg.removeChild(tempText);
 
-        // Финальный текст
         const finalText = document.createElementNS(SVG_NS, "text");
         finalText.setAttribute("x", cx);
         finalText.setAttribute("y", cy);
@@ -4303,7 +4449,7 @@ if (path7 && path55) {
     const svg = document.querySelector("svg");
     const tooltip = document.getElementById("tooltip");
 
-    const systemData = {
+    window.systemData = {
       "Galilei": `
         <strong>Галилея</strong><br><br>
         Нейтральная система на границе ЦПСС и ГКК. Место действий <a href="https://sierra.ss220.space/index.php/%D0%93%D0%B0%D0%B9%D1%81%D0%BA%D0%B8%D0%B9_%D0%9A%D0%BE%D0%BD%D1%84%D0%BB%D0%B8%D0%BA%D1%82" target="_blank">Гайского Конфликта</a><br><br>
@@ -4704,12 +4850,11 @@ el.addEventListener("click", (e) => {
   const mouseX = e.clientX;
   const mouseY = e.clientY;
 
-  // Временно добавим контент для расчёта размеров
   tooltip.querySelector("#tooltipContent").innerHTML = systemData[label];
   glitchifyText(tooltipContent);
 
-  tooltip.style.opacity = 0; // чтобы не мигало
-  tooltip.style.display = "block"; // нужно, чтобы getBoundingClientRect сработал
+  tooltip.style.opacity = 0;
+  tooltip.style.display = "block";
 
   const tooltipRect = tooltip.getBoundingClientRect();
   const viewportWidth = window.innerWidth;
@@ -4747,27 +4892,22 @@ document.addEventListener("click", (e) => {
 });
 (function() {
   let svg, shipGroup, aimLine;
-  let position = { x: 600, y: 600 }; // центр карты
+  let position = { x: 600, y: 600 };
   let velocity = { x: 0, y: 0 };
   let angle = 0;
   let angularVelocity = 0;
   let spawned = false;
-  let keysPressed = {}; // Объект для отслеживания нажатых клавиш
+  let keysPressed = {};
 
-  // Параметры корабля
   const accelerationBase = 0.05;
   const rotationSpeed = 0.005;
   const damping = 0.99;
   const angularDamping = 0.95;
 
-  // Параметры камеры
-  // Убираем плавные параметры, оставляем только целевой зум
-  const targetCameraZoom = 5; // Целевой уровень масштабирования при спавне
+  const targetCameraZoom = 5;
 
 
-  // Обработчик нажатия клавиш
   window.addEventListener("keydown", (e) => {
-    // Активация корабля по Ctrl+Shift+K
     if (e.ctrlKey && e.shiftKey && e.code === "KeyK" && !spawned) {
       svg = document.getElementById("svg1");
       shipGroup = svg.querySelector("#easter-ship");
@@ -4823,7 +4963,7 @@ document.addEventListener("click", (e) => {
       ay += -Math.cos(angle) * accelerationBase;
     }
     if (keysPressed["KeyS"]) {
-      ax -= Math.sin(angle) * accelerationBase * 0.5; // Ускорение назад меньше
+      ax -= Math.sin(angle) * accelerationBase * 0.5;
       ay -= -Math.cos(angle) * accelerationBase * 0.5;
     }
     if (keysPressed["KeyA"]) {
@@ -4881,7 +5021,6 @@ document.addEventListener("click", (e) => {
     setInterval(() => {
       const glitched = realText.split("").map((char, i) => {
         if (char === " ") return " ";
-        // иногда показываем настоящую букву, чаще — рандом
         return Math.random() < 0.05 + (tick % 10) / 100 ? char : randomChar();
       }).join("");
       element.textContent = glitched;
@@ -4903,7 +5042,6 @@ function glitchifyText(container = document) {
     const original = el.getAttribute("data-text") || el.textContent;
     el.setAttribute("data-text", original);
 
-    // Убираем возможные старые таймеры
     if (el._glitchInterval) clearInterval(el._glitchInterval);
 
     el._glitchInterval = setInterval(() => {
@@ -4918,7 +5056,77 @@ function glitchifyText(container = document) {
     }, 60);
   });
 }
+
+window.addEventListener("load", function() {
+  const svg = document.getElementById('svg1');
+  const systemList = document.getElementById('system-list');
+
+  const systemsGroup = svg.querySelector('g#g1');
+  if (!systemsGroup) return;
+
+  const systemData = window.systemData || {};
+
+  const elements = systemsGroup.querySelectorAll('[inkscape\\:label]:not(g)');
+const labels = Array.from(elements)
+  .map(el => el.getAttribute('inkscape:label'))
+  .filter((label, idx, arr) =>
+    label && systemData[label] && arr.indexOf(label) === idx
+  )
+  .sort((a, b) => a.localeCompare(b, 'en'));
+
+  labels.forEach(label => {
+  const li = document.createElement('li');
+  li.textContent = label;
+
+  const el = Array.from(elements).find(e => e.getAttribute('inkscape:label') === label);
+  if (el) {
+    el.setAttribute('filter', 'url(#glow)');
+    el.style.stroke = '#00d5ff';
+    el.style.strokeWidth = '3';
+  }
+
+  li.onclick = function() {
+
+    if (el) {
+      const bbox = el.getBBox();
+      const parent = el.closest('g#g1');
+      let cx = bbox.x + bbox.width / 2;
+      let cy = bbox.y + bbox.height / 2;
+
+      if (parent && parent.transform && parent.transform.baseVal.numberOfItems > 0) {
+        const m = parent.transform.baseVal.consolidate().matrix;
+        cx = m.a * cx + m.c * cy + m.e;
+        cy = m.b * cx + m.d * cy + m.f;
+      }
+
+      const zoom = 8;
+      const viewBoxWidth = 1200 / zoom;
+      const viewBoxHeight = 1200 / zoom;
+      svg.setAttribute('viewBox', `${cx - viewBoxWidth/2} ${cy - viewBoxHeight/2} ${viewBoxWidth} ${viewBoxHeight}`);
+    }
+  };
+  systemList.appendChild(li);
+});
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+  const panel = document.getElementById("system-list-panel");
+  const toggle = document.getElementById("system-list-toggle");
+  const icon = document.getElementById("system-list-toggle-icon");
+  let isOpen = true;
+
+  toggle.addEventListener("click", () => {
+    isOpen = !isOpen;
+    panel.classList.toggle("closed", !isOpen);
+    icon.setAttribute("points", isOpen
+      ? "8,12 8,28 16,20"
+      : "16,12 16,28 8,20"
+    );
+  });
+});
   </script>
+
+  
 
 </body>
 </html>
