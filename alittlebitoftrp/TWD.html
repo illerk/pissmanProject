@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alice Holt</title>
+  <style>
+    
+
+
+#timeline-events {
+  max-height: 700px;   /* или любая нужная вам высота */
+  overflow-y: auto;
+  padding-right: 8px;  /* чтобы скроллбар не перекрывал текст */
+}
+#timeline-events::-webkit-scrollbar {
+  width: 10px;
+  background: transparent;
+}
+#timeline-events::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 8px;
+  border: 2px solid #222;
+}
+#timeline-events::-webkit-scrollbar-thumb:hover {
+  background: #ffcc00;
+  border-color: #222;
+}
+/* Для Firefox */
+#timeline-events {
+  scrollbar-width: thin;
+  scrollbar-color: #ffcc00 #222;
+}   
+ #spiderChart {
+  pointer-events: none;
+}   
+
+.timeline-section {
+  margin: 2rem 0 1rem 0;
+  position: relative;
+  padding: 2rem 1rem 1rem 1rem;
+}
+
+.timeline-bar {
+  position: relative;
+  height: 4px;
+  background: #555;
+  margin: 2rem 0 2.5rem 0;
+  border-radius: 2px;
+}
+
+.timeline-dot {
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  border-radius: 50%;
+  border: 2px solid #ffcc00;
+  background: #222;
+  width: 12px;
+  height: 12px;
+  position: absolute;
+  top: -10px;
+  z-index: 2;
+  cursor: pointer;
+}
+.timeline-dot.active {
+  background: #ffcc00;
+  color: #222;
+}
+
+.timeline-dot::after {
+  content: attr(data-label);
+  display: block;
+  position: absolute;
+  top: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #aaa;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.timeline-event {
+  margin-top: 1.5rem;
+  background: rgba(255,255,255,0.07);
+  padding: 1rem;
+  border-radius: 10px;
+  border-left: 3px solid #ffcc00;
+  color: #eee;
+  min-height: 40px;
+  animation: fadeIn 0.3s;
+}
+
+    .date-marker {
+      cursor: pointer;
+      color: #ccc;
+      font-weight: bold;
+      position: relative;
+      padding: 0.5rem;
+      transition: color 0.3s;
+    }
+
+    .date-marker::before {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: #999;
+      border-radius: 50%;
+      position: absolute;
+      top: -7px;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: background 0.3s;
+    }
+
+    .date-marker.active {
+      color: #ffcc00;
+    }
+
+    .date-marker.active::before {
+      background: #ffcc00;
+    }
+
+    .event-details {
+      margin-top: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+      border-radius: 10px;
+      border-left: 3px solid #ffcc00;
+    }
+
+    .event {
+      display: none;
+      color: #eee;
+    }
+
+    .event.active {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    body {
+      background: url('https://i.pinimg.com/originals/a9/85/18/a98518b3e40be4b69fadbdcbd811265f.gif') no-repeat center center fixed;
+      background-size: cover;
+      color: #eee;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      
+    }
+    
+
+    .card {
+      background: rgba(42, 42, 42, 0.5);
+      border-radius: 16px;
+      padding: 1.5rem;
+      max-width: 700px;
+      margin: auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .section {
+      margin-top: 1rem;
+      border-top: 1px solid #444;
+    }
+
+    .toggle {
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 0;
+    }
+
+    .toggle:hover {
+      color: #ffcc00;
+    }
+
+    .toggle::after {
+      content: '▶';
+      transition: transform 0.2s ease;
+    }
+
+    .toggle.open::after {
+      transform: rotate(90deg);
+    }
+
+    .content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, opacity 0.4s ease;
+      opacity: 0;
+      padding-bottom: 0;
+    }
+
+    .content.open {
+      max-height: 1000px; /* достаточно много, чтобы вместить текст */
+      opacity: 1;
+      padding-bottom: 1rem;
+    }
+
+    .label {
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <button id="toggle-bg" style="position:fixed;top:16px;right:16px;z-index:10;padding:0.5rem 1rem;border-radius:8px;border:none;background:#222;color:#eee;cursor:pointer;">
+    Stop Background
+  </button>
+  <div class="card">
+  <div class="card">
+    <h1>Alice Holt</h1>
+
+    <div class="section">
+      <div class="toggle">General</div>
+      <div class="content">
+        <p><span class="label">age:</span> 22</p>
+        <p><span class="label">Birthday</span> 1991 07 05</p>
+        <p><span class="label">Gender:</span> Female</p>
+        <p><span class="label">Orientation:</span> Bisexual</p>
+        <p><span class="label">Religion:</span> Atheist</p>
+        <p><span class="label">Race & Ethnicity:</span> American</p>
+        <p><span class="label">Hometown:</span> Холост</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="toggle">Physical</div>
+      <div class="content">
+        <p><span class="label">Faceclaim (include image):</span></p>
+        <img src="https://files.catbox.moe/tanhc8.jpg" alt="Faceclaim" style="width:100%; max-width:300px; border-radius: 8px; margin-top: 0.5rem;">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="toggle">Mental</div>
+      <div class="content">
+        <canvas id="spiderChart" width="300" height="300" style="margin: 2rem auto; display: block; pointer-events: none;"></canvas>
+      </div>
+    </div>
+
+    <div class="section">
+  <div class="toggle">Background</div>
+  <div class="content">
+    <div class="timeline-section">
+      <div class="timeline-bar" id="timeline-bar"></div>
+      <div id="timeline-events"></div>
+    </div>
+  </div>
+</div>
+    <div class="section">
+      <div class="toggle">Умения и навыки</div>
+      <div class="content">
+        <p>NOT DONE</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="toggle">Survival</div>
+      <div class="content">
+        <p>NOT DONE</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+document.querySelectorAll('.toggle').forEach(toggle => {
+    toggle.addEventListener('click', () => {
+      const content = toggle.nextElementSibling;
+      const isOpen = content.classList.contains('open');
+
+      if (isOpen) {
+        content.classList.remove('open');
+        toggle.classList.remove('open');
+      } else {
+        content.classList.add('open');
+        toggle.classList.add('open');
+        // Если открыли секцию "Mental", рисуем график
+        if (toggle.textContent.trim() === 'Mental') {
+          setTimeout(createSpiderChart, 350); // Ждём анимацию открытия
+        }
+      }
+    });
+  });
+    const btn = document.getElementById('toggle-bg');
+    let isGif = true;
+    const gifUrl = 'https://i.pinimg.com/originals/a9/85/18/a98518b3e40be4b69fadbdcbd811265f.gif';
+    const staticUrl = 'https://files.catbox.moe/mhe8u7.jpg'; // Статичная версия гифки (замените на подходящее изображение)
+
+    btn.addEventListener('click', () => {
+      if (isGif) {
+        document.body.style.backgroundImage = `url('${staticUrl}')`;
+        btn.textContent = 'Start Background';
+      } else {
+        document.body.style.backgroundImage = `url('${gifUrl}')`;
+        btn.textContent = 'Stop Background';
+      }
+      isGif = !isGif;const markers = document.querySelectorAll('.date-marker');
+const events = document.querySelectorAll('.event');
+    });
+    // События: дата (YYYY-MM), описание
+const timelineEvents = [
+  { date: '2010-04', text: "<strong>BEFORE APOCALYPSE</strong> <br> Alice was born in the state of Delaware in the town of Ummington. Her parents instilled in her making her own decisions and a love of freedom. Few things were forbidden to her. When Alice asked her mom if she could do something - her mother most often replied, “You can do anything that is not forbidden by law.” When she came of age, she went to the College of Health Sciences at the University of Delaware, but she didn't know what would be waiting for her in a year." },
+  { date: '2010-08', text: `<strong>DAY 1</strong> <br> <img src="https://files.catbox.moe/vs53qu.png" alt="75" style="width:100%; max-width:300px; border-radius: 8px; margin-top: 0.5rem;"> <br>Alice had been in college when the pandemic hit. As panic erupted all around, she barricaded herself in an empty lecture hall with a group of other students, using a cabinet to block the door. From the windows, they could see strange, aggressive people wandering the campus, and the whole building echoed with blaring sirens. They kept trying to call 911, but the signal soon went dead. The group agreed to wait — surely help would come soon. There were five of them in the room. Luckily, they had brought a little food with them. But no help came. They spent the night there, waiting. <br><br> <strong>DAY 2</strong> <br> In the morning, they were still holding onto hope, checking their phones for any signal. One girl kept saying, "Someone will come for us. They'll save us."But outside, it was almost empty. Just smoke, distant screams, and occasionally, gunshots. <br>When the sun rose, the sirens stopped. And the silence that followed made things feel even worse <br>When they ran out of water, Tom had to carefully go out into the hallway to get some from the cooler. Just as he was about to return to the lecture hall, he came face-to-face with a walker for the first time.
+  It was at the other end of the corridor, walking straight toward him. From its clothes, it was obvious — it used to be one of their professors.<br>Tom rushed back inside, and they barricaded the door again.
+  For hours afterward, they could still hear a faint knocking.
+  Their professor hadn’t stopped trying to get in. <br>Alice overheard David muttering to himself: “Four walls, five people, two doors.” He repeated it over and over. When she looked at him more closely, she saw he was sharpening the edge of his metal ruler.
+  She pretended not to notice. <br>Eventually, they realized they couldn’t stay there any longer. They had no food, no water.
+  James said he had a car parked in the college lot.
+  They just had to figure out how to reach it. <br>
+  <img src="https://files.catbox.moe/7h2bwo.png" alt="75" style="width:100%; max-width:300px; border-radius: 8px; margin-top: 0.5rem;"> <br> It was a risk, no doubt about it. The siren that had been blaring all of yesterday had drawn too many of them to the front entrance. But waiting was no longer an option. They weren’t starving yet, and they still had the strength to run. 
+  <br>One by one, they climbed out the window onto the platform. From the front of the building, the guttural moans of the walkers were loud and clear—dozens of them, maybe more. Carefully, they dropped down to the lower platform, then to the ground. The moment their feet hit the pavement, they sprinted. James led the way. His car was parked just a short distance away, past a row of parked vehicles. They were so close. And then—chaos. From between two cars, a walker lunged and dragged James down. The sound of his body hitting the pavement was muffled only by his scream. The thing bit into him immediately—shoulder, neck, chest—tearing through flesh like paper. Alice froze. Her mind blanked out everything but the sight of James thrashing beneath that thing. Her chest tightened. Her legs trembled. She couldn't move. Couldn't breathe. Her ears rang with panic. Behind them, more infected began to spill in from the building. The snarling grew louder. Tom reacted first. Without thinking, he snatched the car keys from where James had dropped them, grabbed Alice’s wrist and pulled hard.
+  “Move! We have to go! Now!” Nina let out a sob and covered her mouth. David stood in shock for a heartbeat longer, his eyes wide and unfocused. Then he turned and ran after Tom, not saying a word. They didn’t even have time to look back. As the group made it to the car, Alice stumbled into the back seat, her hands shaking. She could still hear James's screams. They left him behind. And that truth lodged itself deep in her chest like a splinter. <br>
+  With heavy hearts, they drove south, leaving the university behind. Alice sat silently in the back seat, her thoughts stuck on James — on how quickly it had all happened, and whether her parents were still safe somewhere out there. The road ahead felt endless, the scenery a blur of trees, smoke, and scattered wreckage.
+
+Once they got out of the city, Tom reached over and turned on the car radio. For a moment there was static, then a voice broke through — a trembling radio host, speaking of the outbreak, the violence, the warning for people to stay inside, to find shelter and not approach the infected.
+
+“We’re going to Washington,” Tom said, eyes fixed on the road.
+
+David snapped, “What the fuck for?”
+
+Tom didn’t flinch. “If there’s any place in America that’s safe right now, it has to be D.C. — they’ll have walls, soldiers, order... something.”
+
+He glanced down at the dashboard. The fuel gauge was nearing a quarter tank. He exhaled sharply.
+“But we’ll need gas soon. And food. Maybe luck, too.”
+
+Alice didn’t say a word. Her hand was still shaking.
+
+Alice looked at Nina from the backseat. She was always the strongest among them, the loudest, the first to snap back when professors pushed too hard. But now her knuckles were white from gripping her sleeves.
+` },
+
+];
+timelineEvents.forEach(ev => {
+  // Найти все src картинок в тексте события
+  const imgSrcs = Array.from(ev.text.matchAll(/<img[^>]+src="([^"]+)"/g)).map(m => m[1]);
+  imgSrcs.forEach(src => {
+    const img = new Image();
+    img.src = src;
+  });
+});
+
+// Генерация шкалы
+const start = new Date(2010, 3); // сентябрь 2010 (месяцы с 0)
+const end = new Date(2013, 11); // декабрь 2013
+const months = [];
+let d = new Date(start);
+while (d <= end) {
+  months.push({ 
+    year: d.getFullYear(), 
+    month: d.getMonth(), 
+    label: d.toLocaleString('ru', { month: 'short' }), 
+    date: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` 
+  });
+  d.setMonth(d.getMonth() + 1);
+}
+
+// Рендерим шкалу
+const bar = document.getElementById('timeline-bar');
+bar.innerHTML = ''; // очищаем на случай повторного вызова
+bar.style.position = 'relative';
+bar.style.height = '4px';
+bar.style.background = '#555';
+bar.style.margin = '2rem 0 2.5rem 0';
+bar.style.borderRadius = '2px';
+
+// Месячные деления
+months.forEach((m, i) => {
+  const tick = document.createElement('div');
+  tick.style.position = 'absolute';
+  tick.style.left = (i/(months.length-1)*100) + '%';
+  tick.style.top = '-8px';
+  tick.style.width = '2px';
+  tick.style.height = '20px';
+  tick.style.background = (m.month === 0) ? '#ffcc00' : '#888';
+  tick.style.zIndex = '1';
+  bar.appendChild(tick);
+
+  // Годовая подпись
+  if (m.month === 0) {
+    const yearLabel = document.createElement('div');
+    yearLabel.textContent = m.year;
+    yearLabel.style.position = 'absolute';
+    yearLabel.style.left = (i/(months.length-1)*100) + '%';
+    yearLabel.style.top = '18px';
+    yearLabel.style.transform = 'translateX(-50%)';
+    yearLabel.style.color = '#ffcc00';
+    yearLabel.style.fontSize = '0.9rem';
+    yearLabel.style.whiteSpace = 'nowrap';
+    bar.appendChild(yearLabel);
+  }
+});
+
+// События: точки
+timelineEvents.forEach((ev, idx) => {
+  const i = months.findIndex(m => m.date === ev.date);
+  if (i === -1) return;
+  const dot = document.createElement('div');
+  dot.className = 'timeline-dot';
+  dot.style.left = (i/(months.length-1)*100) + '%';
+  dot.style.top = '-10px';
+  dot.style.width = '12px';
+  dot.style.height = '12px';
+  dot.style.background = '#222';
+  dot.style.border = '2px solid #ffcc00';
+  dot.style.borderRadius = '50%';
+  dot.style.position = 'absolute';
+  dot.style.cursor = 'pointer';
+  dot.style.zIndex = '2';
+  dot.setAttribute('data-idx', idx);
+  bar.appendChild(dot);
+});
+
+// Описание событий
+const eventsDiv = document.getElementById('timeline-events');
+function showEvent(idx) {
+  eventsDiv.innerHTML = `<div class="timeline-event">${timelineEvents[idx].text}</div>`;
+  // Подсветка точки
+  bar.querySelectorAll('.timeline-dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === idx);
+    dot.style.background = i === idx ? '#ffcc00' : '#222';
+    dot.style.color = i === idx ? '#222' : '#eee';
+  });
+}
+// Слушатели
+bar.querySelectorAll('.timeline-dot').forEach(dot => {
+  dot.addEventListener('click', () => showEvent(Number(dot.getAttribute('data-idx'))));
+});
+// Показываем первое событие по умолчанию
+if (timelineEvents.length) showEvent(0);
+
+function enableImageModal() {
+  const modal = document.getElementById('img-modal');
+  const modalImg = document.getElementById('img-modal-img');
+  // Снимем старые обработчики
+  document.querySelectorAll('.timeline-event img').forEach(img => {
+    img.onclick = null;
+  });
+  // Навесим новые
+  document.querySelectorAll('.timeline-event img').forEach(img => {
+    img.style.cursor = 'zoom-in';
+    img.onclick = function(e) {
+      modal.style.display = 'flex';
+      modalImg.src = this.src;
+    };
+  });
+  // Закрытие по клику на фон
+  modal.onclick = function(e) {
+    if (e.target === modal) modal.style.display = 'none';
+  };
+}
+
+// Вызовите после showEvent
+function showEvent(idx) {
+  eventsDiv.innerHTML = `<div class="timeline-event">${timelineEvents[idx].text}</div>`;
+  // Подсветка точки
+  bar.querySelectorAll('.timeline-dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === idx);
+    dot.style.background = i === idx ? '#ffcc00' : '#222';
+    dot.style.color = i === idx ? '#222' : '#eee';
+  });
+  enableImageModal();
+}
+
+
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  let spiderChart = null;
+
+  function createSpiderChart() {
+    const ctx = document.getElementById('spiderChart').getContext('2d');
+    if (spiderChart) {
+      spiderChart.destroy();
+    }
+    const data = {
+      labels: ['Stability', 'Trust', 'Kindness', 'Risk', 'Learning', 'Loyalty'],
+      datasets: [{
+        label: 'Навыки персонажа',
+        data:   [5,         7,       9,         6,      8,         5], 
+        backgroundColor: 'rgba(255, 204, 0, 0.2)',
+        borderColor: '#ffcc00',
+        borderWidth: 2,
+        pointBackgroundColor: '#ffcc00'
+      }]
+    };
+    const config = {
+      type: 'radar',
+      data: data,
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          min: 0,
+          max: 10,
+          angleLines: { color: '#555' },
+          grid: { color: '#444' },
+          pointLabels: {
+            color: '#eee',
+            font: { size: 14 }
+          },
+          ticks: {
+            display: false,
+            color: '#888',
+            backdropColor: 'transparent'
+          }
+          }
+        }
+      }
+    };
+    spiderChart = new Chart(ctx, config);
+  }
+</script>
+<div id="img-modal" style="display:none;position:fixed;z-index:10000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;">
+  <img id="img-modal-img" src="" style="max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 0 40px #000;">
+</div>
+</body>
+</html>
