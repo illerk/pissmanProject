@@ -9,9 +9,9 @@
 
 
 #timeline-events {
-  max-height: 700px;   /* или любая нужная вам высота */
+  max-height: 700px;
   overflow-y: auto;
-  padding-right: 8px;  /* чтобы скроллбар не перекрывал текст */
+  padding-right: 8px;
 }
 #timeline-events::-webkit-scrollbar {
   width: 10px;
@@ -26,7 +26,6 @@
   background: #ffcc00;
   border-color: #222;
 }
-/* Для Firefox */
 #timeline-events {
   scrollbar-width: thin;
   scrollbar-color: #ffcc00 #222;
@@ -202,7 +201,7 @@
     }
 
     .content.open {
-      max-height: 1000px; /* достаточно много, чтобы вместить текст */
+      max-height: 1000px;
       opacity: 1;
       padding-bottom: 1rem;
     }
@@ -230,7 +229,7 @@
         <p><span class="label">Orientation:</span> Bisexual</p>
         <p><span class="label">Religion:</span> Atheist</p>
         <p><span class="label">Race & Ethnicity:</span> American</p>
-        <p><span class="label">Hometown:</span> Холост</p>
+        <p><span class="label">Hometown:</span> Wilmington</p>
       </div>
     </div>
 
@@ -285,9 +284,8 @@ document.querySelectorAll('.toggle').forEach(toggle => {
       } else {
         content.classList.add('open');
         toggle.classList.add('open');
-        // Если открыли секцию "Mental", рисуем график
         if (toggle.textContent.trim() === 'Mental') {
-          setTimeout(createSpiderChart, 350); // Ждём анимацию открытия
+          setTimeout(createSpiderChart, 350);
         }
       }
     });
@@ -295,7 +293,7 @@ document.querySelectorAll('.toggle').forEach(toggle => {
     const btn = document.getElementById('toggle-bg');
     let isGif = true;
     const gifUrl = 'https://i.pinimg.com/originals/a9/85/18/a98518b3e40be4b69fadbdcbd811265f.gif';
-    const staticUrl = 'https://files.catbox.moe/mhe8u7.jpg'; // Статичная версия гифки (замените на подходящее изображение)
+    const staticUrl = 'https://files.catbox.moe/mhe8u7.jpg';
 
     btn.addEventListener('click', () => {
       if (isGif) {
@@ -308,7 +306,6 @@ document.querySelectorAll('.toggle').forEach(toggle => {
       isGif = !isGif;const markers = document.querySelectorAll('.date-marker');
 const events = document.querySelectorAll('.event');
     });
-    // События: дата (YYYY-MM), описание
 const timelineEvents = [
   { date: '2010-04', text: "<strong>BEFORE APOCALYPSE</strong> <br> Alice was born in the state of Delaware in the town of Ummington. Her parents instilled in her making her own decisions and a love of freedom. Few things were forbidden to her. When Alice asked her mom if she could do something - her mother most often replied, “You can do anything that is not forbidden by law.” When she came of age, she went to the College of Health Sciences at the University of Delaware, but she didn't know what would be waiting for her in a year." },
   { date: '2010-08', text: `<strong>DAY 1</strong> <br> <img src="https://files.catbox.moe/vs53qu.png" alt="75" style="width:100%; max-width:300px; border-radius: 8px; margin-top: 0.5rem;"> <br>Alice had been in college when the pandemic hit. As panic erupted all around, she barricaded herself in an empty lecture hall with a group of other students, using a cabinet to block the door. From the windows, they could see strange, aggressive people wandering the campus, and the whole building echoed with blaring sirens. They kept trying to call 911, but the signal soon went dead. The group agreed to wait — surely help would come soon. There were five of them in the room. Luckily, they had brought a little food with them. But no help came. They spent the night there, waiting. <br><br> <strong>DAY 2</strong> <br> In the morning, they were still holding onto hope, checking their phones for any signal. One girl kept saying, "Someone will come for us. They'll save us."But outside, it was almost empty. Just smoke, distant screams, and occasionally, gunshots. <br>When the sun rose, the sirens stopped. And the silence that followed made things feel even worse <br>When they ran out of water, Tom had to carefully go out into the hallway to get some from the cooler. Just as he was about to return to the lecture hall, he came face-to-face with a walker for the first time.
@@ -341,7 +338,6 @@ Alice looked at Nina from the backseat. She was always the strongest among them,
 
 ];
 timelineEvents.forEach(ev => {
-  // Найти все src картинок в тексте события
   const imgSrcs = Array.from(ev.text.matchAll(/<img[^>]+src="([^"]+)"/g)).map(m => m[1]);
   imgSrcs.forEach(src => {
     const img = new Image();
