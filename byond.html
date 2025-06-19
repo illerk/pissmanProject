@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BYOND Status Checker</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #1e1e2f;
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .status {
+      margin: 10px 0;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 1.2em;
+      font-weight: bold;
+      min-width: 300px;
+      text-align: center;
+    }
+    .online {
+      background-color: #2ecc71;
+      color: #1e1e2f;
+    }
+    .offline {
+      background-color: #e74c3c;
+      color: #1e1e2f;
+    }
+    .unknown {
+      background-color: #f1c40f;
+      color: #1e1e2f;
+    }
+    .refresh-btn {
+      padding: 10px 15px;
+      background: #3498db;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>BYOND Status Checker</h1>
+  <div id="byond" class="status unknown">Checking www.byond.com...</div>
+  <div id="hub" class="status unknown">Checking hub.byond.com...</div>
+  <button class="refresh-btn" onclick="checkStatus()">🔄 Refresh</button>
+
+  <script>
+    async function checkHost(url, elementId) {
+      const el = document.getElementById(elementId);
+      try {
+        const response = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+        el.textContent = `${url} is ONLINE`;
+        el.className = 'status online';
+      } catch (e) {
+        el.textContent = `${url} is OFFLINE`;
+        el.className = 'status offline';
+      }
+    }
+
+    function checkStatus() {
+      checkHost('https://www.byond.com', 'byond');
+      checkHost('https://hub.byond.com', 'hub');
+    }
+
+    checkStatus();
+  </script>
+</body>
+</html>
