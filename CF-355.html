@@ -107,13 +107,13 @@ function fadeAudio(audio, toVolume, duration = 1000) {
   }, stepTime);
 }
 
-function fadeInFn(audio, duration = 1000, targetVolume = 0.5) {
+function fadeIn(audio, duration = 1000, targetVolume = 0.5) {
   audio.volume = 0;
   audio.play().catch(()=>{});
   fadeAudio(audio, targetVolume, duration);
 }
 
-function fadeOutFn(audio, duration = 1000) {
+function fadeOut(audio, duration = 1000) {
   fadeAudio(audio, 0, duration);
 }
 
@@ -126,8 +126,7 @@ const filters = {
         text: '...',
         play: ['ambience1', 'music1'],
         stop: [],
-        filterOn: ['ambience1'],
-        fadeIn: { ambience1: 2000, music1: 1000 }
+        filterOn: ['ambience1']
       },
       {
         text: 'Тепло...',
@@ -143,7 +142,7 @@ const filters = {
         text: '...',
         play: ['open1', 'open2', 'open3', 'open4'],
         stop: [],
-        filterOff: ['ambience1'],
+        filterOff: ['ambience1']
       },
       {
         text: 'Холодно...',
@@ -163,8 +162,7 @@ const filters = {
       {
         text: '"Здоровых отправьте на имплантацию и разделите на группы."',
         play: [],
-        stop: ['ambience1'],
-        fadeOut: { ambience1: 2500 }
+        stop: []
       },
     ];
 
@@ -179,6 +177,7 @@ const filters = {
       return div;
     }
 
+
     const fadeDuration = 1500;
 
     function showNextSlide() {
@@ -191,30 +190,16 @@ const filters = {
 
       if (currentSlide >= slides.length) return;
 
-      const { play = [], stop = [], filterOn = [], filterOff = [], fadeIn = {}, fadeOut = {} } = slides[currentSlide];
+      const { play = [], stop = [], filterOn = [], filterOff = [] } = slides[currentSlide];
 
       stop.forEach(id => {
         const audio = audioMap[id];
-        if (audio && !audio.paused) {
-          if (fadeOut[id]) {
-            fadeOutFn(audio, fadeOut[id]);
-          } else {
-            audio.pause();
-            audio.volume = 0;
-          }
-        }
+        if (audio && !audio.paused) fadeOut(audio, fadeDuration);
       });
 
       play.forEach(id => {
         const audio = audioMap[id];
-        if (audio) {
-          if (fadeIn[id]) {
-            fadeInFn(audio, fadeIn[id], 0.5);
-          } else {
-            audio.volume = 0.5;
-            audio.play().catch(()=>{});
-          }
-        }
+        if (audio) fadeIn(audio, fadeDuration, 0.5);
       });
 
       filterOn.forEach(id => {
