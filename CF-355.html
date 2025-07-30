@@ -84,16 +84,13 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
   const filter = audioCtx.createBiquadFilter();
   filter.type = type;
   filter.frequency.value = freq;
-  const gain = audioCtx.createGain();
-  gain.gain.value = 0.5;
-  source.connect(filter).connect(gain).connect(audioCtx.destination);
-  audioElement._filter = filter;
-  audioElement._gain = gain;
-  return { filter, gain };
+  source.connect(filter).connect(audioCtx.destination);
+  return filter;
 }
 
 const filters = {
   ambience1: createFilteredSource(audioMap.ambience1),
+  // Добавь другие по желанию
 };
 
     const slides = [
@@ -101,8 +98,7 @@ const filters = {
         text: '...',
         play: ['ambience1', 'music1'],
         stop: [],
-        filterOn: ['ambience1'],
-        fadeIn: { ambience1: 1500, music1: 1500 }
+        filterOn: ['ambience1']
       },
       {
         text: 'Тепло...',
@@ -138,8 +134,7 @@ const filters = {
       {
         text: '"Здоровых отправьте на имплантацию и разделите на группы."',
         play: [],
-        stop: [],
-        fadeOut: { ambience1: 1200}
+        stop: []
       },
     ];
 
@@ -154,56 +149,6 @@ const filters = {
       return div;
     }
 
-function fadeGain(gainNode, to, duration = 1000, onEnd) {
-  const from = gainNode.gain.value;
-  const stepTime = 30;
-  const steps = Math.ceil(duration / stepTime);
-  let currentStep = 0;
-  const diff = to - from;
-  if (steps <= 0) {
-    gainNode.gain.value = to;
-    if (onEnd) onEnd();
-    return;
-  }
-  clearInterval(gainNode._fadeTimer);
-  gainNode._fadeTimer = setInterval(() => {
-    currentStep++;
-    gainNode.gain.value = Math.max(0, Math.min(1, from + (diff * currentStep / steps)));
-    if (currentStep >= steps) {
-      gainNode.gain.value = to;
-      clearInterval(gainNode._fadeTimer);
-      if (onEnd) onEnd();
-    }
-  }, stepTime);
-}
-
-    function fadeAudio(audio, to, duration = 1000, onEnd) {
-  if (audio._gain) {
-    fadeGain(audio._gain, to, duration, onEnd);
-  } else {
-    const stepTime = 30;
-    const from = audio.volume;
-    const steps = Math.ceil(duration / stepTime);
-    let currentStep = 0;
-    const diff = to - from;
-    if (steps <= 0) {
-      audio.volume = to;
-      if (onEnd) onEnd();
-      return;
-    }
-    clearInterval(audio._fadeTimer);
-    audio._fadeTimer = setInterval(() => {
-      currentStep++;
-      audio.volume = Math.max(0, Math.min(1, from + (diff * currentStep / steps)));
-      if (currentStep >= steps) {
-        audio.volume = to;
-        clearInterval(audio._fadeTimer);
-        if (onEnd) onEnd();
-      }
-    }, stepTime);
-  }
-}
-
     function showNextSlide() {
       if (currentSlide >= 0) {
         slidesElements[currentSlide].classList.remove('active');
@@ -214,50 +159,27 @@ function fadeGain(gainNode, to, duration = 1000, onEnd) {
 
       if (currentSlide >= slides.length) return;
 
-      const { play, stop, filterOn = [], filterOff = [], fadeIn = {}, fadeOut = {} } = slides[currentSlide];
+      const { play, stop, filterOn = [], filterOff = [] } = slides[currentSlide];
 
-      stop.forEach(id => {
-        const audio = audioMap[id];
-        if (audio) {
-          if (fadeOut[id]) {
-            fadeAudio(audio, 0, fadeOut[id], () => {
-              audio.pause();
-              audio.currentTime = 0;
-            });
-          } else {
-            audio.pause();
-            audio.currentTime = 0;
-            if (audio._gain) audio._gain.gain.value = 0.5;
-            else audio.volume = 0.5;
-          }
-        }
-      });
-
+      // Управление аудио
+      stop.forEach(id => audioMap[id]?.pause());
       play.forEach(id => {
         const audio = audioMap[id];
         if (audio) {
-          if (fadeIn[id]) {
-            if (audio._gain) audio._gain.gain.value = 0;
-            else audio.volume = 0;
-            audio.play().then(() => {
-              fadeAudio(audio, 0.5, fadeIn[id]);
-            }).catch(e => console.warn("Autoplay blocked", e));
-          } else {
-            if (audio._gain) audio._gain.gain.value = 0.5;
-            else audio.volume = 0.5;
-            audio.play().catch(e => console.warn("Autoplay blocked", e));
-          }
+          audio.volume = 0.5;
+          audio.play().catch(e => console.warn("Autoplay blocked", e));
         }
       });
 
       filterOn.forEach(id => {
-        const obj = filters[id];
-        if (obj && obj.filter) obj.filter.frequency.value = 2000;
+        const filter = filters[id];
+        if (filter) filter.frequency.value = 2000; // приглушение
       });
 
       filterOff.forEach(id => {
-        const obj = filters[id];
-        if (obj && obj.filter) obj.filter.frequency.value = 22000;
+        const filter = filters[id];
+        if (filter) filter.frequency.value = 22000; // вернули высокие частоты
+        
       });
 
       const el = slidesElements[currentSlide];
