@@ -114,8 +114,7 @@ const filters = {
         text: '...',
         play: ['open1', 'open2', 'open3', 'open4'],
         stop: [],
-        filterOff: ['ambience1'],
-        fadeOut: { ambience1: 1200}
+        filterOff: ['ambience1']
       },
       {
         text: 'Холодно...',
@@ -135,7 +134,8 @@ const filters = {
       {
         text: '"Здоровых отправьте на имплантацию и разделите на группы."',
         play: [],
-        stop: []
+        stop: [],
+        fadeOut: { ambience1: 1200}
       },
     ];
 
@@ -150,7 +150,7 @@ const filters = {
       return div;
     }
 
-    function fadeAudio(audio, to, duration = 1000) {
+    function fadeAudio(audio, to, duration = 1000, onEnd) {
   const stepTime = 30;
   const from = audio.volume;
   const steps = Math.ceil(duration / stepTime);
@@ -158,15 +158,17 @@ const filters = {
   const diff = to - from;
   if (steps <= 0) {
     audio.volume = to;
+    if (onEnd) onEnd();
     return;
   }
   clearInterval(audio._fadeTimer);
   audio._fadeTimer = setInterval(() => {
     currentStep++;
-    audio.volume = from + (diff * currentStep / steps);
+    audio.volume = Math.max(0, Math.min(1, from + (diff * currentStep / steps)));
     if (currentStep >= steps) {
       audio.volume = to;
       clearInterval(audio._fadeTimer);
+      if (onEnd) onEnd();
     }
   }, stepTime);
 }
@@ -187,10 +189,13 @@ const filters = {
         const audio = audioMap[id];
         if (audio) {
           if (fadeOut[id]) {
-            fadeAudio(audio, 0, fadeOut[id]);
-            setTimeout(() => audio.pause(), fadeOut[id]);
+            fadeAudio(audio, 0, fadeOut[id], () => {
+              audio.pause();
+              audio.currentTime = 0;
+            });
           } else {
             audio.pause();
+            audio.currentTime = 0;
             audio.volume = 0.5;
           }
         }
@@ -199,12 +204,14 @@ const filters = {
       play.forEach(id => {
         const audio = audioMap[id];
         if (audio) {
-          audio.volume = 0;
-          audio.play().catch(e => console.warn("Autoplay blocked", e));
           if (fadeIn[id]) {
-            fadeAudio(audio, 0.5, fadeIn[id]);
+            audio.volume = 0;
+            audio.play().then(() => {
+              fadeAudio(audio, 0.5, fadeIn[id]);
+            }).catch(e => console.warn("Autoplay blocked", e));
           } else {
             audio.volume = 0.5;
+            audio.play().catch(e => console.warn("Autoplay blocked", e));
           }
         }
       });
