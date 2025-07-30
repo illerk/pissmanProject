@@ -88,7 +88,6 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
   return filter;
 }
 
-// --- Fade helpers ---
 function fadeAudio(audio, toVolume, duration = 1000) {
   if (!audio) return;
   const from = audio.volume;
@@ -108,20 +107,18 @@ function fadeAudio(audio, toVolume, duration = 1000) {
   }, stepTime);
 }
 
-function fadeIn(audio, duration = 1000, targetVolume = 0.5) {
+function fadeInFn(audio, duration = 1000, targetVolume = 0.5) {
   audio.volume = 0;
   audio.play().catch(()=>{});
   fadeAudio(audio, targetVolume, duration);
 }
 
-function fadeOut(audio, duration = 1000) {
+function fadeOutFn(audio, duration = 1000) {
   fadeAudio(audio, 0, duration);
 }
-// --- End Fade helpers ---
 
 const filters = {
   ambience1: createFilteredSource(audioMap.ambience1),
-  // Добавь другие по желанию
 };
 
     const slides = [
@@ -196,12 +193,11 @@ const filters = {
 
       const { play = [], stop = [], filterOn = [], filterOff = [], fadeIn = {}, fadeOut = {} } = slides[currentSlide];
 
-      // Плавно или мгновенно затухаем stop
       stop.forEach(id => {
         const audio = audioMap[id];
         if (audio && !audio.paused) {
           if (fadeOut[id]) {
-            fadeOut(audio, fadeOut[id]);
+            fadeOutFn(audio, fadeOut[id]);
           } else {
             audio.pause();
             audio.volume = 0;
@@ -209,7 +205,6 @@ const filters = {
         }
       });
 
-      // Плавно или мгновенно включаем play
       play.forEach(id => {
         const audio = audioMap[id];
         if (audio) {
@@ -224,12 +219,12 @@ const filters = {
 
       filterOn.forEach(id => {
         const filter = filters[id];
-        if (filter) filter.frequency.value = 2000; // приглушение
+        if (filter) filter.frequency.value = 2000;
       });
 
       filterOff.forEach(id => {
         const filter = filters[id];
-        if (filter) filter.frequency.value = 22000; // вернули высокие частоты
+        if (filter) filter.frequency.value = 22000;
       });
 
       const el = slidesElements[currentSlide];
