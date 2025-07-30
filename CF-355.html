@@ -75,10 +75,13 @@
       ambience1: document.getElementById('ambience1'),
       music1: document.getElementById('music1'),
       ambience2: document.getElementById('ambience2'),
+
       open1: document.getElementById('open1'),
       open2: document.getElementById('open2'),
       open3: document.getElementById('open3'),
-      open4: document.getElementById('open4')
+      open4: document.getElementById('open4'),
+
+      surgery: document.getElementById('surgery'),
     };
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -175,6 +178,7 @@ const filters = {
 
       const { play, stop, filterOn = [], filterOff = [] } = slides[currentSlide];
 
+      // Управление аудио
       stop.forEach(id => audioMap[id]?.pause());
       play.forEach(id => {
         const audio = audioMap[id];
@@ -186,12 +190,12 @@ const filters = {
 
       filterOn.forEach(id => {
         const filter = filters[id];
-        if (filter) filter.frequency.value = 2000;
+        if (filter) filter.frequency.value = 2000; // приглушение
       });
 
       filterOff.forEach(id => {
         const filter = filters[id];
-        if (filter) filter.frequency.value = 22000;
+        if (filter) filter.frequency.value = 22000; // вернули высокие частоты
         
       });
 
