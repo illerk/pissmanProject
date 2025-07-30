@@ -74,7 +74,6 @@
     const audioMap = {
       ambience1: document.getElementById('ambience1'),
       music1: document.getElementById('music1'),
-      ambience2: document.getElementById('ambience2'),
 
       open1: document.getElementById('open1'),
       open2: document.getElementById('open2'),
@@ -97,7 +96,7 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
 
 const filters = {
   ambience1: createFilteredSource(audioMap.ambience1),
-
+  surgery: createFilteredSource(audioMap.surgery),
 };
 
     const slides = [
@@ -178,24 +177,27 @@ const filters = {
 
       const { play, stop, filterOn = [], filterOff = [] } = slides[currentSlide];
 
-      // Управление аудио
       stop.forEach(id => audioMap[id]?.pause());
       play.forEach(id => {
         const audio = audioMap[id];
         if (audio) {
-          audio.volume = 0.5;
+          if (id === 'surgery') {
+            audio.volume = 1;
+          } else {
+            audio.volume = 0.5;
+          }
           audio.play().catch(e => console.warn("Autoplay blocked", e));
         }
       });
 
       filterOn.forEach(id => {
         const filter = filters[id];
-        if (filter) filter.frequency.value = 2000; // приглушение
+        if (filter) filter.frequency.value = 2000;
       });
 
       filterOff.forEach(id => {
         const filter = filters[id];
-        if (filter) filter.frequency.value = 22000; // вернули высокие частоты
+        if (filter) filter.frequency.value = 22000;
         
       });
 
@@ -206,6 +208,9 @@ const filters = {
     const slidesElements = slides.map(slide => createSlide(slide.text));
 
     startBtn.addEventListener('click', () => {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
       startBtn.style.display = 'none';
       showNextSlide();
       setTimeout(() => {
