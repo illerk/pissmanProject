@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>CF-355: Начало</title>
+    <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      color: #ccc;
+      font-family: 'Courier New', monospace;
+      overflow: hidden;
+    }
+    #container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      position: relative;
+    }
+    #startBtn {
+      padding: 1rem 2rem;
+      background-color: #111;
+      color: #ccc;
+      border: 2px solid #ccc;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    .slide {
+      position: absolute;
+      top: 100vh;
+      opacity: 0;
+      transition: all 0.8s ease-in-out;
+      max-width: 600px;
+      padding: 20px;
+      text-align: center;
+      text-shadow: 0 0 1px #888, 0 0 1px #aaa, 0 0 2px #ccc;
+    }
+    .slide.active {
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 1;
+    }
+    .slide.out {
+     top: -50%;
+     transform: translateY(50%);
+     opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <button id="startBtn">начать</button>
+  </div>
+
+  <!-- Пример аудио -->
+  <audio id="ambience1" src="sound/kventa/212025__qubodup__sci-fi-laboratory-ambience.ogg" loop></audio>
+  <audio id="music1" src="sound/kventa/The_Prison.mp3" loop></audio>
+  <audio id="ambience3" src="sounds/ambience3.mp3" loop></audio>
+  <audio id="open1" src="sound/kventa/425090__neospica__pressurized-door-opening.wav"></audio>
+  <audio id="open2" src="sound/kventa/90143__pengo_au__steam_burst.wav"></audio>
+  <audio id="open3" src="sound/kventa/325269__deleted_user_2104797__body-fall-2.wav"></audio>
+  <audio id="open4" src="sound/kventa/195955__minian89__bucket_splash.mp3"></audio>
+  <script>
+    
+    const container = document.getElementById('container');
+    const startBtn = document.getElementById('startBtn');
+
+    const audioMap = {
+      ambience1: document.getElementById('ambience1'),
+      music1: document.getElementById('music1'),
+      // ambience2: document.getElementById('ambience2'), // убрать, если такого нет
+      open1: document.getElementById('open1'),
+      open2: document.getElementById('open2'),
+      open3: document.getElementById('open3'),
+      open4: document.getElementById('open4')
+    };
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let filters = {};
+
+    function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
+      // Проверяем, не создавали ли уже фильтр для этого элемента
+      if (!audioElement._filter) {
+        const source = audioCtx.createMediaElementSource(audioElement);
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = type;
+        filter.frequency.value = freq;
+        source.connect(filter).connect(audioCtx.destination);
+        audioElement._filter = filter;
+      }
+      return audioElement._filter;
+    }
+
+    // Фильтры создаём только после первого пользовательского действия!
+    function setupFilters() {
+      filters.ambience1 = createFilteredSource(audioMap.ambience1);
+      // Добавьте другие фильтры по необходимости
+    }
+
+    const slides = [
+      {
+        text: '...',
+        play: ['ambience1', 'music1'],
+        stop: [],
+        filterOn: ['ambience1']
+      },
+      {
+        text: 'Тепло...',
+        play: [],
+        stop: []
+      },
+      {
+        text: 'Я чувствую, как что-то теплое обволакивает меня с ног до головы.',
+        play: [],
+        stop: []
+      },
+      {
+        text: '...',
+        play: ['open1', 'open2', 'open3', 'open4'],
+        stop: [],
+        filterOff: ['ambience1']
+      },
+      {
+        text: 'Холодно...',
+        play: [],
+        stop: []
+      },
+      {
+        text: '<em>Сквозь глухую темноту слышно:</em><br><br>"Сорок семь здоровы... Троих на утилизацию..."',
+        play: [],
+        stop: []
+      },
+      {
+        text: 'Что это за голос? Кого на утилизацию?',
+        play: [],
+        stop: []
+      },
+      {
+        text: '"Остальных отправьте на имплантацию и разделите на группы."',
+        play: [],
+        stop: []
+      },
+    ];
+
+    let currentSlide = -1;
+    let readyForClick = false;
+
+    function createSlide(text) {
+      const div = document.createElement('div');
+      div.classList.add('slide');
+      div.innerHTML = text;
+      container.appendChild(div);
+      return div;
+    }
+
+    function showNextSlide() {
+      if (currentSlide >= 0) {
+        slidesElements[currentSlide].classList.remove('active');
+        slidesElements[currentSlide].classList.add('out');
+      }
+
+      currentSlide++;
+
+      if (currentSlide >= slides.length) return;
+
+      const { play, stop, filterOn = [], filterOff = [] } = slides[currentSlide];
+
+      // Управление аудио
+      stop.forEach(id => audioMap[id]?.pause());
+      play.forEach(id => {
+        const audio = audioMap[id];
+        if (audio) {
+          audio.volume = 0.5;
+          audio.play().catch(e => console.warn("Autoplay blocked", e));
+        }
+      });
+
+      filterOn.forEach(id => {
+        const filter = filters[id];
+        if (filter) filter.frequency.value = 500; // приглушение
+      });
+
+      filterOff.forEach(id => {
+        const filter = filters[id];
+        if (filter) filter.frequency.value = 22000; // вернули высокие частоты
+      });
+
+      const el = slidesElements[currentSlide];
+      el.classList.add('active');
+    }
+
+    const slidesElements = slides.map(slide => createSlide(slide.text));
+
+    startBtn.addEventListener('click', async () => {
+      startBtn.style.display = 'none';
+      await audioCtx.resume();
+      setupFilters();
+      showNextSlide();
+      setTimeout(() => {
+        readyForClick = true;
+      }, 100);
+    });
+
+    container.addEventListener('click', () => {
+      if (!readyForClick) return;
+      if (currentSlide >= 0 && currentSlide < slides.length - 1) {
+        showNextSlide();
+      }
+    });
+
+  </script>
+</body>
+</html>
