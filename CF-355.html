@@ -71,34 +71,28 @@
     const audioMap = {
       ambience1: document.getElementById('ambience1'),
       music1: document.getElementById('music1'),
-      // ambience2: document.getElementById('ambience2'), // убрать, если такого нет
+      ambience2: document.getElementById('ambience2'),
       open1: document.getElementById('open1'),
       open2: document.getElementById('open2'),
       open3: document.getElementById('open3'),
       open4: document.getElementById('open4')
     };
 
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    let filters = {};
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
-      // Проверяем, не создавали ли уже фильтр для этого элемента
-      if (!audioElement._filter) {
-        const source = audioCtx.createMediaElementSource(audioElement);
-        const filter = audioCtx.createBiquadFilter();
-        filter.type = type;
-        filter.frequency.value = freq;
-        source.connect(filter).connect(audioCtx.destination);
-        audioElement._filter = filter;
-      }
-      return audioElement._filter;
-    }
+function createFilteredSource(audioElement, type = 'lowpass', freq = 2000) {
+  const source = audioCtx.createMediaElementSource(audioElement);
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = type;
+  filter.frequency.value = freq;
+  source.connect(filter).connect(audioCtx.destination);
+  return filter;
+}
 
-    // Фильтры создаём только после первого пользовательского действия!
-    function setupFilters() {
-      filters.ambience1 = createFilteredSource(audioMap.ambience1);
-      // Добавьте другие фильтры по необходимости
-    }
+const filters = {
+  ambience1: createFilteredSource(audioMap.ambience1),
+  // Добавь другие по желанию
+};
 
     const slides = [
       {
@@ -186,6 +180,7 @@
       filterOff.forEach(id => {
         const filter = filters[id];
         if (filter) filter.frequency.value = 22000; // вернули высокие частоты
+        
       });
 
       const el = slidesElements[currentSlide];
@@ -194,10 +189,8 @@
 
     const slidesElements = slides.map(slide => createSlide(slide.text));
 
-    startBtn.addEventListener('click', async () => {
+    startBtn.addEventListener('click', () => {
       startBtn.style.display = 'none';
-      await audioCtx.resume();
-      setupFilters();
       showNextSlide();
       setTimeout(() => {
         readyForClick = true;
