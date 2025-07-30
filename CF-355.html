@@ -88,7 +88,6 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
   return filter;
 }
 
-// --- Fade helpers ---
 function fadeAudio(audio, toVolume, duration = 1000) {
   if (!audio) return;
   const from = audio.volume;
@@ -117,11 +116,9 @@ function fadeIn(audio, duration = 1000, targetVolume = 0.5) {
 function fadeOut(audio, duration = 1000) {
   fadeAudio(audio, 0, duration);
 }
-// --- End Fade helpers ---
 
 const filters = {
   ambience1: createFilteredSource(audioMap.ambience1),
-  // Добавь другие по желанию
 };
 
     const slides = [
@@ -129,7 +126,8 @@ const filters = {
         text: '...',
         play: ['ambience1', 'music1'],
         stop: [],
-        filterOn: ['ambience1']
+        filterOn: ['ambience1'],
+        fadeIn: { ambience1: 2000, music1: 1000 }
       },
       {
         text: 'Тепло...',
@@ -145,7 +143,7 @@ const filters = {
         text: '...',
         play: ['open1', 'open2', 'open3', 'open4'],
         stop: [],
-        filterOff: ['ambience1']
+        filterOff: ['ambience1'],
       },
       {
         text: 'Холодно...',
@@ -165,7 +163,8 @@ const filters = {
       {
         text: '"Здоровых отправьте на имплантацию и разделите на группы."',
         play: [],
-        stop: ['ambience1']
+        stop: ['ambience1'],
+        fadeOut: { 'ambience1': 2500 }
       },
     ];
 
@@ -192,28 +191,40 @@ const filters = {
 
       if (currentSlide >= slides.length) return;
 
-      const { play = [], stop = [], filterOn = [], filterOff = [] } = slides[currentSlide];
+      const { play = [], stop = [], filterOn = [], filterOff = [], fadeIn = {}, fadeOut = {} } = slides[currentSlide];
 
-      // Плавно затухаем stop
       stop.forEach(id => {
         const audio = audioMap[id];
-        if (audio && !audio.paused) fadeOut(audio, fadeDuration);
+        if (audio && !audio.paused) {
+          if (fadeOut[id]) {
+            fadeOut(audio, fadeOut[id]);
+          } else {
+            audio.pause();
+            audio.volume = 0;
+          }
+        }
       });
 
-      // Плавно включаем play
       play.forEach(id => {
         const audio = audioMap[id];
-        if (audio) fadeIn(audio, fadeDuration, 0.5);
+        if (audio) {
+          if (fadeIn[id]) {
+            fadeInFn(audio, fadeIn[id], 0.5);
+          } else {
+            audio.volume = 0.5;
+            audio.play().catch(()=>{});
+          }
+        }
       });
 
       filterOn.forEach(id => {
         const filter = filters[id];
-        if (filter) filter.frequency.value = 2000; // приглушение
+        if (filter) filter.frequency.value = 2000;
       });
 
       filterOff.forEach(id => {
         const filter = filters[id];
-        if (filter) filter.frequency.value = 22000; // вернули высокие частоты
+        if (filter) filter.frequency.value = 22000;
       });
 
       const el = slidesElements[currentSlide];
