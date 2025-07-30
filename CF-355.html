@@ -48,12 +48,30 @@
      transform: translateY(50%);
      opacity: 1;
     }
+    .yellow-animated {
+      color: #ffe066;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+      font-size: 1.1em;
+      letter-spacing: 1px;
+      margin-top: 0;
+      margin-bottom: 0.5em;
+      white-space: pre;
+      transition: color 0.3s;
+      position: fixed;
+      top: 1.5em;
+      left: 2em;
+      text-align: left;
+      z-index: 1000;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
   <div id="container">
     <button id="startBtn">начать</button>
   </div>
+  <span id="yellowAnimatedGlobal" class="yellow-animated" style="display:none"></span>
 
   <audio id="ambience1" src="sound/kventa/212025__qubodup__sci-fi-laboratory-ambience.ogg" loop></audio>
   <audio id="music1" src="sound/kventa/The_Prison.mp3" loop></audio>
@@ -66,6 +84,8 @@
 
   <audio id="surgery" src="sound/kventa/520222__podcapocalipsis__broken-bone-and-flesh.mp3"></audio>
 
+  <audio id="access" src="sound/kventa/459992__florianreichelt__beep-short.mp3"></audio>
+
   <script>
     
     const container = document.getElementById('container');
@@ -74,6 +94,7 @@
     const audioMap = {
       ambience1: document.getElementById('ambience1'),
       music1: document.getElementById('music1'),
+      ambience2: document.getElementById('ambience2'),
 
       open1: document.getElementById('open1'),
       open2: document.getElementById('open2'),
@@ -81,6 +102,8 @@
       open4: document.getElementById('open4'),
 
       surgery: document.getElementById('surgery'),
+
+      access: document.getElementById('access'),
     };
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -96,7 +119,7 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
 
 const filters = {
   ambience1: createFilteredSource(audioMap.ambience1),
-  surgery: createFilteredSource(audioMap.surgery),
+
 };
 
     const slides = [
@@ -152,15 +175,51 @@ const filters = {
         play: ['surgery'],
         stop: []
       },
+      {
+        text: '...',
+        yellowAnimated: [
+          {
+            text: "connecting the neural interface",
+            dots: true,
+            final: "---[neural interface connected]---",
+            play: [], 
+            endPlay: ["access"] 
+          },
+          {
+            text: "cognitive support actibation",
+            dots: true,
+            final: "---[cognitive support is live]---",
+            play: [],
+            endPlay: ["access"]
+          }
+        ],
+        play: [],
+        stop: []
+      },
+      {
+        text: '...',
+        play: [],
+        stop: []
+      },
     ];
 
     let currentSlide = -1;
     let readyForClick = false;
+    let yellowAnimationActive = false;
 
-    function createSlide(text) {
+    function createSlide(slide) {
       const div = document.createElement('div');
       div.classList.add('slide');
-      div.innerHTML = text;
+      if (slide.text) {
+        const textDiv = document.createElement('div');
+        textDiv.innerHTML = slide.text;
+        div.appendChild(textDiv);
+      }
+      if (slide.yellowAnimated) {
+        div._yellowAnimated = Array.isArray(slide.yellowAnimated)
+          ? slide.yellowAnimated.map(obj => ({ ...obj }))
+          : [{ ...slide.yellowAnimated }];
+      }
       container.appendChild(div);
       return div;
     }
@@ -175,17 +234,14 @@ const filters = {
 
       if (currentSlide >= slides.length) return;
 
-      const { play, stop, filterOn = [], filterOff = [] } = slides[currentSlide];
+      const slide = slides[currentSlide];
+      const { play, stop, filterOn = [], filterOff = [] } = slide;
 
       stop.forEach(id => audioMap[id]?.pause());
       play.forEach(id => {
         const audio = audioMap[id];
         if (audio) {
-          if (id === 'surgery') {
-            audio.volume = 1;
-          } else {
-            audio.volume = 0.5;
-          }
+          audio.volume = audioVolumes[id] !== undefined ? audioVolumes[id] : 0.5;
           audio.play().catch(e => console.warn("Autoplay blocked", e));
         }
       });
@@ -198,19 +254,83 @@ const filters = {
       filterOff.forEach(id => {
         const filter = filters[id];
         if (filter) filter.frequency.value = 22000;
-        
       });
 
       const el = slidesElements[currentSlide];
       el.classList.add('active');
+
+      const yellowGlobal = document.getElementById('yellowAnimatedGlobal');
+      yellowGlobal.style.display = 'none';
+      yellowAnimationActive = false;
+      if (el._yellowAnimated && el._yellowAnimated.length > 0) {
+        yellowAnimationActive = true;
+        animateYellowTextSequence(el._yellowAnimated, () => {
+          yellowAnimationActive = false;
+        });
+      }
     }
 
-    const slidesElements = slides.map(slide => createSlide(slide.text));
+    function animateYellowTextSequence(sequence, onFinish) {
+      const yellowGlobal = document.getElementById('yellowAnimatedGlobal');
+      let idx = 0;
+      function next() {
+        if (idx >= sequence.length) {
+          yellowGlobal.style.display = 'none';
+          if (typeof onFinish === 'function') onFinish();
+          return;
+        }
+        yellowGlobal.style.display = '';
+        animateYellowTextGlobal(sequence[idx], () => {
+          idx++;
+          next();
+        });
+      }
+      next();
+    }
+
+    function animateYellowTextGlobal({ text, dots, final, play = [], endPlay = [] }, onFinish) {
+      const yellowGlobal = document.getElementById('yellowAnimatedGlobal');
+      let dotCount = 0;
+      let maxDots = 3;
+      let interval;
+      yellowGlobal.style.display = '';
+      yellowGlobal.textContent = text + (dots ? '.' : '');
+
+      play.forEach(id => {
+        const audio = audioMap[id];
+        if (audio) {
+          audio.volume = audioVolumes[id] !== undefined ? audioVolumes[id] : 0.5;
+          audio.play().catch(e => {});
+        }
+      });
+
+      if (dots) {
+        interval = setInterval(() => {
+          dotCount = (dotCount + 1) % (maxDots + 1);
+          yellowGlobal.textContent = text + '.'.repeat(dotCount);
+        }, 400);
+      }
+      setTimeout(() => {
+        if (interval) clearInterval(interval);
+        yellowGlobal.textContent = final;
+
+        endPlay.forEach(id => {
+          const audio = audioMap[id];
+          if (audio) {
+            audio.volume = audioVolumes[id] !== undefined ? audioVolumes[id] : 0.5;
+            audio.play().catch(e => {});
+          }
+        });
+
+        setTimeout(() => {
+          if (typeof onFinish === 'function') onFinish();
+        }, 700);
+      }, 3000);
+    }
+
+    const slidesElements = slides.map(slide => createSlide(slide));
 
     startBtn.addEventListener('click', () => {
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
       startBtn.style.display = 'none';
       showNextSlide();
       setTimeout(() => {
@@ -220,11 +340,24 @@ const filters = {
 
     container.addEventListener('click', () => {
       if (!readyForClick) return;
+      if (yellowAnimationActive) return;
       if (currentSlide >= 0 && currentSlide < slides.length - 1) {
         showNextSlide();
       }
     });
 
+    const audioVolumes = {
+      ambience1: 0.5,
+      music1: 0.5,
+      ambience2: 0.5,
+      ambience3: 0.5,
+      open1: 0.5,
+      open2: 0.5,
+      open3: 0.5,
+      open4: 0.5,
+      surgery: 1,
+      access: 0.1
+    };
   </script>
 </body>
 </html>
