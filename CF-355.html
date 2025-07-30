@@ -97,7 +97,8 @@ const filters = {
         text: '...',
         play: ['ambience1', 'music1'],
         stop: [],
-        filterOn: ['ambience1']
+        filterOn: ['ambience1'],
+        fadeIn: { ambience1: 1500, music1: 1500 }
       },
       {
         text: 'Тепло...',
@@ -113,7 +114,8 @@ const filters = {
         text: '...',
         play: ['open1', 'open2', 'open3', 'open4'],
         stop: [],
-        filterOff: ['ambience1']
+        filterOff: ['ambience1'],
+        fadeOut: { ambience1: 1200}
       },
       {
         text: 'Холодно...',
@@ -148,6 +150,27 @@ const filters = {
       return div;
     }
 
+    function fadeAudio(audio, to, duration = 1000) {
+  const stepTime = 30;
+  const from = audio.volume;
+  const steps = Math.ceil(duration / stepTime);
+  let currentStep = 0;
+  const diff = to - from;
+  if (steps <= 0) {
+    audio.volume = to;
+    return;
+  }
+  clearInterval(audio._fadeTimer);
+  audio._fadeTimer = setInterval(() => {
+    currentStep++;
+    audio.volume = from + (diff * currentStep / steps);
+    if (currentStep >= steps) {
+      audio.volume = to;
+      clearInterval(audio._fadeTimer);
+    }
+  }, stepTime);
+}
+
     function showNextSlide() {
       if (currentSlide >= 0) {
         slidesElements[currentSlide].classList.remove('active');
@@ -158,14 +181,31 @@ const filters = {
 
       if (currentSlide >= slides.length) return;
 
-      const { play, stop, filterOn = [], filterOff = [] } = slides[currentSlide];
+      const { play, stop, filterOn = [], filterOff = [], fadeIn = {}, fadeOut = {} } = slides[currentSlide];
 
-      stop.forEach(id => audioMap[id]?.pause());
+      stop.forEach(id => {
+        const audio = audioMap[id];
+        if (audio) {
+          if (fadeOut[id]) {
+            fadeAudio(audio, 0, fadeOut[id]);
+            setTimeout(() => audio.pause(), fadeOut[id]);
+          } else {
+            audio.pause();
+            audio.volume = 0.5;
+          }
+        }
+      });
+
       play.forEach(id => {
         const audio = audioMap[id];
         if (audio) {
-          audio.volume = 0.5;
+          audio.volume = 0;
           audio.play().catch(e => console.warn("Autoplay blocked", e));
+          if (fadeIn[id]) {
+            fadeAudio(audio, 0.5, fadeIn[id]);
+          } else {
+            audio.volume = 0.5;
+          }
         }
       });
 
@@ -177,7 +217,6 @@ const filters = {
       filterOff.forEach(id => {
         const filter = filters[id];
         if (filter) filter.frequency.value = 22000;
-        
       });
 
       const el = slidesElements[currentSlide];
