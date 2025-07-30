@@ -80,7 +80,7 @@
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-function createFilteredSource(audioElement, type = 'lowpass', freq = 2000) {
+function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
   const source = audioCtx.createMediaElementSource(audioElement);
   const filter = audioCtx.createBiquadFilter();
   filter.type = type;
@@ -174,7 +174,7 @@ const filters = {
 
       filterOn.forEach(id => {
         const filter = filters[id];
-        if (filter) filter.frequency.value = 500; // приглушение
+        if (filter) filter.frequency.value = 2000; // приглушение
       });
 
       filterOff.forEach(id => {
