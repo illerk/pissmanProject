@@ -84,8 +84,12 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
   const filter = audioCtx.createBiquadFilter();
   filter.type = type;
   filter.frequency.value = freq;
-  source.connect(filter).connect(audioCtx.destination);
-  return filter;
+  const gain = audioCtx.createGain();
+  gain.gain.value = 0.5;
+  source.connect(filter).connect(gain).connect(audioCtx.destination);
+  audioElement._filter = filter;
+  audioElement._gain = gain;
+  return { filter, gain };
 }
 
 const filters = {
@@ -150,27 +154,54 @@ const filters = {
       return div;
     }
 
-    function fadeAudio(audio, to, duration = 1000, onEnd) {
+function fadeGain(gainNode, to, duration = 1000, onEnd) {
+  const from = gainNode.gain.value;
   const stepTime = 30;
-  const from = audio.volume;
   const steps = Math.ceil(duration / stepTime);
   let currentStep = 0;
   const diff = to - from;
   if (steps <= 0) {
-    audio.volume = to;
+    gainNode.gain.value = to;
     if (onEnd) onEnd();
     return;
   }
-  clearInterval(audio._fadeTimer);
-  audio._fadeTimer = setInterval(() => {
+  clearInterval(gainNode._fadeTimer);
+  gainNode._fadeTimer = setInterval(() => {
     currentStep++;
-    audio.volume = Math.max(0, Math.min(1, from + (diff * currentStep / steps)));
+    gainNode.gain.value = Math.max(0, Math.min(1, from + (diff * currentStep / steps)));
     if (currentStep >= steps) {
-      audio.volume = to;
-      clearInterval(audio._fadeTimer);
+      gainNode.gain.value = to;
+      clearInterval(gainNode._fadeTimer);
       if (onEnd) onEnd();
     }
   }, stepTime);
+}
+
+    function fadeAudio(audio, to, duration = 1000, onEnd) {
+  if (audio._gain) {
+    fadeGain(audio._gain, to, duration, onEnd);
+  } else {
+    const stepTime = 30;
+    const from = audio.volume;
+    const steps = Math.ceil(duration / stepTime);
+    let currentStep = 0;
+    const diff = to - from;
+    if (steps <= 0) {
+      audio.volume = to;
+      if (onEnd) onEnd();
+      return;
+    }
+    clearInterval(audio._fadeTimer);
+    audio._fadeTimer = setInterval(() => {
+      currentStep++;
+      audio.volume = Math.max(0, Math.min(1, from + (diff * currentStep / steps)));
+      if (currentStep >= steps) {
+        audio.volume = to;
+        clearInterval(audio._fadeTimer);
+        if (onEnd) onEnd();
+      }
+    }, stepTime);
+  }
 }
 
     function showNextSlide() {
@@ -196,7 +227,8 @@ const filters = {
           } else {
             audio.pause();
             audio.currentTime = 0;
-            audio.volume = 0.5;
+            if (audio._gain) audio._gain.gain.value = 0.5;
+            else audio.volume = 0.5;
           }
         }
       });
@@ -205,25 +237,27 @@ const filters = {
         const audio = audioMap[id];
         if (audio) {
           if (fadeIn[id]) {
-            audio.volume = 0;
+            if (audio._gain) audio._gain.gain.value = 0;
+            else audio.volume = 0;
             audio.play().then(() => {
               fadeAudio(audio, 0.5, fadeIn[id]);
             }).catch(e => console.warn("Autoplay blocked", e));
           } else {
-            audio.volume = 0.5;
+            if (audio._gain) audio._gain.gain.value = 0.5;
+            else audio.volume = 0.5;
             audio.play().catch(e => console.warn("Autoplay blocked", e));
           }
         }
       });
 
       filterOn.forEach(id => {
-        const filter = filters[id];
-        if (filter) filter.frequency.value = 2000;
+        const obj = filters[id];
+        if (obj && obj.filter) obj.filter.frequency.value = 2000;
       });
 
       filterOff.forEach(id => {
-        const filter = filters[id];
-        if (filter) filter.frequency.value = 22000;
+        const obj = filters[id];
+        if (obj && obj.filter) obj.filter.frequency.value = 22000;
       });
 
       const el = slidesElements[currentSlide];
