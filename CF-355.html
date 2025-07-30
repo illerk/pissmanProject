@@ -58,10 +58,14 @@
   <audio id="ambience1" src="sound/kventa/212025__qubodup__sci-fi-laboratory-ambience.ogg" loop></audio>
   <audio id="music1" src="sound/kventa/The_Prison.mp3" loop></audio>
   <audio id="ambience3" src="sounds/ambience3.mp3" loop></audio>
+
   <audio id="open1" src="sound/kventa/425090__neospica__pressurized-door-opening.wav"></audio>
   <audio id="open2" src="sound/kventa/90143__pengo_au__steam_burst.wav"></audio>
   <audio id="open3" src="sound/kventa/325269__deleted_user_2104797__body-fall-2.wav"></audio>
   <audio id="open4" src="sound/kventa/195955__minian89__bucket_splash.mp3"></audio>
+
+  <audio id="surgery" src="sound/kventa/520222__podcapocalipsis__broken-bone-and-flesh.mp3"></audio>
+
   <script>
     
     const container = document.getElementById('container');
@@ -136,6 +140,16 @@ const filters = {
         play: [],
         stop: []
       },
+      {
+        text: 'Я чувствую отдалённые прикосновения, затем ощущения затихают...',
+        play: [],
+        stop: []
+      },
+      {
+        text: '...',
+        play: ['surgery'],
+        stop: []
+      },
     ];
 
     let currentSlide = -1;
@@ -161,7 +175,6 @@ const filters = {
 
       const { play, stop, filterOn = [], filterOff = [] } = slides[currentSlide];
 
-      // Управление аудио
       stop.forEach(id => audioMap[id]?.pause());
       play.forEach(id => {
         const audio = audioMap[id];
@@ -173,12 +186,12 @@ const filters = {
 
       filterOn.forEach(id => {
         const filter = filters[id];
-        if (filter) filter.frequency.value = 2000; // приглушение
+        if (filter) filter.frequency.value = 2000;
       });
 
       filterOff.forEach(id => {
         const filter = filters[id];
-        if (filter) filter.frequency.value = 22000; // вернули высокие частоты
+        if (filter) filter.frequency.value = 22000;
         
       });
 
