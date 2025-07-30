@@ -88,37 +88,9 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
   return filter;
 }
 
-function fadeAudio(audio, toVolume, duration = 1000) {
-  if (!audio) return;
-  const from = audio.volume;
-  const stepTime = 20;
-  const steps = Math.ceil(duration / stepTime);
-  let currentStep = 0;
-  const diff = toVolume - from;
-  clearInterval(audio._fadeInterval);
-  audio._fadeInterval = setInterval(() => {
-    currentStep++;
-    audio.volume = Math.max(0, Math.min(1, from + diff * (currentStep / steps)));
-    if (currentStep >= steps) {
-      audio.volume = toVolume;
-      clearInterval(audio._fadeInterval);
-      if (toVolume === 0) audio.pause();
-    }
-  }, stepTime);
-}
-
-function fadeIn(audio, duration = 1000, targetVolume = 0.5) {
-  audio.volume = 0;
-  audio.play().catch(()=>{});
-  fadeAudio(audio, targetVolume, duration);
-}
-
-function fadeOut(audio, duration = 1000) {
-  fadeAudio(audio, 0, duration);
-}
-
 const filters = {
   ambience1: createFilteredSource(audioMap.ambience1),
+
 };
 
     const slides = [
@@ -177,9 +149,6 @@ const filters = {
       return div;
     }
 
-
-    const fadeDuration = 1500;
-
     function showNextSlide() {
       if (currentSlide >= 0) {
         slidesElements[currentSlide].classList.remove('active');
@@ -190,26 +159,27 @@ const filters = {
 
       if (currentSlide >= slides.length) return;
 
-      const { play = [], stop = [], filterOn = [], filterOff = [] } = slides[currentSlide];
+      const { play, stop, filterOn = [], filterOff = [] } = slides[currentSlide];
 
-      stop.forEach(id => {
-        const audio = audioMap[id];
-        if (audio && !audio.paused) fadeOut(audio, fadeDuration);
-      });
-
+      // Управление аудио
+      stop.forEach(id => audioMap[id]?.pause());
       play.forEach(id => {
         const audio = audioMap[id];
-        if (audio) fadeIn(audio, fadeDuration, 0.5);
+        if (audio) {
+          audio.volume = 0.5;
+          audio.play().catch(e => console.warn("Autoplay blocked", e));
+        }
       });
 
       filterOn.forEach(id => {
         const filter = filters[id];
-        if (filter) filter.frequency.value = 2000;
+        if (filter) filter.frequency.value = 2000; // приглушение
       });
 
       filterOff.forEach(id => {
         const filter = filters[id];
-        if (filter) filter.frequency.value = 22000;
+        if (filter) filter.frequency.value = 22000; // вернули высокие частоты
+        
       });
 
       const el = slidesElements[currentSlide];
