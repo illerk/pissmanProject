@@ -86,6 +86,8 @@
 
   <audio id="access" src="sound/kventa/459992__florianreichelt__beep-short.mp3"></audio>
 
+  <audio id="writing" src="sound/kventa/33773__digifishmusic__writing.wav"></audio>
+
   <script>
     
     const container = document.getElementById('container');
@@ -104,6 +106,8 @@
       surgery: document.getElementById('surgery'),
 
       access: document.getElementById('access'),
+
+      writing: document.getElementById('writing')
     };
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -206,6 +210,16 @@ const filters = {
         play: [],
         stop: ['ambience1']
       },
+      {
+        text: '<em>Яркий свет. Ослепительный свет. ...Фонарик?</em>"',
+        play: [],
+        stop: []
+      },
+      {
+        text: '<em>Я проморгалась и прищурилась, смотря перед собой</em><br><br>Передо мной стоит мужчина в белом халате. Он убрал фонарик в карман и записал что-то в планшет.',
+        play: ['writing'],
+        stop: []
+      },
     ];
 
     let currentSlide = -1;
@@ -286,6 +300,7 @@ const filters = {
           yellowAnimationActive = false;
         });
       }
+
     }
 
     function animateYellowTextSequence(sequence, onFinish) {
@@ -366,7 +381,7 @@ const filters = {
 
     const audioVolumes = {
       ambience1: 0.5,
-      music1: 0.5,
+      music1: 0.2,
       ambience2: 0.5,
       ambience3: 0.5,
       open1: 0.5,
@@ -376,6 +391,24 @@ const filters = {
       surgery: 1,
       access: 0.1
     };
+
+    const style = document.createElement('style');
+    style.textContent = `
+      body.negative-effect {
+        filter: invert(1) hue-rotate(180deg) contrast(1.2) brightness(1.1);
+        background: #fff !important;
+        color: #000 !important;
+        transition: filter 0.5s cubic-bezier(.4,2,.6,1), background 0.5s, color 0.5s;
+      }
+      body.negative-effect-animate {
+        animation: negative-flash 0.5s cubic-bezier(.4,2,.6,1);
+      }
+      @keyframes negative-flash {
+        0% { filter: none; background: #000; color: #ccc; }
+        100% { filter: invert(1) hue-rotate(180deg) contrast(1.2) brightness(1.1); background: #fff; color: #000;}
+      }
+    `;
+    document.head.appendChild(style);
   </script>
 </body>
 </html>
