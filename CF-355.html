@@ -215,13 +215,11 @@ const filters = {
     function createSlide(slide) {
       const div = document.createElement('div');
       div.classList.add('slide');
-      // Обычный текст слайда всегда отображается (если есть)
       if (slide.text) {
         const textDiv = document.createElement('div');
         textDiv.innerHTML = slide.text;
         div.appendChild(textDiv);
       }
-      // Сохраняем yellowAnimated данные для showNextSlide (может быть массив или объект)
       if (slide.yellowAnimated) {
         div._yellowAnimated = Array.isArray(slide.yellowAnimated)
           ? slide.yellowAnimated.map(obj => ({ ...obj }))
@@ -244,12 +242,10 @@ const filters = {
       const slide = slides[currentSlide];
       const { play, stop, filterOn = [], filterOff = [] } = slide;
 
-      // Управление аудио
       stop.forEach(id => audioMap[id]?.pause());
       play.forEach(id => {
         const audio = audioMap[id];
         if (audio) {
-          // Используем индивидуальную громкость
           audio.volume = audioVolumes[id] !== undefined ? audioVolumes[id] : 0.5;
           audio.play().catch(e => console.warn("Autoplay blocked", e));
         }
@@ -257,18 +253,17 @@ const filters = {
 
       filterOn.forEach(id => {
         const filter = filters[id];
-        if (filter) filter.frequency.value = 2000; // приглушение
+        if (filter) filter.frequency.value = 2000;
       });
 
       filterOff.forEach(id => {
         const filter = filters[id];
-        if (filter) filter.frequency.value = 22000; // вернули высокие частоты
+        if (filter) filter.frequency.value = 22000;
       });
 
       const el = slidesElements[currentSlide];
       el.classList.add('active');
 
-      // Глобальный желтый текст
       const yellowGlobal = document.getElementById('yellowAnimatedGlobal');
       yellowGlobal.style.display = 'none';
       yellowAnimationActive = false;
@@ -280,7 +275,6 @@ const filters = {
       }
     }
 
-    // Анимация последовательности желтых текстов
     function animateYellowTextSequence(sequence, onFinish) {
       const yellowGlobal = document.getElementById('yellowAnimatedGlobal');
       let idx = 0;
@@ -299,7 +293,6 @@ const filters = {
       next();
     }
 
-    // Глобальная анимация желтого текста с колбэком по завершению
     function animateYellowTextGlobal({ text, dots, final, play = [], endPlay = [] }, onFinish) {
       const yellowGlobal = document.getElementById('yellowAnimatedGlobal');
       let dotCount = 0;
@@ -308,7 +301,6 @@ const filters = {
       yellowGlobal.style.display = '';
       yellowGlobal.textContent = text + (dots ? '.' : '');
 
-      // Воспроизвести звуки при появлении желтого текста
       play.forEach(id => {
         const audio = audioMap[id];
         if (audio) {
@@ -327,7 +319,6 @@ const filters = {
         if (interval) clearInterval(interval);
         yellowGlobal.textContent = final;
 
-        // Воспроизвести звуки при окончании анимации желтого текста
         endPlay.forEach(id => {
           const audio = audioMap[id];
           if (audio) {
@@ -338,7 +329,7 @@ const filters = {
 
         setTimeout(() => {
           if (typeof onFinish === 'function') onFinish();
-        }, 700); // небольшая пауза после финального текста
+        }, 700);
       }, 3000);
     }
 
@@ -354,13 +345,12 @@ const filters = {
 
     container.addEventListener('click', () => {
       if (!readyForClick) return;
-      if (yellowAnimationActive) return; // Блокируем переход, если анимация не закончилась
+      if (yellowAnimationActive) return;
       if (currentSlide >= 0 && currentSlide < slides.length - 1) {
         showNextSlide();
       }
     });
 
-    // Добавьте объект для индивидуальной громкости каждого звука
     const audioVolumes = {
       ambience1: 0.5,
       music1: 0.5,
