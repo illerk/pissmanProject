@@ -48,6 +48,37 @@
      transform: translateY(50%);
      opacity: 1;
     }
+    .yellow-annot {
+      color: #ffe066;
+      font-weight: bold;
+      cursor: pointer;
+      border-bottom: 1px dashed #ffe066;
+      position: relative;
+      transition: color 0.2s;
+    }
+    .yellow-annot:hover {
+      color: #fffbe0;
+    }
+    .yellow-annot-tooltip {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: 1.5em;
+      background: #222;
+      color: #ffe066;
+      border: 1px solid #ffe066;
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 0.95em;
+      z-index: 2000;
+      white-space: pre-line;
+      min-width: 180px;
+      max-width: 320px;
+      pointer-events: none;
+    }
+    .yellow-annot:hover .yellow-annot-tooltip {
+      display: block;
+    }
     .yellow-animated {
       color: #ffe066;
       font-weight: bold;
@@ -88,6 +119,8 @@
 
   <audio id="writing" src="sound/kventa/33773__digifishmusic__writing.wav"></audio>
 
+  <audio id="click" src="sound/kventa/mixkit-old-camera-shutter-click-1137.wav"></audio>
+
   <script>
     
     const container = document.getElementById('container');
@@ -107,7 +140,9 @@
 
       access: document.getElementById('access'),
 
-      writing: document.getElementById('writing')
+      writing: document.getElementById('writing'),
+
+      click: document.getElementById('click')
     };
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -129,54 +164,54 @@ const filters = {
     const slides = [
       {
         text: '...',
-        play: ['ambience1', 'music1'],
+        play: ['ambience1', 'music1', 'click'],
         stop: [],
         filterOn: ['ambience1']
       },
       {
         text: 'Тепло...',
-        play: [],
+        play: ['click'],
         stop: []
       },
       {
         text: 'Я чувствую, как что-то теплое обволакивает меня с ног до головы.',
-        play: [],
+        play: ['click'],
         stop: []
       },
       {
         text: '...',
-        play: ['open1', 'open2', 'open3', 'open4'],
+        play: ['open1', 'open2', 'open3', 'open4', 'click'],
         stop: [],
         filterOff: ['ambience1']
       },
       {
         text: 'Холодно...',
-        play: [],
+        play: ['click'],
         stop: []
       },
       {
         text: '<em>Сквозь глухую темноту слышно:</em><br><br>"Сорок семь здоровы... Троих на утилизацию..."',
-        play: [],
+        play: ['click'],
         stop: []
       },
       {
         text: 'Что это за голос? Кого на утилизацию?',
-        play: [],
+        play: ['click'],
         stop: []
       },
       {
         text: '"Здоровых отправьте на имплантацию и разделите на группы."',
-        play: [],
+        play: ['click'],
         stop: []
       },
       {
         text: 'Я чувствую отдалённые прикосновения, затем ощущения затихают...',
-        play: [],
+        play: ['click'],
         stop: []
       },
       {
         text: '...',
-        play: ['surgery'],
+        play: ['surgery', 'click'],
         stop: []
       },
       {
@@ -197,27 +232,42 @@ const filters = {
             endPlay: ["access"]
           }
         ],
-        play: [],
+        play: ['click'],
         stop: []
       },
       {
         text: '...',
-        play: [],
+        play: ['click'],
         stop: []
       },
       {
         text: 'Сколько времени прошло?',
-        play: [],
+        play: ['click'],
         stop: ['ambience1']
       },
       {
         text: '<em>Яркий свет. Ослепительный свет. ...Фонарик?</em>"',
-        play: [],
+        play: ['click'],
         stop: []
       },
       {
         text: '<em>Я проморгалась и прищурилась, смотря перед собой</em><br><br>Передо мной стоит мужчина в белом халате. Он убрал фонарик в карман и записал что-то в планшет.',
-        play: ['writing'],
+        play: ['writing', 'click'],
+        stop: []
+      },
+      {
+        text: '"Она в сознании..."<br><br>Мужчина отдал планшет девушке и вышел из комнаты',
+        play: ['click'],
+        stop: []
+      },
+      {
+        text: 'Девушка смотрит в планшет, затем кладет его на стол и садится на стул напротив меня и слегка улыбается.<br><br>"С пробуждением. Понимаешь меня? Говорить умеешь?"',
+        play: ['click'],
+        stop: []
+      },
+      {
+        text: 'Почему все ощущается так странно..? <br><em>Я смотрю на девушку передо мной.</em> Она одета в синюю униформу. у нее аккуратно постриженные черные волосы на уровне плеч. Она мягко улыбается мне. Я чувствую себя комфортно рядом с ней. Нужно ей ответить...<br><br>"Да... Кажется умею..."',
+        play: ['click'],
         stop: []
       },
     ];
@@ -226,12 +276,19 @@ const filters = {
     let readyForClick = false;
     let yellowAnimationActive = false;
 
+    function renderAnnotatedText(text) {
+      if (!text) return '';
+      return text.replace(/\[\[([^\|\]]+)\|([^\]]+)\]\]/g, (m, word, info) => {
+        return `<span class="yellow-annot">${word}<span class="yellow-annot-tooltip">${info}</span></span>`;
+      });
+    }
+
     function createSlide(slide) {
       const div = document.createElement('div');
       div.classList.add('slide');
       if (slide.text) {
         const textDiv = document.createElement('div');
-        textDiv.innerHTML = slide.text;
+        textDiv.innerHTML = renderAnnotatedText(slide.text);
         div.appendChild(textDiv);
       }
       if (slide.yellowAnimated) {
@@ -294,13 +351,23 @@ const filters = {
       const yellowGlobal = document.getElementById('yellowAnimatedGlobal');
       yellowGlobal.style.display = 'none';
       yellowAnimationActive = false;
+
       if (el._yellowAnimated && el._yellowAnimated.length > 0) {
         yellowAnimationActive = true;
         animateYellowTextSequence(el._yellowAnimated, () => {
           yellowAnimationActive = false;
         });
+      } else {
+        yellowGlobal.style.display = 'none';
       }
+    }
 
+    function triggerNegativeEffect() {
+      document.body.classList.add('negative-effect-animate');
+      setTimeout(() => {
+        document.body.classList.remove('negative-effect-animate');
+        document.body.classList.add('negative-effect');
+      }, 500);
     }
 
     function animateYellowTextSequence(sequence, onFinish) {
