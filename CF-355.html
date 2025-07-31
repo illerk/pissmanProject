@@ -363,8 +363,18 @@ const filters = {
 
     const slidesElements = slides.map(slide => createSlide(slide));
 
+    audioMap.ambience1?.load();
+
     startBtn.addEventListener('click', () => {
-      startBtn.style.display = 'none';
+      const amb = audioMap.ambience1;
+      if (amb) {
+        amb.muted = true;
+        amb.play().catch(()=>{}).finally(() => {
+          amb.pause();
+          amb.currentTime = 0;
+          amb.muted = false;
+        });
+      }
       showNextSlide();
       setTimeout(() => {
         readyForClick = true;
