@@ -363,7 +363,8 @@ const filters = {
 
     const slidesElements = slides.map(slide => createSlide(slide));
 
-    startBtn.addEventListener('click', () => {
+      startBtn.addEventListener('click', async () => {
+      await audioCtx.resume().catch(e => console.warn("AudioContext resume error:", e));
       startBtn.style.display = 'none';
       showNextSlide();
       setTimeout(() => {
