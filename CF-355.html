@@ -246,7 +246,13 @@ const filters = {
         const audio = audioMap[id];
         if (audio) {
           audio.pause();
-          try { audio.currentTime = 0; } catch (e) {}
+          try {
+            audio.currentTime = 0;
+            if (audio.loop) {
+              audio.loop = false;
+              setTimeout(() => { audio.loop = true; }, 100);
+            }
+          } catch (e) {}
         }
       });
 
