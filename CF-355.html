@@ -342,6 +342,11 @@ const filters = {
         play: ['click'],
         stop: []
       },
+      {
+        text: 'Она посмотрела на меня с некоторым сожалением... Но почему?<br>Она вернула свое прежнее выражение лица и продолжила:<br><br>"Ты сейчас находишься на борту корабля [[Телхин|Флагмен ОСЧ. Оснащен тяжелой артиллерией. Также корабль выступает в качестве ремонтной станции, а также собирает легкие корабли, готовые к бою.]]" ',
+        play: ['click'],
+        stop: []
+      },
     ];
 
     let currentSlide = -1;
@@ -578,6 +583,13 @@ const filters = {
   const particleCount = 100;
   let mouse = { x: null, y: null };
 
+  const LINK_DISTANCE = 60;
+  const LINK_BREAK_DISTANCE = 120;
+  const LINK_TIME = 1000;
+  const LINK_FORCE = 0.0010;
+
+  let links = [];
+
   function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -611,6 +623,8 @@ const filters = {
       this.baseAlpha = Math.random() * 0.4 + 0.4;
       this.alphaOffset = Math.random() * Math.PI * 2;
       this.wanderAngle = Math.random() * Math.PI * 2;
+      this.id = Particle._id++;
+      this.nearTimes = {};
     }
 
     update(time) {
@@ -629,6 +643,19 @@ const filters = {
       if (dist < 100) {
         this.vx += dx / dist * 0.08;
         this.vy += dy / dist * 0.08;
+      }
+
+      for (const link of links) {
+        let other = null;
+        if (link.a === this) other = link.b;
+        else if (link.b === this) other = link.a;
+        if (other) {
+          let dxl = other.x - this.x;
+          let dyl = other.y - this.y;
+          let d = Math.sqrt(dxl * dxl + dyl * dyl) || 1;
+          this.vx += dxl / d * LINK_FORCE;
+          this.vy += dyl / d * LINK_FORCE;
+        }
       }
 
       this.x += this.vx;
@@ -662,7 +689,6 @@ const filters = {
       return Math.max(0, Math.min(1, opacity));
     }
 
-
     draw() {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -670,13 +696,61 @@ const filters = {
       ctx.fill();
     }
   }
+  Particle._id = 0;
 
   for (let i = 0; i < particleCount; i++) {
     particles.push(new Particle());
   }
 
+  function updateLinks(time) {
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const a = particles[i], b = particles[j];
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        let link = links.find(l => (l.a === a && l.b === b) || (l.a === b && l.b === a));
+
+        if (dist < LINK_DISTANCE) {
+          if (!a.nearTimes[b.id]) a.nearTimes[b.id] = time;
+          if (!b.nearTimes[a.id]) b.nearTimes[a.id] = time;
+          const nearTime = Math.max(a.nearTimes[b.id], b.nearTimes[a.id]);
+          if (!link && time - nearTime > LINK_TIME) {
+            links.push({ a, b, created: time });
+          }
+        } else {
+          a.nearTimes[b.id] = time;
+          b.nearTimes[a.id] = time;
+        }
+
+        if (link && dist > LINK_BREAK_DISTANCE) {
+          links = links.filter(l => l !== link);
+        }
+      }
+    }
+    links = links.filter(l => particles.includes(l.a) && particles.includes(l.b));
+  }
+
+  function drawLinks() {
+    ctx.save();
+    ctx.strokeStyle = "rgba(255,255,255,0.18)";
+    ctx.lineWidth = 1.1;
+    for (const link of links) {
+      ctx.beginPath();
+      ctx.moveTo(link.a.x, link.a.y);
+      ctx.lineTo(link.b.x, link.b.y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   function animateParticles(time = 0) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    updateLinks(time);
+
+    drawLinks();
+
     for (let p of particles) {
       p.update(time);
       p.draw();
@@ -687,11 +761,13 @@ const filters = {
   animateParticles();
 
   function resetParticleHomes() {
-  particles.forEach(p => {
-    p.homeX = Math.random() * canvas.width;
-    p.homeY = Math.random() * canvas.height;
-  });
-}
+    particles.forEach(p => {
+      p.homeX = Math.random() * canvas.width;
+      p.homeY = Math.random() * canvas.height;
+    });
+    links = [];
+    particles.forEach(p => p.nearTimes = {});
+  }
 
   </script>
 
