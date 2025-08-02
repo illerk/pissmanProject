@@ -590,6 +590,8 @@ const filters = {
 
   let links = [];
 
+  let breakingLinks = [];
+
   function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -716,7 +718,7 @@ const filters = {
           if (!b.nearTimes[a.id]) b.nearTimes[a.id] = time;
           const nearTime = Math.max(a.nearTimes[b.id], b.nearTimes[a.id]);
           if (!link && time - nearTime > LINK_TIME) {
-            links.push({ a, b, created: time });
+            links.push({ a, b, created: time, progress: 0 });
           }
         } else {
           a.nearTimes[b.id] = time;
@@ -725,22 +727,50 @@ const filters = {
 
         if (link && dist > LINK_BREAK_DISTANCE) {
           links = links.filter(l => l !== link);
+          breakingLinks.push({ ...link, breaking: true });
         }
       }
     }
     links = links.filter(l => particles.includes(l.a) && particles.includes(l.b));
+    breakingLinks = breakingLinks.filter(l => particles.includes(l.a) && particles.includes(l.b));
   }
 
   function drawLinks() {
     ctx.save();
     ctx.strokeStyle = "rgba(255,255,255,0.18)";
     ctx.lineWidth = 1.1;
+
     for (const link of links) {
+      if (link.progress < 1) link.progress += 0.08;
+      if (link.progress > 1) link.progress = 1;
+
+      const { a, b, progress } = link;
+      const x1 = a.x, y1 = a.y;
+      const x2 = a.x + (b.x - a.x) * progress;
+      const y2 = a.y + (b.y - a.y) * progress;
       ctx.beginPath();
-      ctx.moveTo(link.a.x, link.a.y);
-      ctx.lineTo(link.b.x, link.b.y);
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
       ctx.stroke();
     }
+
+    for (let i = breakingLinks.length - 1; i >= 0; i--) {
+      const link = breakingLinks[i];
+      link.progress -= 0.08;
+      if (link.progress <= 0) {
+        breakingLinks.splice(i, 1);
+        continue;
+      }
+      const { a, b, progress } = link;
+      const x1 = a.x, y1 = a.y;
+      const x2 = a.x + (b.x - a.x) * progress;
+      const y2 = a.y + (b.y - a.y) * progress;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    }
+
     ctx.restore();
   }
 
@@ -766,6 +796,7 @@ const filters = {
       p.homeY = Math.random() * canvas.height;
     });
     links = [];
+    breakingLinks = [];
     particles.forEach(p => p.nearTimes = {});
   }
 
