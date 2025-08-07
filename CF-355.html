@@ -920,54 +920,57 @@ const filters = {
     marsTrackNode = audioCtx.createMediaElementSource(marsAudio);
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 64;
-    const bufferLength = analyser.frequencyBinCount;
-    dataArray = new Uint8Array(bufferLength);
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
 
     marsTrackNode.connect(analyser);
     analyser.connect(audioCtx.destination);
 
     marsAudio.play().catch(err => console.warn("Autoplay blocked:", err));
-
     isMarsEQ = true;
-
 
     const marsSlideTimings = [
       { text: '...', time: 0 },
-      { text: 'На Марсе классно', time: 44000 },
-      { text: 'Красные пески, крутые горы и краторы', time: 45000 },
-      { text: 'Безумно красивые каналы рядом с экватором', time: 47000 },
-      { text: 'Ничто не сравнится с тамошними закатами', time: 50000 },
-      { text: 'Правда холодновато и давление, мягко говоря, низковатое...', time: 52000 },
-      { text: 'За то две луны на небе и очень яркие звёзды!', time: 55000 },
-      { text: 'Это из-за низкой плотности воздуха<br>Жаль, что так поздно земляне получили снимки с этой прекрасной планеты', time: 57000 },
-      { text: 'Здесь было еще прикольнее до местного конца света', time: 63000 },
-      { text: 'Летом цвели пышным цветом диковенные растения', time: 65000 },
-      { text: 'Невиданно высокии из-за слабого притяжения', time: 68000 },
-      { text: 'Шумели гигантскими кронами в лесах, скверах и парках', time: 71000 },
-      { text: 'Где в их тени прятались местные жители, когда жарко', time: 73000 },
-      { text: 'Они были похожи на нас<br>Не во всем, конечно, но всё-таки', time: 76000 },
-      { text: 'В целом без какой-то там оголтелой экзотики', time: 79000 },
+      { text: 'На Марсе классно', time: 44 },
+      { text: 'Красные пески, крутые горы и краторы', time: 45 },
+      { text: 'Безумно красивые каналы рядом с экватором', time: 47 },
+      { text: 'Ничто не сравнится с тамошними закатами', time: 50 },
+      { text: 'Правда холодновато...', time: 52 },
+      { text: 'За то две луны на небе...', time: 55 },
+      { text: 'Жаль, что так поздно...', time: 57 },
+      { text: 'Здесь было еще прикольнее...', time: 63 },
+      { text: 'Летом цвели...', time: 65 },
+      { text: 'Невиданно высокии...', time: 68 },
+      { text: 'Шумели гигантскими кронами...', time: 71 },
+      { text: 'Где в их тени прятались...', time: 73 },
+      { text: 'Они были похожи на нас', time: 76 },
+      { text: 'В целом без оголтелой экзотики', time: 79 },
     ];
 
-    for (let i = 0; i < marsSlideTimings.length; i++) {
-      const slide = { text: marsSlideTimings[i].text, play: ['click'] };
-      const el = createSlide(slide);
-      slidesElements.push(el);
+    const marsSlides = marsSlideTimings.map(s => createSlide({ text: s.text, play: ['click'] }));
+    marsSlides.forEach(el => slidesElements.push(el));
 
-      setTimeout(() => {
-        const prev = document.querySelector('.slide.active');
-        if (prev) {
-          prev.classList.remove('active');
-          prev.classList.add('out');
+    let marsSlideIndex = -1;
+
+    function checkMarsSlides() {
+      const current = marsAudio.currentTime;
+      if (marsSlideIndex < marsSlides.length - 1 &&
+          current >= marsSlideTimings[marsSlideIndex + 1].time) {
+
+        if (marsSlideIndex >= 0) {
+          marsSlides[marsSlideIndex].classList.remove('active');
+          marsSlides[marsSlideIndex].classList.add('out');
         }
 
-        currentSlide = slidesElements.indexOf(el);
-        el.classList.add('active');
+        marsSlideIndex++;
+        marsSlides[marsSlideIndex].classList.add('active');
         resetParticleHomes();
-      }, marsSlideTimings[i].time);
+      }
+      requestAnimationFrame(checkMarsSlides);
     }
 
+    requestAnimationFrame(checkMarsSlides);
   }
+
 
 
   </script>
