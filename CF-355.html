@@ -736,16 +736,17 @@ const filters = {
       return Math.max(0, Math.min(1, opacity));
     }
 
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        const alpha = this.getOpacity() * (this.eqAlpha !== undefined ? this.eqAlpha : 1);
-        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-        ctx.fill();
-      }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      const alpha = this.getOpacity() * (this.eqAlpha !== undefined ? this.eqAlpha : 1);
+      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+      ctx.fill();
+    }
+  }
 
     
-  }
+  
   Particle._id = 0;
 
   for (let i = 0; i < particleCount; i++) {
@@ -838,17 +839,23 @@ const filters = {
     if (isMarsEQ && analyser) {
       analyser.getByteFrequencyData(dataArray);
 
-      let sum = 0;
-      let count = 0;
+      let sum = 0, count = 0;
       for (let i = 8; i < 32; i++) {
         sum += dataArray[i];
         count++;
       }
       const avg = sum / count / 255;
-      const brightness = Math.min(1, 0.1 + Math.pow(avg, 1.5));
 
+      const target = Math.min(1, 0.15 + Math.pow(avg, 1.5));
+
+      const decaySpeed = 0.02;
       particles.forEach(p => {
-        p.eqAlpha = brightness;
+        if (p.eqAlpha === undefined) p.eqAlpha = 0;
+        if (target > p.eqAlpha) {
+          p.eqAlpha = target;
+        } else {
+          p.eqAlpha += (target - p.eqAlpha) * decaySpeed;
+        }
       });
     }
 
