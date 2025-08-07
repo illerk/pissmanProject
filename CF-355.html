@@ -834,16 +834,22 @@ const filters = {
     }
     requestAnimationFrame(animateParticles);
 
-    if (isMarsEQ && analyser && dataArray) {
-    analyser.getByteFrequencyData(dataArray);
-    const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-    const brightness = avg / 255;
+    if (isMarsEQ && analyser) {
+      analyser.getByteFrequencyData(dataArray);
 
-    particles.forEach(p => {
-      const baseAlpha = 0.05 + 0.3 * brightness;
-      p.alpha = Math.min(1, baseAlpha);
-    });
-  }
+      let sum = 0;
+      let count = 0;
+      for (let i = 8; i < 32; i++) {
+        sum += dataArray[i];
+        count++;
+      }
+      const avg = sum / count / 255;
+      const brightness = Math.min(1, 0.1 + Math.pow(avg, 1.5));
+
+      particles.forEach(p => {
+        p.eqAlpha = brightness;
+      });
+    }
 
   }
 
