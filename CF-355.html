@@ -156,6 +156,9 @@
   </div>
   <span id="yellowAnimatedGlobal" class="yellow-animated" style="display:none"></span>
 
+  <audio id="marsTrack" src="sound/kventa/Mars_Special_Track.mp3"></audio>
+
+
   <audio id="ambience1" src="sound/kventa/212025__qubodup__sci-fi-laboratory-ambience.ogg" loop></audio>
   <audio id="music1" src="sound/kventa/The_Prison.mp3" loop></audio>
   <audio id="ambience3" src="sounds/ambience3.mp3" loop></audio>
@@ -173,7 +176,12 @@
 
   <audio id="click" src="sound/kventa/mixkit-old-camera-shutter-click-1137.wav"></audio>
 
+
   <script>
+
+    let analyser, dataArray, marsTrackNode;
+    let isMarsEQ = false;
+
     
     const container = document.getElementById('container');
     const startBtn = document.getElementById('startBtn');
@@ -194,7 +202,9 @@
 
       writing: document.getElementById('writing'),
 
-      click: document.getElementById('click')
+      click: document.getElementById('click'),
+
+      marsTrack: document.getElementById('marsTrack')
     };
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -358,7 +368,27 @@ const filters = {
         stop: []
       },
       {
-        text: '"Сейчас мы находимся в отдельной зоне, где происходит создание и обучение репликантов. Ну и жить пока ты будешь тоже тут. Столовая же находится в общей зоне. Сходи туда и возвращайся"',
+        text: '"Сейчас мы находимся в отдельной зоне, где происходит создание и обучение репликантов. Ну и жить пока ты будешь тоже тут. У тебя есть доступ в общую зону для пероснала, так что тебе не обязательно сидеть в нашей зоне постоянно."',
+        play: ['click'],
+        stop: []
+      },
+      {
+        text: '<em>Некоторое время спустя я вышла в корридор общей зоны</em><br>Идя по корридору я видела людей. Многие спешили куда-то. Кажется офицер шел по корридору впереди. Рядом находящиеся члены экипажа отдавали ему честь. В этом жесте не было энтузиазма. Лишь заученное до рефлекса механическое движение. Сам офицер никак не реагировал и просто шел дальше.',
+        play: ['click'],
+        stop: []
+      },
+      {
+        text: 'Все вокруг выглядят такими подавленными. Я не знаю стоит ли мне заводить разговор с кем-то...',
+        play: ['click'],
+        stop: []
+      },
+      {
+        text: 'Проходя очередной шлюз, я обноружила себя возле какого-то широкого ангара.',
+        play: ['click'],
+        stop: []
+      },
+      {
+        text: 'Пока я шла по корридору и наблюдала за этим, в меня врезаося какой-то мужик и я упала на пол.',
         play: ['click'],
         stop: []
       },
@@ -712,6 +742,8 @@ const filters = {
       ctx.fillStyle = `rgba(255,255,255,${this.getOpacity()})`;
       ctx.fill();
     }
+
+    
   }
   Particle._id = 0;
 
@@ -801,6 +833,18 @@ const filters = {
       p.draw();
     }
     requestAnimationFrame(animateParticles);
+
+    if (isMarsEQ && analyser && dataArray) {
+    analyser.getByteFrequencyData(dataArray);
+    const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+    const brightness = avg / 255;
+
+    particles.forEach(p => {
+      const baseAlpha = 0.05 + 0.3 * brightness;
+      p.alpha = Math.min(1, baseAlpha);
+    });
+  }
+
   }
 
   animateParticles();
@@ -814,6 +858,77 @@ const filters = {
     breakingLinks = [];
     particles.forEach(p => p.nearTimes = {});
   }
+
+  let marsCode = ['m', 'a', 'r', 's'];
+  let marsIndex = 0;
+  let marsMode = false;
+
+
+  document.addEventListener('keydown', async (e) => {
+    if (e.key.toLowerCase() === marsCode[marsIndex]) {
+      marsIndex++;
+      if (marsIndex === marsCode.length) {
+        marsIndex = 0;
+        await startMarsSequence();
+      }
+    } else {
+      marsIndex = 0;
+    }
+  });
+
+  async function startMarsSequence() {
+    marsMode = true;
+    readyForClick = false;
+    startBtn.style.display = 'none';
+
+    const marsAudio = document.getElementById('marsTrack');
+    await audioCtx.resume();
+    marsAudio.volume = 0.6;
+
+    marsTrackNode = audioCtx.createMediaElementSource(marsAudio);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 64;
+    const bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+
+    marsTrackNode.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    marsAudio.play().catch(err => console.warn("Autoplay blocked:", err));
+
+    isMarsEQ = true;
+
+
+    const marsSlideTimings = [
+      { text: 'Марс дышит...', time: 0 },
+      { text: 'Он зовёт тебя.', time: 4000 },
+      { text: 'Ты рождён для битвы.', time: 8000 },
+      { text: 'Ты — его клинок.', time: 13000 },
+      { text: '...' , time: 18000 },
+      { text: 'Огонь разгорается.', time: 24000 },
+      { text: 'Время пришло.', time: 29000 },
+    ];
+
+    for (let i = 0; i < marsSlideTimings.length; i++) {
+      const slide = { text: marsSlideTimings[i].text, play: ['click'] };
+      const el = createSlide(slide);
+      slidesElements.push(el);
+
+      setTimeout(() => {
+        const prev = document.querySelector('.slide.active');
+        if (prev) {
+          prev.classList.remove('active');
+          prev.classList.add('out');
+        }
+
+        currentSlide = slidesElements.indexOf(el);
+        el.classList.add('active');
+        resetParticleHomes();
+      }, marsSlideTimings[i].time);
+    }
+
+  }
+
 
   </script>
 
