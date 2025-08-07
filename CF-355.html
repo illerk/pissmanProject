@@ -736,12 +736,13 @@ const filters = {
       return Math.max(0, Math.min(1, opacity));
     }
 
-    draw() {
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255,255,255,${this.getOpacity()})`;
-      ctx.fill();
-    }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        const alpha = this.getOpacity() * (this.eqAlpha !== undefined ? this.eqAlpha : 1);
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.fill();
+      }
 
     
   }
@@ -913,7 +914,7 @@ const filters = {
       { text: 'Ничто не сравнится с тамошними закатами', time: 50000 },
       { text: 'Правда холодновато и давление, мягко говоря, низковатое...', time: 52000 },
       { text: 'За то две луны на небе и очень яркие звёзды!', time: 55000 },
-      { text: 'Это из-за низкой плотности воздуха<br>Жаль, что так поздно земляни получили снимки с этой прекрасной планеты', time: 57000 },
+      { text: 'Это из-за низкой плотности воздуха<br>Жаль, что так поздно земляне получили снимки с этой прекрасной планеты', time: 57000 },
       { text: 'Здесь было еще прикольнее до местного конца света', time: 63000 },
       { text: 'Летом цвели пышным цветом диковенные растения', time: 65000 },
       { text: 'Невиданно высокии из-за слабого притяжения', time: 68000 },
