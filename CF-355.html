@@ -176,6 +176,8 @@
 
   <audio id="click" src="sound/kventa/mixkit-old-camera-shutter-click-1137.wav"></audio>
 
+  <audio id="CF377" src="sound/kventa/CF-377 coming.wav"></audio>
+
 
   <script>
 
@@ -204,7 +206,9 @@
 
       click: document.getElementById('click'),
 
-      marsTrack: document.getElementById('marsTrack')
+      marsTrack: document.getElementById('marsTrack'),
+
+      CF377: document.getElementById('CF377')
     };
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -228,6 +232,12 @@ const filters = {
         text: '...',
         play: ['ambience1', 'music1', 'click'],
         stop: [],
+        thoughts: [
+      { text: "Моя первая мысль", minLinks: 1, removeBelow: 1 },
+      { text: "Где я?", minLinks: 6, removeBelow: 4 },
+      { text: "Ощущения приятные", minLinks: 6, removeBelow: 4 },
+      { text: "Я плаваю?", minLinks: 4, removeBelow: 2 },
+        ],
         filterOn: ['ambience1']
       },
       {
@@ -416,6 +426,22 @@ const filters = {
         text: 'Еще несколько ударов... Я закрыла область живота левой рукой, а правой зажала нос из которого лилась кровь.',
         play: ['click'],
         stop: []
+      },
+      {
+        text: 'Через некоторыое время удары прекратились и он ушел, но я продолжала лежать на полу, чувствуя вкус крови у себя во рту.',
+        play: ['click'],
+        stop: []
+      },
+      {
+        text: 'Кажется, сзади кто-то подходит ко мне...',
+        play: ['click', 'CF377'],
+        stop: [],
+        thoughts:[
+      { text: "Больно...", minLinks: 4, removeBelow: 2 },
+      { text: "Шаги приближаются", minLinks: 6, removeBelow: 4 },
+      { text: "Кто это?", minLinks: 6, removeBelow: 4 },
+      { text: "Тошнит", minLinks: 4, removeBelow: 2 },
+  ]
       },
     ];
 
@@ -659,8 +685,13 @@ const filters = {
   const LINK_FORCE = 0.0010;
 
   let links = [];
-
   let breakingLinks = [];
+
+  let activeThoughts = [];
+  let thoughtTemplates = [];
+  const CLUSTER_RADIUS = 48;
+  const CLUSTER_MATCH_RADIUS = 50;
+  let nextThoughtId = 1;
 
   function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -675,7 +706,6 @@ const filters = {
   }
 
   resizeCanvas();
-
   window.addEventListener("resize", resizeCanvas);
 
   document.addEventListener("mousemove", e => {
@@ -770,8 +800,6 @@ const filters = {
     }
   }
 
-    
-  
   Particle._id = 0;
 
   for (let i = 0; i < particleCount; i++) {
@@ -809,7 +837,7 @@ const filters = {
     breakingLinks = breakingLinks.filter(l => particles.includes(l.a) && particles.includes(l.b));
   }
 
-    function drawLinks() {
+  function drawLinks() {
     ctx.save();
     ctx.lineWidth = 1.1;
 
@@ -855,6 +883,233 @@ const filters = {
     ctx.restore();
   }
 
+  function computeClustersFromLinks() {
+    const clusters = [];
+
+    for (let i = 0; i < links.length; i++) {
+      const l = links[i];
+      const mx = (l.a.x + l.b.x) / 2;
+      const my = (l.a.y + l.b.y) / 2;
+      let placed = false;
+      for (const c of clusters) {
+        const dx = c.x - mx, dy = c.y - my;
+        if (Math.sqrt(dx*dx + dy*dy) < CLUSTER_RADIUS) {
+          c.x = (c.x * c.count + mx) / (c.count + 1);
+          c.y = (c.y * c.count + my) / (c.count + 1);
+          c.count++;
+          c.links.push(i);
+          placed = true;
+          break;
+        }
+      }
+      if (!placed) {
+        clusters.push({ x: mx, y: my, count: 1, links: [i] });
+      }
+    }
+
+    const now = performance.now();
+    const newPrev = [];
+
+    const prevPool = previousClusterRecords.slice();
+
+    for (const c of clusters) {
+      let matched = null;
+      let matchedIndex = -1;
+      for (let i = 0; i < prevPool.length; i++) {
+        const p = prevPool[i];
+        const d = Math.hypot(p.x - c.x, p.y - c.y);
+        if (d < CLUSTER_MATCH_ID_RADIUS) {
+          matched = p;
+          matchedIndex = i;
+          break;
+        }
+      }
+
+      if (matched) {
+        c.uid = matched.uid;
+        newPrev.push({ uid: matched.uid, x: c.x, y: c.y, lastSeen: now });
+        prevPool.splice(matchedIndex, 1);
+      } else {
+        c.uid = 'c' + (nextClusterUid++);
+        newPrev.push({ uid: c.uid, x: c.x, y: c.y, lastSeen: now });
+      }
+    }
+
+    previousClusterRecords = newPrev;
+
+    return clusters;
+  }
+
+
+  let previousClusterRecords = [];
+  let nextClusterUid = 1;
+  const CLUSTER_MATCH_ID_RADIUS = 36;
+  const DUPLICATE_POS_RADIUS = 10000;
+  const THOUGHT_APPEAR_DELAY = 5000;
+  const thoughtPending = new Map();
+  const thoughtCooldown = new Map();
+
+
+  function updateThoughtsFromClusters(clusters) {
+  const now = performance.now();
+
+  for (const key of Array.from(thoughtPending.keys())) {
+    const [tplIdxStr, clusterUid] = key.split('__');
+    const tplIdx = Number(tplIdxStr);
+    const cluster = clusters.find(c => c.uid === clusterUid);
+    const tpl = (thoughtTemplates[tplIdx] !== undefined) ? ({ ...thoughtTemplates[tplIdx], __i: tplIdx }) : null;
+    if (!cluster || !tpl || cluster.count < (tpl.minLinks || 5)) {
+      thoughtPending.delete(key);
+    }
+  }
+
+  for (const th of activeThoughts) {
+    th._matchedCluster = clusters.find(c => c.uid === th.clusterUid) || null;
+  }
+
+  const clusterObjs = clusters.map(c => ({ ...c }));
+  clusterObjs.sort((a, b) => b.count - a.count);
+
+  const templates = thoughtTemplates
+    .map((tpl, i) => ({ ...tpl, __i: i }))
+    .sort((a, b) => (b.minLinks || 5) - (a.minLinks || 5));
+
+  const usedClusterUids = new Set();
+  activeThoughts.forEach(t => {
+    if (t.clusterUid !== undefined && clusters.find(c => c.uid === t.clusterUid)) {
+      usedClusterUids.add(t.clusterUid);
+    }
+  });
+
+  for (const tpl of templates) {
+    const need = tpl.minLinks || 5;
+
+    const alreadyGlobal = activeThoughts.some(at => {
+      const idx = (at.template && at.template.__i !== undefined) ? at.template.__i : thoughtTemplates.indexOf(at.template);
+      const clusterAlive = (at.clusterUid !== undefined) && clusters.some(c => c.uid === at.clusterUid && c.count >= need);
+      return idx === tpl.__i && clusterAlive;
+    });
+    if (alreadyGlobal) continue;
+
+    let chosen = null;
+    for (const c of clusterObjs) {
+      if (usedClusterUids.has(c.uid)) continue;
+      if (c.count < need) continue;
+      const key = `${tpl.__i}__${c.uid}`;
+      const cd = thoughtCooldown.get(key);
+      if (cd && now < cd) continue;
+      const dupNearby = activeThoughts.some(at => at.text === tpl.text && Math.hypot(at.x - c.x, at.y - c.y) < DUPLICATE_POS_RADIUS);
+      if (dupNearby) continue;
+      chosen = c;
+      break;
+    }
+
+    if (chosen) {
+      const key = `${tpl.__i}__${chosen.uid}`;
+      const pending = thoughtPending.get(key);
+      if (!pending) {
+        thoughtPending.set(key, { since: now });
+        usedClusterUids.add(chosen.uid);
+      } else {
+        if (now - pending.since >= THOUGHT_APPEAR_DELAY) {
+          const exists = activeThoughts.find(at => at.text === tpl.text && at.clusterUid === chosen.uid);
+          if (!exists) {
+            const th = {
+              id: nextThoughtId++,
+              x: chosen.x,
+              y: chosen.y,
+              targetX: chosen.x,
+              targetY: chosen.y - 30,
+              text: tpl.text,
+              alpha: 0,
+              alive: true,
+              template: tpl,
+              clusterUid: chosen.uid,
+              clusterCount: chosen.count,
+              _flickerOffset: Math.random() * Math.PI * 2
+            };
+            activeThoughts.push(th);
+          }
+          thoughtPending.delete(key);
+          usedClusterUids.add(chosen.uid);
+        } else {
+          usedClusterUids.add(chosen.uid);
+        }
+      }
+    }
+  }
+
+  for (let i = activeThoughts.length - 1; i >= 0; i--) {
+    const t = activeThoughts[i];
+    const c = clusters.find(c => c.uid === t.clusterUid) || null;
+    const removeBelow = t.template.removeBelow !== undefined ? t.template.removeBelow : Math.max(1, (t.template.minLinks || 5) - 2);
+
+    if (!c || c.count < removeBelow) {
+      if (t.alive) {
+        const tplIdx = (t.template && t.template.__i !== undefined) ? t.template.__i : thoughtTemplates.indexOf(t.template);
+        if (tplIdx >= 0 && t.clusterUid !== undefined) {
+          const key = `${tplIdx}__${t.clusterUid}`;
+          thoughtCooldown.set(key, now + THOUGHT_APPEAR_DELAY);
+        }
+      }
+      t.alive = false;
+    } else {
+      t.clusterCount = c.count;
+      t.targetX = c.x;
+      t.targetY = c.y - 30;
+      t.alpha += (1 - t.alpha) * 0.12;
+      t.x += (t.targetX - t.x) * 0.14;
+      t.y += (t.targetY - t.y) * 0.14;
+    }
+
+    if (!t.alive) {
+      t.alpha *= 0.86;
+      if (t.alpha < 0.02) {
+        activeThoughts.splice(i, 1);
+      }
+    }
+  }
+}
+
+
+  function drawThoughts() {
+    const now = performance.now();
+    for (const t of activeThoughts) {
+      const flicker = 0.50 + 0.20 * Math.sin(now / 1000 + (t._flickerOffset || 0));
+      const alpha = Math.max(0, Math.min(1, t.alpha * flicker));
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.font = "14px 'Courier New', monospace";
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = `rgba(255,255,255,1)`;
+
+      const metrics = ctx.measureText(t.text);
+      const textW = metrics.width;
+      let x = t.x - textW / 2;
+      let y = t.y - 22;
+
+      if (x < 6) x = 6;
+      if (x + textW > canvas.width - 6) x = canvas.width - textW - 6;
+      if (y < 6) y = t.y + 10;
+
+      ctx.fillText(t.text, x, y);
+      ctx.restore();
+    }
+  }
+
+  function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+    if (typeof r === 'undefined') r = 5;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    if (fill) ctx.fill();
+    if (stroke) ctx.stroke();
+  }
 
   function animateParticles(time = 0) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -867,6 +1122,11 @@ const filters = {
       p.update(time);
       p.draw();
     }
+
+    const clusters = computeClustersFromLinks();
+    updateThoughtsFromClusters(clusters);
+    drawThoughts();
+
     requestAnimationFrame(animateParticles);
 
     if (isMarsEQ && analyser) {
@@ -900,8 +1160,6 @@ const filters = {
         }
       });
     }
-
-
   }
 
   animateParticles();
@@ -914,91 +1172,106 @@ const filters = {
     links = [];
     breakingLinks = [];
     particles.forEach(p => p.nearTimes = {});
+    activeThoughts = [];
   }
 
-  let marsCode = ['m', 'a', 'r', 's'];
-  let marsIndex = 0;
-  let marsMode = false;
+  let blockAdvanceUntilCF377Ends = false;
+  function applySlideThoughtTemplates(slide) {
+    if (!slide || !slide.thoughts) {
+      thoughtTemplates = [];
+      activeThoughts = [];
+      return;
+    }
+    thoughtTemplates = slide.thoughts.map(t => ({ text: t.text, minLinks: t.minLinks || 5, removeBelow: t.removeBelow }));
+    activeThoughts = [];
+  }
 
+  const cfAudio = audioMap.CF377;
+  if (cfAudio) {
+    cfAudio.addEventListener('playing', () => {
+      blockAdvanceUntilCF377Ends = true;
+      readyForClick = false;
+    });
+    cfAudio.addEventListener('ended', () => {
+      blockAdvanceUntilCF377Ends = false;
+      readyForClick = true;
+    });
+  }
 
-  document.addEventListener('keydown', async (e) => {
-    if (e.key.toLowerCase() === marsCode[marsIndex]) {
-      marsIndex++;
-      if (marsIndex === marsCode.length) {
-        marsIndex = 0;
-        await startMarsSequence();
-      }
-    } else {
-      marsIndex = 0;
+  container.addEventListener('click', () => {
+    if (!readyForClick) return;
+    if (yellowAnimationActive) return;
+    if (blockAdvanceUntilCF377Ends) return;
+    if (currentSlide >= 0 && currentSlide < slides.length - 1) {
+      showNextSlide();
     }
   });
 
-  async function startMarsSequence() {
-    marsMode = true;
-    readyForClick = false;
-    startBtn.style.display = 'none';
+  const SLIDE_ADVANCE_DEBOUNCE = 300;
+  let __lastSlideAdvance = 0;
 
-    const marsAudio = document.getElementById('marsTrack');
-    await audioCtx.resume();
-    marsAudio.volume = 0.6;
-
-    marsTrackNode = audioCtx.createMediaElementSource(marsAudio);
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 64;
-    dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-    marsTrackNode.connect(analyser);
-    analyser.connect(audioCtx.destination);
-
-    marsAudio.play().catch(err => console.warn("Autoplay blocked:", err));
-    isMarsEQ = true;
-
-    const marsSlideTimings = [
-      { text: '...', time: 0 },
-      { text: 'На Марсе классно', time: 44 },
-      { text: 'Красные пески, крутые горы и краторы', time: 45 },
-      { text: 'Безумно красивые каналы рядом с экватором', time: 47 },
-      { text: 'Ничто не сравнится с тамошними закатами', time: 50 },
-      { text: 'Правда холодновато и давление, мягко говоря, низковатое', time: 52 },
-      { text: 'За то две луны на небе и очень яркие звёзды', time: 56 },
-      { text: 'Это из-за низкой плотности воздуха<br>Жаль что так поздно земляне получили снимки с этой прекрасной планеты', time: 58 },
-      { text: 'Тут было еще прикольнее до местного конца света', time: 63 },
-      { text: 'Летом цвели пышным цветом диковенные растения', time: 65 },
-      { text: 'Невиданно высокие из-за низкого притяжения', time: 69 },
-      { text: 'Шумели гигантскими кронами в лесах, скверах и парках', time: 71 },
-      { text: 'Где в их тени прятались местные жители когда жарко', time: 74 },
-      { text: 'Они были похожи на нас<br>Не во всём конечно, но всё-таки', time: 77 },
-      { text: 'В целом без како-то там оголтелой экзотики', time: 80 },
-    ];
-
-    const marsSlides = marsSlideTimings.map(s => createSlide({ text: s.text, play: ['click'] }));
-    marsSlides.forEach(el => slidesElements.push(el));
-
-    let marsSlideIndex = -1;
-
-    function checkMarsSlides() {
-      const current = marsAudio.currentTime;
-      if (marsSlideIndex < marsSlides.length - 1 &&
-          current >= marsSlideTimings[marsSlideIndex + 1].time) {
-
-        if (marsSlideIndex >= 0) {
-          marsSlides[marsSlideIndex].classList.remove('active');
-          marsSlides[marsSlideIndex].classList.add('out');
-        }
-
-        marsSlideIndex++;
-        marsSlides[marsSlideIndex].classList.add('active');
-        resetParticleHomes();
+  if (typeof window.showNextSlide === 'function') {
+    const _origShow = window.showNextSlide;
+    window.showNextSlide = function(...args) {
+      const now = performance.now();
+      if (now - __lastSlideAdvance < SLIDE_ADVANCE_DEBOUNCE) {
+        return;
       }
-      requestAnimationFrame(checkMarsSlides);
-    }
+      __lastSlideAdvance = now;
 
-    requestAnimationFrame(checkMarsSlides);
+      const res = _origShow.apply(this, args);
+
+      const s = slides[currentSlide];
+      try {
+        applySlideThoughtTemplates(s);
+      } catch (err) { console.warn("applySlideThoughtTemplates error:", err); }
+
+      if (s?.play && s.play.includes('CF377')) {
+        blockAdvanceUntilCF377Ends = true;
+        readyForClick = false;
+        try {
+          const a = audioMap.CF377;
+          if (a && !a.paused) {
+          } else if (a && a.paused) {
+          }
+        } catch (e) {}
+      } else {
+        if (!yellowAnimationActive) readyForClick = true;
+      }
+
+      return res;
+    };
+  } else {
+    window.showNextSlide = function() {
+      const now = performance.now();
+      if (now - __lastSlideAdvance < SLIDE_ADVANCE_DEBOUNCE) return;
+      __lastSlideAdvance = now;
+    };
   }
 
+  const mo = new MutationObserver(mutations => {
+    for (const m of mutations) {
+      if (m.type === 'attributes' && m.attributeName === 'class') {
+        const active = document.querySelector('.slide.active');
+        if (active) {
+          const idx = Array.from(slidesElements).indexOf(active);
+          if (idx >= 0 && slides[idx]) {
+            applySlideThoughtTemplates(slides[idx]);
+            if (slides[idx].play && slides[idx].play.includes('CF377')) {
+              blockAdvanceUntilCF377Ends = true;
+              readyForClick = false;
+            } else {
+              if (!yellowAnimationActive) readyForClick = true;
+            }
+          }
+        }
+      }
+    }
+  });
+  mo.observe(container, { attributes: true, subtree: true, attributeFilter: ['class'] });
 
+</script>
 
-  </script>
 
 
 </body>
