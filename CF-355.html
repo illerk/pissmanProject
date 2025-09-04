@@ -415,7 +415,14 @@ const filters = {
       {
         text: '"Ой, извините, я..."<br>Не успела я договорить, как он резко пнул меня под коленом. Удар лицом о стальной пол, тошнотворные ощущения от разбитого носа.',
         play: ['click'],
-        stop: []
+        stop: [],
+        thoughts:[
+      { text: "Больно!", minLinks: 4, removeBelow: 2 },
+      { text: "За что?", minLinks: 6, removeBelow: 4 },
+      { text: "Кровь пошла", minLinks: 6, removeBelow: 4 },
+      { text: "ой-ой-ой...", minLinks: 4, removeBelow: 2 },
+  ]
+        
       },
       {
         text: '"Да пошла ты нахуй, сука!"<br>Затем стальной нос его ботинка врезался в мой бок. Какая ужасная боль...',
@@ -632,7 +639,8 @@ const filters = {
       open3: 0.5,
       open4: 0.5,
       surgery: 1,
-      access: 0.1
+      access: 0.1,
+      CF377: 1
     };
 
     const style = document.createElement('style');
@@ -685,7 +693,18 @@ const filters = {
   const LINK_FORCE = 0.0010;
 
   let links = [];
+  let linkMap = new Map();
+
+  function pairKey(a, b) {
+    return a.id < b.id ? `${a.id}|${b.id}` : `${b.id}|${a.id}`;
+  }
+
+  const LINK_UPDATE_PERIOD = 2;
+  const CLUSTER_UPDATE_PERIOD = 6;
+  let frameCount = 0;
+  let activeRects = [];
   let breakingLinks = [];
+  if (linkMap && linkMap.clear) linkMap.clear();
 
   let activeThoughts = [];
   let thoughtTemplates = [];
@@ -770,26 +789,19 @@ const filters = {
     }
 
     getOpacity() {
-      let opacity = this.alpha;
-
-      const slides = document.querySelectorAll('.slide.active, .slide.out');
-      slides.forEach(slide => {
-        const rect = slide.getBoundingClientRect();
-        const cx = this.x;
-        const cy = this.y;
-
-        const dx = Math.max(rect.left - cx, 0, cx - rect.right);
-        const dy = Math.max(rect.top - cy, 0, cy - rect.bottom);
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance < 120) {
-          let fade = distance / 120;
-          opacity *= fade;
-        }
-      });
-
-      return Math.max(0, Math.min(1, opacity));
+  let opacity = this.alpha;
+  if (!activeRects || activeRects.length === 0) return Math.max(0, Math.min(1, opacity));
+  for (const rect of activeRects) {
+    const cx = this.x, cy = this.y;
+    const dx = Math.max(rect.left - cx, 0, cx - rect.right);
+    const dy = Math.max(rect.top - cy, 0, cy - rect.bottom);
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < 120) {
+      opacity *= dist / 120;
     }
+  }
+  return Math.max(0, Math.min(1, opacity));
+}
 
     draw() {
       ctx.beginPath();
@@ -807,56 +819,66 @@ const filters = {
   }
 
   function updateLinks(time) {
+    const LINK_DIST2 = LINK_DISTANCE * LINK_DISTANCE;
+    const LINK_BREAK2 = LINK_BREAK_DISTANCE * LINK_BREAK_DISTANCE;
+
     for (let i = 0; i < particles.length; i++) {
+      const a = particles[i];
       for (let j = i + 1; j < particles.length; j++) {
-        const a = particles[i], b = particles[j];
+        const b = particles[j];
         const dx = a.x - b.x, dy = a.y - b.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const dist2 = dx * dx + dy * dy;
+        const key = pairKey(a, b);
+        const existing = linkMap.get(key);
 
-        let link = links.find(l => (l.a === a && l.b === b) || (l.a === b && l.b === a));
-
-        if (dist < LINK_DISTANCE) {
+        if (dist2 < LINK_DIST2) {
           if (!a.nearTimes[b.id]) a.nearTimes[b.id] = time;
           if (!b.nearTimes[a.id]) b.nearTimes[a.id] = time;
           const nearTime = Math.max(a.nearTimes[b.id], b.nearTimes[a.id]);
-          if (!link && time - nearTime > LINK_TIME) {
-            links.push({ a, b, created: time, progress: 0 });
+          if (!existing && (time - nearTime > LINK_TIME)) {
+            linkMap.set(key, { a, b, created: time, progress: 0, eqAlpha: 1 });
           }
         } else {
           a.nearTimes[b.id] = time;
           b.nearTimes[a.id] = time;
         }
 
-        if (link && dist > LINK_BREAK_DISTANCE) {
-          links = links.filter(l => l !== link);
-          breakingLinks.push({ ...link, breaking: true });
+        const link = linkMap.get(key);
+        if (link && dist2 > LINK_BREAK2) {
+          linkMap.delete(key);
+          breakingLinks.push({ ...link, progress: link.progress || 1 });
         }
       }
     }
-    links = links.filter(l => particles.includes(l.a) && particles.includes(l.b));
-    breakingLinks = breakingLinks.filter(l => particles.includes(l.a) && particles.includes(l.b));
+
+    for (const [k, l] of linkMap.entries()) {
+      if (!particles.includes(l.a) || !particles.includes(l.b)) linkMap.delete(k);
+    }
   }
 
   function drawLinks() {
     ctx.save();
     ctx.lineWidth = 1.1;
 
-    for (const link of links) {
+    for (const link of linkMap.values()) {
       if (link.progress < 1) link.progress += 0.08;
       if (link.progress > 1) link.progress = 1;
 
-      const { a, b, progress, eqAlpha = 1 } = link;
+      const { a, b, progress } = link;
+      const eqAlpha = (link.eqAlpha === undefined) ? 1 : link.eqAlpha;
+
       const x1 = a.x, y1 = a.y;
       const x2 = a.x + (b.x - a.x) * progress;
       const y2 = a.y + (b.y - a.y) * progress;
 
       const alpha = 0.18 * eqAlpha;
-      ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
-
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
+      if (alpha > 0.003) {
+        ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
     }
 
     for (let i = breakingLinks.length - 1; i >= 0; i--) {
@@ -866,50 +888,53 @@ const filters = {
         breakingLinks.splice(i, 1);
         continue;
       }
-      const { a, b, progress, eqAlpha = 1 } = link;
+      const { a, b, progress } = link;
+      const eqAlpha = (link.eqAlpha === undefined) ? 1 : link.eqAlpha;
       const x1 = a.x, y1 = a.y;
       const x2 = a.x + (b.x - a.x) * progress;
       const y2 = a.y + (b.y - a.y) * progress;
 
       const alpha = 0.18 * eqAlpha;
-      ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
-
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
+      if (alpha > 0.003) {
+        ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
     }
 
     ctx.restore();
   }
 
-  function computeClustersFromLinks() {
-    const clusters = [];
 
-    for (let i = 0; i < links.length; i++) {
-      const l = links[i];
+    function computeClustersFromLinks() {
+    const clusters = [];
+    const linkArr = Array.from(linkMap.values());
+
+    for (let i = 0; i < linkArr.length; i++) {
+      const l = linkArr[i];
       const mx = (l.a.x + l.b.x) / 2;
       const my = (l.a.y + l.b.y) / 2;
       let placed = false;
       for (const c of clusters) {
         const dx = c.x - mx, dy = c.y - my;
-        if (Math.sqrt(dx*dx + dy*dy) < CLUSTER_RADIUS) {
+        if (dx*dx + dy*dy < CLUSTER_RADIUS * CLUSTER_RADIUS) {
           c.x = (c.x * c.count + mx) / (c.count + 1);
           c.y = (c.y * c.count + my) / (c.count + 1);
           c.count++;
-          c.links.push(i);
+          c.links.push(l);
           placed = true;
           break;
         }
       }
       if (!placed) {
-        clusters.push({ x: mx, y: my, count: 1, links: [i] });
+        clusters.push({ x: mx, y: my, count: 1, links: [l] });
       }
     }
 
     const now = performance.now();
     const newPrev = [];
-
     const prevPool = previousClusterRecords.slice();
 
     for (const c of clusters) {
@@ -917,14 +942,13 @@ const filters = {
       let matchedIndex = -1;
       for (let i = 0; i < prevPool.length; i++) {
         const p = prevPool[i];
-        const d = Math.hypot(p.x - c.x, p.y - c.y);
-        if (d < CLUSTER_MATCH_ID_RADIUS) {
+        const d2 = (p.x - c.x)*(p.x - c.x) + (p.y - c.y)*(p.y - c.y);
+        if (d2 < CLUSTER_MATCH_ID_RADIUS * CLUSTER_MATCH_ID_RADIUS) {
           matched = p;
           matchedIndex = i;
           break;
         }
       }
-
       if (matched) {
         c.uid = matched.uid;
         newPrev.push({ uid: matched.uid, x: c.x, y: c.y, lastSeen: now });
@@ -936,7 +960,6 @@ const filters = {
     }
 
     previousClusterRecords = newPrev;
-
     return clusters;
   }
 
@@ -948,6 +971,9 @@ const filters = {
   const THOUGHT_APPEAR_DELAY = 5000;
   const thoughtPending = new Map();
   const thoughtCooldown = new Map();
+  const THOUGHT_SPRING = 0.06;
+  const THOUGHT_DAMPING = 0.82;
+  const THOUGHT_MAX_VELOCITY = 12;
 
 
   function updateThoughtsFromClusters(clusters) {
@@ -1026,7 +1052,9 @@ const filters = {
               template: tpl,
               clusterUid: chosen.uid,
               clusterCount: chosen.count,
-              _flickerOffset: Math.random() * Math.PI * 2
+              _flickerOffset: Math.random() * Math.PI * 2,
+              vx: 0,
+              vy: 0
             };
             activeThoughts.push(th);
           }
@@ -1111,69 +1139,77 @@ const filters = {
     if (stroke) ctx.stroke();
   }
 
-  function animateParticles(time = 0) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  function updateThoughtPositions() {
+    for (const t of activeThoughts) {
+      if (t.targetX === undefined || t.targetY === undefined) continue;
 
-    updateLinks(time);
+      const dx = t.targetX - t.x;
+      const dy = t.targetY - t.y;
 
-    drawLinks();
+      t.vx += dx * THOUGHT_SPRING;
+      t.vy += dy * THOUGHT_SPRING;
 
-    for (let p of particles) {
-      p.update(time);
-      p.draw();
-    }
-
-    const clusters = computeClustersFromLinks();
-    updateThoughtsFromClusters(clusters);
-    drawThoughts();
-
-    requestAnimationFrame(animateParticles);
-
-    if (isMarsEQ && analyser) {
-      analyser.getByteFrequencyData(dataArray);
-
-      let sum = 0, count = 0;
-      for (let i = 8; i < 32; i++) {
-        sum += dataArray[i];
-        count++;
+      const speed = Math.hypot(t.vx, t.vy);
+      if (speed > THOUGHT_MAX_VELOCITY) {
+        t.vx = (t.vx / speed) * THOUGHT_MAX_VELOCITY;
+        t.vy = (t.vy / speed) * THOUGHT_MAX_VELOCITY;
       }
-      const avg = sum / count / 255;
-      const target = Math.min(1, 0.15 + Math.pow(avg, 1.5));
-      const decaySpeed = 0.02;
 
-      particles.forEach(p => {
-        if (p.eqAlpha === undefined) p.eqAlpha = 0;
-        if (target > p.eqAlpha) {
-          p.eqAlpha = target;
-        } else {
-          p.eqAlpha += (target - p.eqAlpha) * decaySpeed;
-        }
-      });
+      t.vx *= THOUGHT_DAMPING;
+      t.vy *= THOUGHT_DAMPING;
 
-      links.forEach(l => {
-        if (l.eqAlpha === undefined) l.eqAlpha = 0;
-        const avgAlpha = (l.a.eqAlpha + l.b.eqAlpha) / 2;
-        if (avgAlpha > l.eqAlpha) {
-          l.eqAlpha = avgAlpha;
-        } else {
-          l.eqAlpha += (avgAlpha - l.eqAlpha) * decaySpeed;
-        }
-      });
+      t.x += t.vx;
+      t.y += t.vy;
+
+      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
+        t.vx *= 0.6;
+        t.vy *= 0.6;
+      }
     }
   }
+
+
+  function animateParticles(time = 0) {
+  frameCount++;
+  activeRects = Array.from(document.querySelectorAll('.slide.active, .slide.out')).map(el => el.getBoundingClientRect());
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (frameCount % LINK_UPDATE_PERIOD === 0) {
+    updateLinks(time);
+  }
+  
+  drawLinks();
+
+  for (let p of particles) {
+    p.update(time);
+    p.draw();
+  }
+
+  if (frameCount % CLUSTER_UPDATE_PERIOD === 0) {
+    const clusters = computeClustersFromLinks();
+    updateThoughtsFromClusters(clusters);
+  }
+  updateThoughtPositions();
+  drawThoughts();
+
+  if (typeof updateAndDrawThoughtFragments === 'function') updateAndDrawThoughtFragments(ctx);
+
+
+  requestAnimationFrame(animateParticles);
+}
+
 
   animateParticles();
 
   function resetParticleHomes() {
-    particles.forEach(p => {
-      p.homeX = Math.random() * canvas.width;
-      p.homeY = Math.random() * canvas.height;
-    });
-    links = [];
-    breakingLinks = [];
-    particles.forEach(p => p.nearTimes = {});
-    activeThoughts = [];
-  }
+  particles.forEach(p => {
+    p.homeX = Math.random() * canvas.width;
+    p.homeY = Math.random() * canvas.height;
+    p.nearTimes = {};
+    if (!isFinite(p.x) || !isFinite(p.y)) { p.x = p.homeX; p.y = p.homeY; }
+  });
+}
 
   let blockAdvanceUntilCF377Ends = false;
   function applySlideThoughtTemplates(slide) {
