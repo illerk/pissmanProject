@@ -178,6 +178,8 @@
 
   <audio id="CF377" src="sound/kventa/CF-377 coming.wav"></audio>
 
+  <audio id="sighwithfx" src="sound/kventa/sighwithfx.wav"></audio>
+
 
   <script>
 
@@ -208,7 +210,9 @@
 
       marsTrack: document.getElementById('marsTrack'),
 
-      CF377: document.getElementById('CF377')
+      CF377: document.getElementById('CF377'),
+
+      sighwithfx: document.getElementById('sighwithfx'),
     };
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -448,7 +452,18 @@ const filters = {
       { text: "Шаги приближаются", minLinks: 6, removeBelow: 4 },
       { text: "Кто это?", minLinks: 6, removeBelow: 4 },
       { text: "Тошнит", minLinks: 4, removeBelow: 2 },
-  ]
+      ]
+      },
+      {
+        text: 'Кто-то берет меня под руку и начинает поднимать с пола. Теперь я вижу - это темноволосая девушка с янтарными глазами. Она одета в ту же форму, что и я. Я ыижу номер: RT-381.',
+        play: ['click', 'sighwithfx'],
+        stop: [],
+        thoughts:[
+      { text: "381...", minLinks: 4, removeBelow: 2 },
+      { text: "Спасибо", minLinks: 6, removeBelow: 4 },
+      { text: "Кровь все еще течет...", minLinks: 6, removeBelow: 4 },
+      { text: "Значит она тоже...", minLinks: 4, removeBelow: 2 },
+      ]
       },
     ];
 
