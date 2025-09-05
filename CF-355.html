@@ -252,13 +252,25 @@ const filters = {
       {
         text: 'Я чувствую, как что-то теплое обволакивает меня с ног до головы.',
         play: ['click'],
-        stop: []
+        stop: [],
+        thoughts:[
+      { text: "Нос чешется", minLinks: 4, removeBelow: 2 },
+      { text: "Тепло, приятно...", minLinks: 6, removeBelow: 4 },
+      { text: "Вот бы это продолжалось вечно", minLinks: 6, removeBelow: 4 },
+      { text: "Что это там пикает?", minLinks: 4, removeBelow: 2 },
+      ]
       },
       {
         text: '...',
         play: ['open1', 'open2', 'open3', 'open4', 'click'],
         stop: [],
-        filterOff: ['ambience1']
+        filterOff: ['ambience1'],
+        thoughts:[
+      { text: "Нееет...", minLinks: 4, removeBelow: 2 },
+      { text: "Я хочу обратно", minLinks: 6, removeBelow: 4 },
+      { text: "Неприятно, хлолодно", minLinks: 6, removeBelow: 4 },
+      { text: "Пахнет какой-то химией", minLinks: 4, removeBelow: 2 },
+      ]
       },
       {
         text: 'Холодно...',
@@ -455,7 +467,7 @@ const filters = {
       ]
       },
       {
-        text: 'Кто-то берет меня под руку и начинает поднимать с пола. Теперь я вижу - это темноволосая девушка с янтарными глазами. Она одета в ту же форму, что и я. Я ыижу номер: RT-381.',
+        text: 'Кто-то берет меня под руку и начинает поднимать с пола. Теперь я вижу - это темноволосая девушка с янтарными глазами. Она одета в ту же форму, что и я. На ее форме номер: RT-381.',
         play: ['click', 'sighwithfx'],
         stop: [],
         thoughts:[
