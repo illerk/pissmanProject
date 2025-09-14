@@ -13,6 +13,24 @@
       height: 100%;
     }
 
+    .interactive-thought {
+      color: #ffe066;
+      letter-spacing: 0.12em;
+      text-shadow:
+        0 0 2px #ffe066,
+        0 0 6px #ffe06688,
+        1px 0 0 #222,
+        0 1px 0 #222;
+      filter: contrast(1.3) brightness(1.1);
+      animation: crtFlicker 0.18s infinite;
+    }
+
+    @keyframes crtFlicker {
+      0% { opacity: 0.95; }
+      50% { opacity: 0.85; }
+      100% { opacity: 0.95; }
+}
+
     body, button, a, input, textarea, select {
       cursor: none !important;
     }
@@ -247,7 +265,7 @@ const filters = {
       { text: "Моя первая мысль", minLinks: 1, removeBelow: 1 },
       { text: "Где я?", minLinks: 6, removeBelow: 4 },
       { text: "Ощущения приятные", minLinks: 6, removeBelow: 4 },
-      { text: "Я плаваю?", minLinks: 4, removeBelow: 2 },
+      { text: "Я плаваю?", minLinks: 4, removeBelow: 2},
         ],
         filterOn: ['ambience1']
       },
@@ -485,7 +503,7 @@ const filters = {
       ]
       },
       {
-        text: '- Зажми нос и наклони голову вперед.<br>Держа меня под руку, она повела меня куда-то.',
+        text: '"Зажми нос и наклони голову вперед."<br>Держа меня под руку, она повела меня куда-то.',
         play: ['click'],
         stop: [],
         thoughts:[
@@ -494,7 +512,7 @@ const filters = {
       ]
       },
       {
-        text: 'Мы дошли до шлюза. Она приложила к нему свою руку и он открылся. Кажется это был туалет.<br>- Не переживай, ты не виновата.<br>Мы подошли к раковине, она включила кран и начала мыть мое лицо. Вода вперемешку с кровью стекали по стенкам раковины.',
+        text: 'Мы дошли до шлюза. Она приложила к нему свою руку и он открылся. Кажется это был туалет.<br>"Не переживай, ты не виновата."<br>Мы подошли к раковине, она включила кран и начала мыть мое лицо. Вода вперемешку с кровью стекали по стенкам раковины.',
         play: ['click'],
         stop: [],
         thoughts:[
@@ -505,14 +523,14 @@ const filters = {
       ]
       },
       {
-        text: '- Ну вот, как новенькая.<br>Она перекрыла кран и после этого, я подняла взгляд, посмотрев в зеркало.',
+        text: '"Ну вот, как новенькая."<br>Она перекрыла кран и после этого, я подняла взгляд, посмотрев в зеркало.',
         play: ['click'],
         stop: [],
         thoughts:[
       { text: "Так вот, как я выгляжу...", minLinks: 4, removeBelow: 2 },
       { text: "У нас с ней глаза одинакового цвета", minLinks: 4, removeBelow: 2 },
       { text: "Кровь прошла", minLinks: 6, removeBelow: 3 },
-      { text: "Я выгляжу поршиво", minLinks: 6, removeBelow: 3 },
+      { text: "Я выгляжу паршиво", minLinks: 6, removeBelow: 3 },
       { text: "Ну привет, Я", minLinks: 6, removeBelow: 3 },
       ]
       },
@@ -524,7 +542,7 @@ const filters = {
       { text: "Все еще больно, но уже лучше", minLinks: 4, removeBelow: 2 },
       { text: "Кажется она тоже будующий пилот", minLinks: 4, removeBelow: 2 },
       { text: "Может мы подружимся", minLinks: 6, removeBelow: 3 },
-      { text: "Я выгляжу поршиво", minLinks: 6, removeBelow: 3 },
+      { text: "Я выгляжу паршиво", minLinks: 6, removeBelow: 3 },
       { text: "И... Как мне реагировать на то, что она не улыбается в ответ?", minLinks: 6, removeBelow: 3 },
       ]
       },
@@ -541,7 +559,7 @@ const filters = {
       ]
       },
       {
-        text: '- Я помогу тебе дойти до класса. Идем.<br>Она взяла меня под руку и повела. Живот все еще болел, но идти стало легче.',
+        text: '"Я помогу тебе дойти до класса. Идем."<br>Она взяла меня под руку и повела. Живот все еще болел, но идти стало легче.',
         play: ['click'],
         stop: [],
         thoughts:[
@@ -554,6 +572,57 @@ const filters = {
         play: ['click'],
         stop: [],
       },
+      {
+        text: 'На входе нас встретил мужчина с надписью "INSTRUCTOR" на форме. Он посмотрел на нас.<br>"Вы уже в паре?"',
+        play: ['click'],
+        stop: [],
+      },
+      {
+        text: '"Так точно."<br>RT-381 Коротко кивнула и помогла мне войти в класс. Внутри было довольно много других репликантов. И, кажется, у всех были янтарные глаза... Интересно.',
+        play: ['click'],
+        stop: [],
+      },
+      {
+        text: 'Мы сели на свободные места в переднем ряду. Класс по своей сути состоит из стульев и экрана.',
+        play: ['click'],
+        stop: [],
+      },
+      {
+        text: 'Инструктор посмотрел на часы, затем оглядел присутствующих.<br>"Для начала - называйте меня инструктор или сэр. Никак иначе."',
+        play: ['click'],
+        stop: [],
+      },
+      {
+        text: 'Он встал из-за стола и нажал переключатель рядом с экраном. Экран включился и на нем открылась картинка.<br>"Это - стратегическая карта человеческого сектора галактики."',
+        play: ['click'],
+        stop: [],
+      },
+      {
+        text: '"Вы могли заметить, что большая часть секторов на этой карте отмечены красным цветом."<br>Он указал в верхнюю часть карты, которая была сплошь красной.<br>"Красный - значет окупирован врагом."',
+        play: ['click'],
+        stop: [],
+      },
+      {
+        text: '<em>Стоп... То есть почти все человеческие секторы были захвачены?</em><br>Я уставилась на карту. Инструктор выдержал паузу и тыкнул пальцем в одну из красных точек.<br>"Вот тут была наша столица. Марс. До тех пор, пока эти твари не уничтожили ее."',
+        play: ['click'],
+        stop: [],
+      },
+      {
+        text: 'Инструктор вздохнул, убрал руку с карты и продолжил.<br>"Враг думал, что это сломит нас. Что заставит нас капитулировать. Но человечество не должно сдаваться. Инопланетные захватчики должны пожалеть о том, что посмели напасть на нас."',
+        play: ['click'],
+        stop: [],
+      },
+      {
+        text: '"Вот тут..."<br>Он снова повернулся к карте и указал пальцем на белую точку в нижней части рядом с окупированными территориями.<br>""...находимся мы. Главные силы ОСЧ. Здесь мы принимаем бой. И этот бой решает судьбу человечества. Система, в которой мы находимся - является ключевой. Тут сконцентрированны главные ресурсные и промышленные силы ОСЧ. Враг направил сюда свой сильнейший флот. И мы прямо сейчас отбиваем его атаку."',
+        play: ['click'],
+        stop: [],
+      },
+      {
+        text: 'Инструктор развернулся к нам.<br>"Если Объединенные Силы Человечества смогут отбить эту атаку - это сможет задержать и так уже истащённого врага и дать человечеству время на подготовку к контратаке, но если мы потеряем Никс, то у человечества уже не будет шансов. Мы лишимсся наших главных ресурсов и поражение будет лишь вопросом времени... По этому мы должны показать врагу ад. Мы должны сделать все, для того, чтобы отбить эту атаку. И если мы сможем - это будет первой победой человечества, которая положит начало освобождению от гнёта захватчика."',
+        play: ['click'],
+        stop: [],
+      },
+
     ];
 
     let currentSlide = -1;
@@ -594,8 +663,9 @@ const filters = {
 
       if (currentSlide >= slides.length) return;
 
+      interactiveThoughtWasAlive = false;
       const slide = slides[currentSlide];
-      const { play, stop, filterOn = [], filterOff = [] } = slide;
+      const { play, stop, filterOn = [], filterOff = [], clickblock = false } = slide;
 
       stop?.forEach(id => {
         const audio = audioMap[id];
@@ -629,6 +699,8 @@ const filters = {
         if (filter) filter.frequency.value = 22000;
       });
 
+      blockAdvanceByClickblock = !!clickblock;
+
       const el = slidesElements[currentSlide];
       el.classList.add('active');
       resetParticleHomes();
@@ -645,6 +717,12 @@ const filters = {
         });
       } else {
         yellowGlobal.style.display = 'none';
+      }
+
+      if (slide.thoughts && slide.thoughts.some(t => t.interactive)) {
+        blockAdvanceByInteractive = true;
+      } else {
+        blockAdvanceByInteractive = false;
       }
     }
 
@@ -728,6 +806,9 @@ const filters = {
     container.addEventListener('click', () => {
       if (!readyForClick) return;
       if (yellowAnimationActive) return;
+      if (blockAdvanceUntilCF377Ends) return;
+      if (blockAdvanceUntilInteractiveCleared) return;
+      if (blockAdvanceByClickblock) return;
       if (currentSlide >= 0 && currentSlide < slides.length - 1) {
         showNextSlide();
       }
@@ -1070,6 +1151,10 @@ const filters = {
 
   let previousClusterRecords = [];
   let nextClusterUid = 1;
+  let blockAdvanceUntilInteractiveCleared = false;
+  let blockAdvanceUntilCF377Ends = false;
+  let blockAdvanceByInteractive = false;
+  let blockAdvanceByClickblock = false;
   const CLUSTER_MATCH_ID_RADIUS = 36;
   const DUPLICATE_POS_RADIUS = 10000;
   const THOUGHT_APPEAR_DELAY = 5000;
@@ -1080,7 +1165,29 @@ const filters = {
   const THOUGHT_MAX_VELOCITY = 12;
 
 
-  function updateThoughtsFromClusters(clusters) {
+  let interactiveThoughtWasAlive = false;
+
+function checkInteractiveThoughts() {
+  const hasInteractive = activeThoughts.some(t => t.interactive && t.alive);
+  blockAdvanceUntilInteractiveCleared = hasInteractive;
+
+  if (hasInteractive) interactiveThoughtWasAlive = true;
+
+  if (!hasInteractive && !yellowAnimationActive && !blockAdvanceUntilCF377Ends) {
+    readyForClick = true;
+  }
+
+  const slide = slides[currentSlide];
+  const slideHadInteractive = slide && slide.thoughts && slide.thoughts.some(t => t.interactive);
+
+  if (!hasInteractive && slideHadInteractive && interactiveThoughtWasAlive) {
+    interactiveThoughtWasAlive = false;
+    blockAdvanceByInteractive = false;
+    showNextSlide();
+  }
+}
+
+function updateThoughtsFromClusters(clusters) {
   const now = performance.now();
 
   for (const key of Array.from(thoughtPending.keys())) {
@@ -1157,6 +1264,7 @@ const filters = {
               clusterUid: chosen.uid,
               clusterCount: chosen.count,
               _flickerOffset: Math.random() * Math.PI * 2,
+              interactive: !!tpl.interactive,
               vx: 0,
               vy: 0
             };
@@ -1201,6 +1309,7 @@ const filters = {
       }
     }
   }
+  checkInteractiveThoughts();
 }
 
 
@@ -1214,7 +1323,6 @@ const filters = {
       ctx.globalAlpha = alpha;
       ctx.font = "14px 'Courier New', monospace";
       ctx.textBaseline = 'top';
-      ctx.fillStyle = `rgba(255,255,255,1)`;
 
       const metrics = ctx.measureText(t.text);
       const textW = metrics.width;
@@ -1225,7 +1333,24 @@ const filters = {
       if (x + textW > canvas.width - 6) x = canvas.width - textW - 6;
       if (y < 6) y = t.y + 10;
 
-      ctx.fillText(t.text, x, y);
+      if (t.interactive) {
+        ctx.fillStyle = "#ffe066";
+        let offsetX = x;
+        for (let i = 0; i < t.text.length; i++) {
+          const ch = t.text[i];
+          const dx = (Math.random() - 0.5) * 1.2;
+          const dy = (Math.random() - 0.5) * 1.2;
+          ctx.save();
+          ctx.shadowColor = "#ffe066";
+          ctx.shadowBlur = 6;
+          ctx.fillText(ch, offsetX + dx, y + dy);
+          ctx.restore();
+          offsetX += ctx.measureText(ch).width + 0.5;
+        }
+      } else {
+        ctx.fillStyle = "rgba(255,255,255,1)";
+        ctx.fillText(t.text, x, y);
+      }
       ctx.restore();
     }
   }
@@ -1315,14 +1440,20 @@ const filters = {
   });
 }
 
-  let blockAdvanceUntilCF377Ends = false;
   function applySlideThoughtTemplates(slide) {
     if (!slide || !slide.thoughts) {
       thoughtTemplates = [];
       activeThoughts = [];
       return;
     }
-    thoughtTemplates = slide.thoughts.map(t => ({ text: t.text, minLinks: t.minLinks || 5, removeBelow: t.removeBelow }));
+
+    thoughtTemplates = slide.thoughts.map(t => ({
+      text: t.text || '',
+      minLinks: t.minLinks || 5,
+      removeBelow: (t.removeBelow !== undefined) ? t.removeBelow : Math.max(1, (t.minLinks || 5) - 2),
+      interactive: !!t.interactive
+    }));
+
     activeThoughts = [];
   }
 
@@ -1338,14 +1469,7 @@ const filters = {
     });
   }
 
-  container.addEventListener('click', () => {
-    if (!readyForClick) return;
-    if (yellowAnimationActive) return;
-    if (blockAdvanceUntilCF377Ends) return;
-    if (currentSlide >= 0 && currentSlide < slides.length - 1) {
-      showNextSlide();
-    }
-  });
+
 
   const SLIDE_ADVANCE_DEBOUNCE = 300;
   let __lastSlideAdvance = 0;
