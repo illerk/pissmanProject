@@ -213,7 +213,6 @@
 
   <audio id="insolitum" src="sound/kventa/insolitum.mp3"></audio>
 
-
   <script>
 
     let analyser, dataArray, marsTrackNode;
@@ -254,7 +253,6 @@
       part3: document.getElementById('part3'),
 
       insolitum: document.getElementById('insolitum'),
-      
     };
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -268,7 +266,12 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
   return filter;
 }
 
-    const slides = [
+const filters = {
+  ambience1: createFilteredSource(audioMap.ambience1),
+
+};
+
+     const slides = [
 
       {
         text: '...',
@@ -1203,7 +1206,6 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
         ]
       },
     ];
-
     let currentSlide = -1;
     let readyForClick = false;
     let yellowAnimationActive = false;
@@ -2131,8 +2133,6 @@ function updateThoughtsFromClusters(clusters) {
 
 </body>
 </html>
-
-
 
 
 
