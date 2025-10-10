@@ -237,6 +237,7 @@
     
 
 async function startMarsSequence() {
+  drawLinks = drawLinksMars;
   marsMode = true;
   readyForClick = false;
   startBtn.style.display = 'none';
@@ -2084,6 +2085,52 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
 
     ctx.restore();
   }
+
+  function drawLinksMars() {
+  ctx.save();
+  ctx.lineWidth = 1.1;
+
+  for (const link of links) {
+    if (link.progress < 1) link.progress += 0.08;
+    if (link.progress > 1) link.progress = 1;
+
+    const { a, b, progress, eqAlpha = 1 } = link;
+    const x1 = a.x, y1 = a.y;
+    const x2 = a.x + (b.x - a.x) * progress;
+    const y2 = a.y + (b.y - a.y) * progress;
+
+    const alpha = 0.18 * eqAlpha;
+    ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  }
+
+  for (let i = breakingLinks.length - 1; i >= 0; i--) {
+    const link = breakingLinks[i];
+    link.progress -= 0.08;
+    if (link.progress <= 0) {
+      breakingLinks.splice(i, 1);
+      continue;
+    }
+    const { a, b, progress, eqAlpha = 1 } = link;
+    const x1 = a.x, y1 = a.y;
+    const x2 = a.x + (b.x - a.x) * progress;
+    const y2 = a.y + (b.y - a.y) * progress;
+
+    const alpha = 0.18 * eqAlpha;
+    ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
 
 
     function computeClustersFromLinks() {
