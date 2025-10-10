@@ -236,57 +236,69 @@
 
     
 
-    async function startMarsSequence() {
-      marsMode = true;
-      readyForClick = false;
-      startBtn.style.display = 'none';
+async function startMarsSequence() {
+  marsMode = true;
+  readyForClick = false;
+  startBtn.style.display = 'none';
 
-      const marsAudio = document.getElementById('marsTrack');
-      await audioCtx.resume();
-      marsAudio.volume = 0.6;
+  const marsAudio = document.getElementById('marsTrack');
+  await audioCtx.resume();
+  marsAudio.volume = 0.6;
 
-      marsTrackNode = audioCtx.createMediaElementSource(marsAudio);
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 64;
-      const bufferLength = analyser.frequencyBinCount;
-      dataArray = new Uint8Array(bufferLength);
+  marsTrackNode = audioCtx.createMediaElementSource(marsAudio);
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 64;
+  dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-      marsTrackNode.connect(analyser);
-      analyser.connect(audioCtx.destination);
+  marsTrackNode.connect(analyser);
+  analyser.connect(audioCtx.destination);
 
-      marsAudio.play().catch(err => console.warn("Autoplay blocked:", err));
+  marsAudio.play().catch(err => console.warn("Autoplay blocked:", err));
+  isMarsEQ = true;
 
-      isMarsEQ = true;
+  const marsSlideTimings = [
+    { text: '...', time: 0 },
+    { text: 'На Марсе классно', time: 44 },
+    { text: 'Красные пески, крутые горы и краторы', time: 45 },
+    { text: 'Безумно красивые каналы рядом с экватором', time: 47 },
+    { text: 'Ничто не сравнится с тамошними закатами', time: 50 },
+    { text: 'Правда холодновато...', time: 52 },
+    { text: 'За то две луны на небе...', time: 55 },
+    { text: 'Жаль, что так поздно...', time: 57 },
+    { text: 'Здесь было еще прикольнее...', time: 63 },
+    { text: 'Летом цвели...', time: 65 },
+    { text: 'Невиданно высокии...', time: 68 },
+    { text: 'Шумели гигантскими кронами...', time: 71 },
+    { text: 'Где в их тени прятались...', time: 73 },
+    { text: 'Они были похожи на нас', time: 76 },
+    { text: 'В целом без оголтелой экзотики', time: 79 },
+  ];
 
-      const marsSlideTimings = [
-        { text: 'Марс дышит...', time: 0 },
-        { text: 'Он зовёт тебя.', time: 4000 },
-        { text: 'Ты рождён для битвы.', time: 8000 },
-        { text: 'Ты — его клинок.', time: 13000 },
-        { text: '...' , time: 18000 },
-        { text: 'Огонь разгорается.', time: 24000 },
-        { text: 'Время пришло.', time: 29000 },
-      ];
+  const marsSlides = marsSlideTimings.map(s => createSlide({ text: s.text, play: ['click'] }));
+  marsSlides.forEach(el => slidesElements.push(el));
 
-      for (let i = 0; i < marsSlideTimings.length; i++) {
-        const slide = { text: marsSlideTimings[i].text, play: ['click'] };
-        const el = createSlide(slide);
-        slidesElements.push(el);
+  let marsSlideIndex = -1;
 
-      setTimeout(() => {
-        const prev = document.querySelector('.slide.active');
-        if (prev) {
-          prev.classList.remove('active');
-          prev.classList.add('out');
-        }
+  function checkMarsSlides() {
+    const current = marsAudio.currentTime;
+    if (marsSlideIndex < marsSlides.length - 1 &&
+        current >= marsSlideTimings[marsSlideIndex + 1].time) {
 
-        currentSlide = slidesElements.indexOf(el);
-        el.classList.add('active');
-        resetParticleHomes();
-      }, marsSlideTimings[i].time);
+      if (marsSlideIndex >= 0) {
+        marsSlides[marsSlideIndex].classList.remove('active');
+        marsSlides[marsSlideIndex].classList.add('out');
       }
 
+      marsSlideIndex++;
+      marsSlides[marsSlideIndex].classList.add('active');
+      resetParticleHomes();
     }
+    requestAnimationFrame(checkMarsSlides);
+  }
+
+  requestAnimationFrame(checkMarsSlides);
+}
+
 
 
     
@@ -2409,21 +2421,36 @@ function updateThoughtsFromClusters(clusters) {
   requestAnimationFrame(animateParticles);
 
   if (isMarsEQ && analyser) {
-    analyser.getByteFrequencyData(dataArray);
+  analyser.getByteFrequencyData(dataArray);
 
-    let sum = 0;
-    let count = 0;
-    for (let i = 8; i < 32; i++) {
-      sum += dataArray[i];
-      count++;
-    }
-    const avg = sum / count / 255;
-    const brightness = Math.min(1, 0.1 + Math.pow(avg, 1.5));
-
-    particles.forEach(p => {
-      p.eqAlpha = brightness;
-    });
+  let sum = 0, count = 0;
+  for (let i = 8; i < 32; i++) {
+    sum += dataArray[i];
+    count++;
   }
+  const avg = sum / count / 255;
+  const target = Math.min(1, 0.15 + Math.pow(avg, 1.5));
+  const decaySpeed = 0.02;
+
+  particles.forEach(p => {
+    if (p.eqAlpha === undefined) p.eqAlpha = 0;
+    if (target > p.eqAlpha) {
+      p.eqAlpha = target;
+    } else {
+      p.eqAlpha += (target - p.eqAlpha) * decaySpeed;
+    }
+  });
+
+  links.forEach(l => {
+    if (l.eqAlpha === undefined) l.eqAlpha = 0;
+    const avgAlpha = (l.a.eqAlpha + l.b.eqAlpha) / 2;
+    if (avgAlpha > l.eqAlpha) {
+      l.eqAlpha = avgAlpha;
+    } else {
+      l.eqAlpha += (avgAlpha - l.eqAlpha) * decaySpeed;
+    }
+  });
+}
 }
 
 
