@@ -12,6 +12,36 @@
       width: 100%;
       height: 100%;
     }
+    #loading-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: #000;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 10000;
+      font-family: 'Courier New', monospace;
+    }
+    #loading-ring {
+      text-align: center;
+    }
+    #loading-ring svg {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 1rem;
+    }
+    #loading-text {
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+    #loading-percent {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
 
     .interactive-thought {
       color: #ffe066;
@@ -172,6 +202,68 @@
     }
   </style>
 </head>
+<div id="loading-screen">
+  <div id="loading-ring">
+    <svg viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="45" stroke="#ffe06633" stroke-width="6" fill="none" />
+      <circle id="loading-progress" cx="50" cy="50" r="45" stroke="#ffffff" stroke-width="6"
+              stroke-dasharray="283" stroke-dashoffset="283" fill="none"
+              stroke-linecap="round" />
+    </svg>
+    <div id="loading-text">Человек воспитывается для свободы</div>
+    <div id="loading-percent">0%</div>
+  </div>
+<script>
+window.addEventListener('load', async () => {
+  const loadingScreen = document.getElementById('loading-screen');
+  const loadingProgress = document.getElementById('loading-progress');
+  const loadingPercent = document.getElementById('loading-percent');
+
+  const audioElements = Array.from(document.querySelectorAll('audio'));
+  const total = audioElements.length;
+  let loaded = 0;
+
+  const updateProgress = () => {
+    const percent = Math.round((loaded / total) * 100);
+    loadingPercent.textContent = percent + '%';
+    const offset = 283 - (283 * percent / 100);
+    loadingProgress.style.strokeDashoffset = offset;
+  };
+
+  updateProgress();
+
+  async function preloadAudio(audio) {
+    return new Promise(resolve => {
+      let done = false;
+
+      const finish = () => {
+        if (done) return;
+        done = true;
+        loaded++;
+        updateProgress();
+        resolve();
+      };
+
+      audio.addEventListener('canplaythrough', finish, { once: true });
+      audio.addEventListener('error', finish, { once: true });
+      setTimeout(finish, 5000);
+
+      try {
+        audio.load();
+      } catch {
+        finish();
+      }
+    });
+  }
+
+  await Promise.all(audioElements.map(preloadAudio));
+
+  loadingScreen.style.transition = 'opacity 1s ease';
+  loadingScreen.style.opacity = 0;
+  setTimeout(() => loadingScreen.remove(), 1000);
+});
+</script>
+</div>
 <div id="customCursor"></div>
 <body>
   <canvas id="particleCanvas"></canvas>
