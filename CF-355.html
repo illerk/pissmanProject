@@ -220,7 +220,6 @@
     let isMarsEQ = false;
     let marsCode = ['m', 'a', 'r', 's'];
     let marsIndex = 0;
-    let marsMode = false;
 
     document.addEventListener('keydown', async (e) => {
       if (e.key.toLowerCase() === marsCode[marsIndex]) {
@@ -238,7 +237,6 @@
 
 async function startMarsSequence() {
   drawLinks = drawLinksMars;
-  marsMode = true;
   readyForClick = false;
   startBtn.style.display = 'none';
 
@@ -299,38 +297,6 @@ async function startMarsSequence() {
 
   requestAnimationFrame(checkMarsSlides);
 }
-async function enableEQFor(audioId) {
-  const audioElement = document.getElementById(audioId);
-  if (!audioElement) return;
-
-  await audioCtx.resume();
-
-  const source = audioCtx.createMediaElementSource(audioElement);
-  analyser = audioCtx.createAnalyser();
-  analyser.fftSize = 64;
-  dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-  source.connect(analyser);
-  analyser.connect(audioCtx.destination);
-  isMarsEQ = true;
-
-  function drawEQ() {
-    requestAnimationFrame(drawEQ);
-    analyser.getByteFrequencyData(dataArray);
-    const ctx = particleCanvas.getContext('2d');
-    const w = particleCanvas.width;
-    const h = particleCanvas.height;
-    ctx.clearRect(0, 0, w, h);
-    const barWidth = w / dataArray.length;
-    for (let i = 0; i < dataArray.length; i++) {
-      const barHeight = dataArray[i] / 2;
-      ctx.fillStyle = `hsl(${i * 5}, 100%, 70%)`;
-      ctx.fillRect(i * barWidth, h - barHeight, barWidth, barHeight);
-    }
-  }
-  drawEQ();
-}
-
 
 
 
@@ -390,9 +356,11 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
         play: ['ambience1', 'music1', 'click'],
         stop: [],
         thoughts: [
+  { text: "пим", minLinks: 4, removeBelow: 4 },
+  { text: "папим", minLinks: 4, removeBelow: 4 },
+  { text: "папум", minLinks: 4, removeBelow: 4 }
 ],
-        filterOn: ['ambience1'],
-        eqFor: 'music1'
+        filterOn: ['ambience1']
       },
       {
         text: '...',
@@ -403,8 +371,9 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
   { text: "Где я?", minLinks: 6, removeBelow: 4 },
   { text: "Ощущения приятные", minLinks: 6, removeBelow: 4 },
   { text: "Я плаваю?", minLinks: 4, removeBelow: 2 },
+  { text: "Убей себя", minLinks: 6, removeBelow: 6 }
 ],
-        filterOn: ['ambience1'],
+        filterOn: ['ambience1']
       },
       {
         text: 'Тепло...',
@@ -469,7 +438,6 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
         text: '...',
         play: ['surgery', 'click'],
         stop: []
-        
       },
       {
         text: '...',
@@ -533,7 +501,7 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
         stop: []
       },
       {
-        text: 'Она сложила руки<br><br><color:alice>"Для начала. Ты репликант. Искусственно созданный человек. Прямо сейчас мы находимся в системе [[Никс|Твое место дислокации. Важнейшая система в пределах пространства ОСЧ на данный момент.]. Твой номер - CF-355"</color>',
+        text: 'Она сложила руки<br><br><color:alice>"Для начала. Ты репликант. Искусственно созданный человек. Прямо сейчас мы находимся в системе [[Никс|Твое место дислокации. Важнейшая система в пределах пространства ОЧС на данный момент.]. Твой номер - CF-355"</color>',
         play: ['click'],
         stop: []
       },
@@ -548,7 +516,7 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
         stop: []
       },
       {
-        text: 'Она посмотрела на меня с некоторым сожалением... Но почему?<br>Она вернула свое прежнее выражение лица и продолжила:<br><br><color:alice>"Ты сейчас находишься на борту корабля [[Телхин|Флагман ОСЧ. Оснащен тяжелой артиллерией. Также корабль выступает в качестве ремонтной станции, а также собирает легкие корабли, готовые к бою.]"</color>',
+        text: 'Она посмотрела на меня с некоторым сожалением... Но почему?<br>Она вернула свое прежнее выражение лица и продолжила:<br><br><color:alice>"Ты сейчас находишься на борту корабля [[Телхин|Флагман ОЧС. Оснащен тяжелой артиллерией. Также корабль выступает в качестве ремонтной станции, а также собирает легкие корабли, готовые к бою.]"</color>',
         play: ['click'],
         stop: []
       },
@@ -757,12 +725,12 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
         stop: [],
       },
       {
-        text: '<color:instructor>"Вот тут..."</color><br>Он снова повернулся к карте и указал пальцем на белую точку в нижней части рядом с оккупированными территориями.<br><color:instructor>"...находимся мы. Главные силы ОСЧ. Здесь мы принимаем бой. И этот бой решает судьбу человечества. Система, в которой мы находимся - является ключевой. Тут сконцентрированны главные ресурсные и промышленные силы ОСЧ. Враг направил сюда свой сильнейший флот. И мы прямо сейчас отбиваем его атаку."</color>',
+        text: '<color:instructor>"Вот тут..."</color><br>Он снова повернулся к карте и указал пальцем на белую точку в нижней части рядом с оккупированными территориями.<br><color:instructor>"...находимся мы. Главные силы ОЧС. Здесь мы принимаем бой. И этот бой решает судьбу человечества. Система, в которой мы находимся - является ключевой. Тут сконцентрированны главные ресурсные и промышленные силы ОЧС. Враг направил сюда свой сильнейший флот. И мы прямо сейчас отбиваем его атаку."</color>',
         play: ['click'],
         stop: [],
       },
       {
-        text: 'Инструктор развернулся к нам.<br><color:instructor>"Если Объединенные Силы Человечества смогут отбить эту атаку - это сможет задержать и так уже истощённого врага и дать человечеству время на подготовку к контратаке, но если мы потеряем Никс, то у человечества уже не будет шансов. Мы лишимсся наших главных ресурсов и поражение будет лишь вопросом времени... По этому мы должны показать врагу ад. Мы должны сделать все, для того, чтобы отбить эту атаку. И если мы сможем - это будет первой победой человечества, которая положит начало освобождению от гнёта захватчика."</color>',
+        text: 'Инструктор развернулся к нам.<br><color:instructor>"Если Объединенные Человеческие Силы смогут отбить эту атаку - это сможет задержать и так уже истощённого врага и дать человечеству время на подготовку к контратаке, но если мы потеряем Никс, то у человечества уже не будет шансов. Мы лишимсся наших главных ресурсов и поражение будет лишь вопросом времени... По этому мы должны показать врагу ад. Мы должны сделать все, для того, чтобы отбить эту атаку. И если мы сможем - это будет первой победой человечества, которая положит начало освобождению от гнёта захватчика."</color>',
         play: ['click'],
         stop: [],
       },
@@ -1778,9 +1746,6 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
           ? slide.yellowAnimated.map(obj => ({ ...obj }))
           : [{ ...slide.yellowAnimated }];
       }
-        if (slide.eqFor) {
-        enableEQFor(slide.eqFor);
-  }
       container.appendChild(div);
       return div;
     }
@@ -2263,20 +2228,6 @@ function drawLinksMars() {
   ctx.restore();
 }
 
-const originalShowNextSlide = showNextSlide;
-showNextSlide = function() {
-  if (currentSlide >= 0 && currentSlide < slides.length) {
-    const slide = slides[currentSlide];
-    if (slide.marsMode) {
-      drawLinks = drawLinksMars;
-      isMarsEQ = true;
-    } else {
-      drawLinks = window.drawLinksOriginal || drawLinks;
-      isMarsEQ = false;
-    }
-  }
-  return originalShowNextSlide.apply(this, arguments);
-};
 
 if (!window.drawLinksOriginal) window.drawLinksOriginal = drawLinks;
 
