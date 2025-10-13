@@ -349,6 +349,9 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
   return filter;
 }
 
+const filters = {
+ambience1: createFilteredSource(audioMap.ambience1),
+};
     const slides = [
 
       {
