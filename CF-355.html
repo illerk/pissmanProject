@@ -12,6 +12,7 @@
       width: 100%;
       height: 100%;
     }
+    
     #loading-screen {
       position: fixed;
       top: 0; left: 0;
@@ -42,7 +43,7 @@
       font-size: 1.2rem;
       font-weight: bold;
     }
-
+    
     .interactive-thought {
       color: #ffe066;
       letter-spacing: 0.12em;
@@ -451,9 +452,7 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['ambience1', 'music1', 'click'],
         stop: [],
         thoughts: [
-  { text: "пим", minLinks: 4, removeBelow: 4 },
-  { text: "папим", minLinks: 4, removeBelow: 4 },
-  { text: "папум", minLinks: 4, removeBelow: 4 }
+  
 ],
         filterOn: ['ambience1']
       },
@@ -465,8 +464,7 @@ ambience1: createFilteredSource(audioMap.ambience1),
   { text: "Моя первая мысль", minLinks: 1, removeBelow: 1 },
   { text: "Где я?", minLinks: 6, removeBelow: 4 },
   { text: "Ощущения приятные", minLinks: 6, removeBelow: 4 },
-  { text: "Я плаваю?", minLinks: 4, removeBelow: 2 },
-  { text: "Убей себя", minLinks: 6, removeBelow: 6 }
+  { text: "Я плаваю?", minLinks: 4, removeBelow: 2 }
 ],
         filterOn: ['ambience1']
       },
@@ -495,7 +493,7 @@ ambience1: createFilteredSource(audioMap.ambience1),
         stop: [],
         filterOff: ['ambience1'],
         thoughts:[
-  { text: "Нееет...", minLinks: 4, removeBelow: 2 },
+  { text: "Не-е-ет...", minLinks: 4, removeBelow: 2 },
   { text: "Я хочу обратно", minLinks: 6, removeBelow: 4 },
   { text: "Неприятно, холодно", minLinks: 6, removeBelow: 4 },
   { text: "Пахнет какой-то химией", minLinks: 4, removeBelow: 2 }
@@ -513,7 +511,12 @@ ambience1: createFilteredSource(audioMap.ambience1),
         text: '<em>Сквозь глухую темноту слышно:</em><br><br><span style="color: #ffe066;">"Сорок семь здоровы... Троих на утилизацию..."</span>',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Что..?", minLinks: 4, removeBelow: 4 },
+  { text: "Утилизация?", minLinks: 2, removeBelow: 1 },
+  { text: "Надеюсь, меня не утилизируют...", minLinks: 1, removeBelow: 1 }
+]},
       {
         text: 'Что это за голос? Кого на утилизацию?',
         play: ['click'],
@@ -523,12 +526,19 @@ ambience1: createFilteredSource(audioMap.ambience1),
         text: '"Здоровых отправьте на имплантацию и разделите на группы."',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Может речь... про кроликов?", minLinks: 2, removeBelow: 1 }
+]},
       {
         text: 'Я чувствую отдалённые прикосновения, затем ощущения затихают...',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Не дают поспать...", minLinks: 4, removeBelow: 2 },
+  { text: "Неприятно...", minLinks: 3, removeBelow: 1 }
+]},
       {
         text: '...',
         play: ['surgery', 'click'],
@@ -564,102 +574,231 @@ ambience1: createFilteredSource(audioMap.ambience1),
         text: 'Сколько времени прошло?',
         play: ['click'],
         stop: ['ambience1']
-      },
+      ,
+  thoughts: [
+  { text: "Просыпаться совсем не хочется...", minLinks: 4, removeBelow: 3 },
+  { text: "Что-то в голове", minLinks: 3, removeBelow: 2 },
+  { text: "Щелкает", minLinks: 2, removeBelow: 1 }
+]},
       {
         text: '<em>Яркий свет. Ослепительный свет. ...Фонарик?</em>"',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Грубо", minLinks: 2, removeBelow: 1 },
+  { text: "Больно глазам...", minLinks: 4, removeBelow: 3 },
+  { text: "К чему мне в глаза светить?!", minLinks: 3, removeBelow: 2 }
+]},
       {
         text: '<em>Я проморгалась и прищурилась, смотря перед собой</em><br><br>Передо мной стоит мужчина в белом халате. Он убрал фонарик в карман и записал что-то в планшет.',
         play: ['writing', 'click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "О нет... это госпиталь?", minLinks: 2, removeBelow: 1 },
+  { text: "Как я сюда попала?", minLinks: 3, removeBelow: 2 },
+  { text: "Не люблю докторов...", minLinks: 4, removeBelow: 3 }
+]},
       {
         text: '"Она в сознании..."<br><br>Мужчина отдал планшет девушке и вышел из комнаты',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Будить было совсем не обязательно", minLinks: 3, removeBelow: 2 },
+  { text: "И на что я им?", minLinks: 2, removeBelow: 1 }
+]},
       {
         text: 'Девушка смотрит в планшет, затем кладет его на стол и садится на стул напротив меня и слегка улыбается.<br><br><color:alice>"С пробуждением. Понимаешь меня? Говорить умеешь?"</color>',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Добрая", minLinks: 2, removeBelow: 1 },
+  { text: "А умею ли я говорить..?", minLinks: 3, removeBelow: 2 },
+  { text: "Что за вопросы такие?", minLinks: 4, removeBelow: 3 }
+]},
       {
         text: 'Почему все ощущается так странно..? <br><em>Я смотрю на девушку передо мной.</em> Она одета в синюю униформу. у нее аккуратно постриженные черные волосы на уровне плеч. Она мягко улыбается мне. Я чувствую себя комфортно рядом с ней. Нужно ей ответить...<br><br><color:cf>"Да... Кажется умею..."</color>',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Надеюсь, я умею говорить...", minLinks: 4, removeBelow: 3 },
+  { text: "А что если я не могу говорить?", minLinks: 1, removeBelow: 1 },
+  { text: "Вдруг я немая?", minLinks: 3, removeBelow: 1 },
+  { text: "Может поэтому я в госпитале?", minLinks: 2, removeBelow: 1 }
+]},
       {
         text: 'Девушка подняла два больших пальца вверх и кивнула.<br><br><color:alice>"Меня зовут Алиса. Я помогу тебе освоиться."</color>',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Алиса?", minLinks: 8, removeBelow: 8 },
+  { text: "Алиса...", minLinks: 7, removeBelow: 6 },
+  { text: "Алиса.", minLinks: 6, removeBelow: 5 },
+  { text: "Алиса..", minLinks: 5, removeBelow: 4 },
+  { text: "Алиса ", minLinks: 4, removeBelow: 3 },
+  { text: "Алиса  ", minLinks: 3, removeBelow: 2 },
+  { text: "Алиса   ", minLinks: 2, removeBelow: 1 },
+  { text: "Алиса       ", minLinks: 1, removeBelow: 1 }
+]},
       {
         text: 'Она сложила руки<br><br><color:alice>"Для начала. Ты репликант. Искусственно созданный человек. Прямо сейчас мы находимся в системе [[Никс|Твое место дислокации. Важнейшая система в пределах пространства ОЧС на данный момент.]]. Твой номер - CF-355"</color>',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Си-Эф?", minLinks: 2, removeBelow: 1 },
+  { text: "Почему у меня номер?!", minLinks: 1, removeBelow: 1 },
+  { text: "У нее имя, а у меня номер...", minLinks: 3, removeBelow: 2 },
+  { text: "Это не правильно...", minLinks: 4, removeBelow: 3 }
+]},
       {
         text: 'Стоп. Это кажется знакомым.<br><br> <color:cf>"Кажется... Я откуда-то уже знаю про систему Никс."</color>',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Центр корпоративной войны", minLinks: 5, removeBelow: 4 },
+  { text: "Исход", minLinks: 2, removeBelow: 1 },
+  { text: "Эребус", minLinks: 3, removeBelow: 2 },
+  { text: "Форон", minLinks: 4, removeBelow: 3 },
+  { text: "Брикбёрн", minLinks: 5, removeBelow: 4 },
+  { text: "Калдарк", minLinks: 5, removeBelow: 4 },
+  { text: "Роанок", minLinks: 5, removeBelow: 4 },
+  { text: "Йуклит", minLinks: 5, removeBelow: 4 },
+  { text: "Где я..?", minLinks: 3, removeBelow: 2 }
+]},
       {
         text: 'Алиса постучала пальцем по своей голове. <br><br><color:alice>"Имплант. Он подсказывает тебе. Он позволит тебе быстрее обучаться, а также поможет справляться с эмоциями."</color>',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Что-то мешает моим мыслям...", minLinks: 1, removeBelow: 1 },
+  { text: "Я чувствую...", minLinks: 2, removeBelow: 1 },
+  { text: "Странно...", minLinks: 3, removeBelow: 2 },
+  { text: "Спокойно", minLinks: 3, removeBelow: 2 },
+  { text: "Ничего не чувствую...", minLinks: 4, removeBelow: 2 }
+]},
       {
         text: 'Она посмотрела на меня с некоторым сожалением... Но почему?<br>Она вернула свое прежнее выражение лица и продолжила:<br><br><color:alice>"Ты сейчас находишься на борту корабля [[Телхин|Флагман ОЧС. Оснащен тяжелой артиллерией. Также корабль выступает в качестве ремонтной станции, а также собирает легкие корабли, готовые к бою.]]"</color>',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Со мной что-то не так", minLinks: 1, removeBelow: 1 },
+  { text: "Я и есть кролик", minLinks: 3, removeBelow: 2 },
+  { text: "Что я тут вообще делаю...", minLinks: 3, removeBelow: 2 },
+  { text: "Кто я такая?", minLinks: 4, removeBelow: 3 }
+]},
       {
         text: '<color:alice>"Прямо сейчас Телхин участвует в бою. Мы находимся в тылу и подготавливаем таких как ты для управления штурмовиками. Через месяц ты вылетаешь в бой."</color>',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Нет...", minLinks: 2, removeBelow: 2 },
+  { text: "Зачем мне это вообще", minLinks: 3, removeBelow: 2 },
+  { text: "Все ясно", minLinks: 4, removeBelow: 3 },
+  { text: "Должна лететь в бой", minLinks: 1, removeBelow: 1 },
+  { text: "Вот зачем я им нужна...", minLinks: 3, removeBelow: 3 },
+  { text: "Совсем не страшно... почему?", minLinks: 2, removeBelow: 1 },
+  { text: "Не хочу думать об этом", minLinks: 1, removeBelow: 1 }
+]},
       {
         text: 'Вот оно как...<br>Алиса смотрит на меня, пытаясь понять мою реакцию. Замечая, что я спокойна, она кивает и продолжает<br><br><color:alice>"Твоё обучение скоро начнётся. Через час тебе нужно подойти в класс 45, а пока можешь сходить поесть."</color>',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Ну пожили и хватит", minLinks: 4, removeBelow: 3 },
+  { text: "Кушать хочется", minLinks: 2, removeBelow: 1 },
+  { text: "Надеюсь, в столовой дают...", minLinks: 3, removeBelow: 2 },
+  { text: "В голову ни одного блюда не приходит", minLinks: 1, removeBelow: 1 }
+]},
       {
         text: '<color:alice>"Сейчас мы находимся в отдельной зоне, где происходит создание и обучение репликантов. Ну и жить пока ты будешь тоже тут. У тебя есть доступ в общую зону для персонала, так что тебе не обязательно сидеть в нашей зоне постоянно."</color>',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Пока поживу еще", minLinks: 3, removeBelow: 2 },
+  { text: "Репликант... хоть не кролик", minLinks: 4, removeBelow: 2 },
+  { text: "Лучше быть кроликом или репликантом?", minLinks: 4, removeBelow: 2 },
+  { text: "Хуже чем кроликом-репликантом быть", minLinks: 4, removeBelow: 2 },
+  { text: "Я знаю что такое репликант, но кто я..?", minLinks: 4, removeBelow: 2 }
+]},
       {
         text: '<em>Некоторое время спустя я вышла в коридор общей зоны</em><br>Идя по коридору я видела людей. Многие спешили куда-то. Кажется офицер шел по коридору впереди. Рядом находящиеся члены экипажа отдавали ему честь. В этом жесте не было энтузиазма. Лишь заученное до рефлекса механическое движение. Сам офицер никак не реагировал и просто шел дальше.',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Какие все занятые", minLinks: 2, removeBelow: 1 },
+  { text: "А я чем заниматься должна?", minLinks: 2, removeBelow: 1 },
+  { text: "Я кушать иду", minLinks: 4, removeBelow: 2 },
+  { text: "А мне нужно офицера приветствовать?", minLinks: 3, removeBelow: 2 }
+]},
       {
         text: 'Все вокруг выглядят такими подавленными. Я не знаю стоит ли мне заводить разговор с кем-то...',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Может не думать лишний раз и хорошо?", minLinks: 3, removeBelow: 2 },
+  { text: "Как-то... никак вообще", minLinks: 2, removeBelow: 1 },
+  { text: "Зато не переживаю", minLinks: 3, removeBelow: 2 }
+]},
       {
         text: 'Проходя очередной шлюз, я обнаружила по правую сторону коридора окно, выходящее на широкий ангар.',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Просторно!", minLinks: 1, removeBelow: 1 },
+  { text: "Техника всякая", minLinks: 3, removeBelow: 2 },
+  { text: "Штуки всякие...", minLinks: 4, removeBelow: 2 },
+  { text: "Штурмовик!", minLinks: 2, removeBelow: 1 },
+  { text: "Какие все занятые...", minLinks: 4, removeBelow: 3 }
+]},
       {
         text: 'В ангаре кипела работа. Десятки человек занимались тем, что принимали в ангаре разбитые корабли. Из них доставали тела погибших и раненых. Тут же происходил и ремонт кораблей, если они еще подлежали восстановлению.',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Все это выглядит...", minLinks: 3, removeBelow: 2 },
+  { text: "Это... плохо?", minLinks: 4, removeBelow: 3 },
+  { text: "Скоро я займу их место...", minLinks: 2, removeBelow: 1 },
+  { text: "И потом кто-то займет мое место...", minLinks: 2, removeBelow: 1 }
+]},
       {
         text: 'Я засмотрелась на это, продолжая идти по коридору и вдруг в кого-то врезалась.',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Надо бы извиниться", minLinks: 2, removeBelow: 3 },
+  { text: "А может ему стоит извиниться?", minLinks: 3, removeBelow: 2 },
+  { text: "Хотят тут такие важные...", minLinks: 4, removeBelow: 3 }
+]},
       {
         text: 'Я повернула голову и увидела перед собой инженера, который уронил на пол инструменты после столкновения со мной. Он посмотрел на меня со злобой и презрением.',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Ой...", minLinks: 1, removeBelow: 1 },
+  { text: "Надо сказать что-то и срочно!", minLinks: 2, removeBelow: 1 },
+  { text: "Прости?", minLinks: 4, removeBelow: 3 },
+  { text: "Извиняюсь?", minLinks: 4, removeBelow: 3 },
+  { text: "Извините?", minLinks: 4, removeBelow: 3 },
+  { text: "Прошу прошения?", minLinks: 4, removeBelow: 3 }
+]},
       {
         text: '<color:cf>"Ой, извините, я..."</color><br>Не успела я договорить, как он резко пнул меня под коленом. Удар лицом о стальной пол, тошнотворные ощущения от разбитого носа.',
         play: ['click'],
@@ -676,17 +815,36 @@ ambience1: createFilteredSource(audioMap.ambience1),
         text: '"Да пошла ты нахуй, сука!"<br>Затем стальной нос его ботинка врезался в мой бок. Какая ужасная боль...',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Я не могу ему ответить...", minLinks: 1, removeBelow: 1 },
+  { text: "Мне нельзя отвечать", minLinks: 3, removeBelow: 2 },
+  { text: "Не могу себя защитить", minLinks: 3, removeBelow: 2 },
+  { text: "Нельзя дать отпор", minLinks: 3, removeBelow: 2 },
+  { text: "Терпи", minLinks: 3, removeBelow: 2 }
+]},
       {
         text: 'Еще несколько ударов... Я закрыла область живота левой рукой, а правой зажала нос из которого лилась кровь.',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Почему я не могу просто ударить в ответ..?", minLinks: 1, removeBelow: 1 },
+  { text: "Я этого не заслужила...", minLinks: 2, removeBelow: 1 },
+  { text: "Хоть бы не сломал ничего", minLinks: 3, removeBelow: 2 },
+  { text: "Чтоб ты сдох!", minLinks: 9, removeBelow: 1 }
+]},
       {
         text: 'Через некоторое время удары прекратились и он ушел, но я продолжала лежать на полу, чувствуя вкус крови у себя во рту.',
         play: ['click'],
         stop: []
-      },
+      ,
+  thoughts: [
+  { text: "Больно... очень", minLinks: 2, removeBelow: 1 },
+  { text: "Тошнит", minLinks: 2, removeBelow: 1 },
+  { text: "Я боюсь пошевелиться", minLinks: 3, removeBelow: 1 },
+  { text: "За что мне все это...", minLinks: 4, removeBelow: 1 }
+]},
       {
         text: 'Кажется, сзади кто-то подходит ко мне...',
         play: ['click', 'CF377'],
@@ -695,7 +853,8 @@ ambience1: createFilteredSource(audioMap.ambience1),
   { text: "Больно...", minLinks: 4, removeBelow: 2 },
   { text: "Шаги приближаются", minLinks: 6, removeBelow: 4 },
   { text: "Кто это?", minLinks: 6, removeBelow: 4 },
-  { text: "Тошнит", minLinks: 4, removeBelow: 2 }
+  { text: "Тошнит", minLinks: 4, removeBelow: 2 },
+  { text: "Дальше бить будут?", minLinks: 2, removeBelow: 1 }
 ]
       },
       {
@@ -706,7 +865,8 @@ ambience1: createFilteredSource(audioMap.ambience1),
   { text: "381...", minLinks: 4, removeBelow: 2 },
   { text: "Спасибо", minLinks: 6, removeBelow: 4 },
   { text: "Кровь все еще течет...", minLinks: 6, removeBelow: 4 },
-  { text: "Значит она тоже...", minLinks: 4, removeBelow: 2 }
+  { text: "Значит она тоже...", minLinks: 4, removeBelow: 2 },
+  { text: "Эр-Кей?", minLinks: 1, removeBelow: 1 }
 ]
       },
       {
@@ -715,7 +875,8 @@ ambience1: createFilteredSource(audioMap.ambience1),
         stop: [],
         thoughts:[
   { text: "Ага... Поняла", minLinks: 4, removeBelow: 2 },
-  { text: "Живот болит", minLinks: 4, removeBelow: 2 }
+  { text: "Живот болит", minLinks: 4, removeBelow: 2 },
+  { text: "Почему меня побили?", minLinks: 4, removeBelow: 1 }
 ]
       },
       {
@@ -730,7 +891,7 @@ ambience1: createFilteredSource(audioMap.ambience1),
 ]
       },
       {
-        text: '"Ну вот, как новенькая."<br>Она перекрыла кран и после этого, я подняла взгляд, посмотрев в зеркало.',
+        text: 'Приведя меня в порядок, она кивнула одобрительно перекрывыв кран. <br>Я подняла взгляд, посмотрев в зеркало.',
         play: ['click'],
         stop: [],
         thoughts:[
@@ -738,7 +899,8 @@ ambience1: createFilteredSource(audioMap.ambience1),
   { text: "У нас с ней глаза одинакового цвета", minLinks: 4, removeBelow: 2 },
   { text: "Кровь прошла", minLinks: 6, removeBelow: 3 },
   { text: "Я выгляжу паршиво", minLinks: 6, removeBelow: 3 },
-  { text: "Ну привет, Я", minLinks: 6, removeBelow: 3 }
+  { text: "Ну привет, Я", minLinks: 6, removeBelow: 3 },
+  { text: "Не кролик и на том спасибо", minLinks: 7, removeBelow: 6 }
 ]
       },
       {
@@ -750,7 +912,8 @@ ambience1: createFilteredSource(audioMap.ambience1),
   { text: "Кажется она тоже будущий пилот", minLinks: 4, removeBelow: 2 },
   { text: "Может мы подружимся", minLinks: 6, removeBelow: 3 },
   { text: "Я выгляжу паршиво", minLinks: 6, removeBelow: 3 },
-  { text: "И... Как мне реагировать на то, что она не улыбается в ответ?", minLinks: 6, removeBelow: 3 }
+  { text: "И... Как мне реагировать на то, что она не улыбается в ответ?", minLinks: 6, removeBelow: 3 },
+  { text: "Какая же она добрая!", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -762,7 +925,8 @@ ambience1: createFilteredSource(audioMap.ambience1),
   { text: "Больно!", minLinks: 4, removeBelow: 2 },
   { text: "Я точно в порядке?", minLinks: 6, removeBelow: 3 },
   { text: "Ходить будет больно...", minLinks: 6, removeBelow: 3 },
-  { text: "Сейчас стою смирно... Вроде боль проходит", minLinks: 6, removeBelow: 3 }
+  { text: "Сейчас стою смирно... Вроде боль проходит", minLinks: 6, removeBelow: 3 },
+  { text: "Я умира-а-а-аю...", minLinks: 8, removeBelow: 7 }
 ]
       },
       {
@@ -771,69 +935,135 @@ ambience1: createFilteredSource(audioMap.ambience1),
         stop: [],
         thoughts:[
   { text: "Она такая добрая", minLinks: 4, removeBelow: 2 },
-  { text: "Класс 45 вроде", minLinks: 4, removeBelow: 2 }
+  { text: "Класс 45 вроде", minLinks: 4, removeBelow: 2 },
+  { text: "Есть не хочется совсем... тошнит", minLinks: 3, removeBelow: 2 },
+  { text: "Хочется полежать...", minLinks: 1, removeBelow: 1 }
 ]
       },
       {
         text: 'Пройдя через коридоры общей зоны, мы вернулись в зону для репликантов. Это заняло чуть больше времени, поскольку мне было достаточно больно идти. Черт, я ведь так и не поела.',
         play: ['click'],
         stop: [],
-      },
+        thoughts: [
+  { text: "Хочется есть, но не хочется...", minLinks: 4, removeBelow: 2 },
+  { text: "Отдохнуть бы...", minLinks: 4, removeBelow: 2 }
+]},
       {
         text: 'На входе нас встретил мужчина с надписью "INSTRUCTOR" на форме. Он посмотрел на нас.<br><color:instructor>"Вы уже в паре?"</color>',
         play: ['click'],
         stop: [],
-      },
+        thoughts: [
+  { text: "Надо ему сказать что меня побили", minLinks: 4, removeBelow: 2 },
+  { text: "А может отгул попросить?", minLinks: 2, removeBelow: 1 },
+  { text: "Опять кто-то важный...", minLinks: 4, removeBelow: 2 },
+  { text: "Пара? Это в каком таком смысле...", minLinks: 6, removeBelow: 3 }
+]},
       {
         text: '<color:rk>"Так точно."</color><br>RK-381 Коротко кивнула и помогла мне войти в класс. Внутри было довольно много других репликантов. И, кажется, у всех были янтарные глаза... Интересно.',
         play: ['click'],
         stop: [],
-      },
+        thoughts: [
+  { text: "Девушки...", minLinks: 1, removeBelow: 1 },
+  { text: "Парни...", minLinks: 1, removeBelow: 1 },
+  { text: "Хотя бы лица разные...", minLinks: 4, removeBelow: 2 },
+  { text: "А эта на меня похожа!", minLinks: 6, removeBelow: 1 },
+  { text: "Я опоздала?", minLinks: 4, removeBelow: 2 },
+  { text: "Зато я с ней в паре!", minLinks: 4, removeBelow: 2 }
+]},
       {
         text: 'Мы сели на свободные места в переднем ряду. Класс по своей сути состоит из стульев и экрана.',
         play: ['click'],
         stop: [],
-      },
+        thoughts: [
+  { text: "Неудобно... и все болит...", minLinks: 4, removeBelow: 2 },
+  { text: "Вот бы поспать...", minLinks: 4, removeBelow: 2 },
+  { text: "У нас первые места!", minLinks: 4, removeBelow: 2 },
+  { text: "У нас первые места... это плохо...", minLinks: 4, removeBelow: 2 }
+]},
       {
         text: 'Инструктор посмотрел на часы, затем оглядел присутствующих.<br><color:instructor>"Для начала - называйте меня инструктор или сэр. Никак иначе."</color>',
         play: ['click'],
         stop: [],
-      },
+        thoughts: [
+  { text: "Так точно, сэр", minLinks: 3, removeBelow: 2 },
+  { text: "Принято, сэр", minLinks: 3, removeBelow: 2 },
+  { text: "Есть, сэр", minLinks: 3, removeBelow: 2 },
+  { text: "Мудак", minLinks: 9, removeBelow: 1 },
+  { text: "Важный какой...", minLinks: 5, removeBelow: 4 }
+]},
       {
         text: 'Он встал из-за стола и нажал переключатель рядом с экраном. Экран включился и на нем открылась картинка.<br><color:instructor>"Это - стратегическая карта человеческого сектора галактики."</color>',
         play: ['click'],
         stop: [],
-      },
+        thoughts: [
+  { text: "Большая!", minLinks: 2, removeBelow: 1 },
+  { text: "Точечки", minLinks: 4, removeBelow: 3 },
+  { text: "Линии", minLinks: 4, removeBelow: 3 },
+  { text: "Много всего", minLinks: 4, removeBelow: 3 },
+  { text: "И все кажется знакомым", minLinks: 4, removeBelow: 1 }
+]},
       {
         text: '<color:instructor>"Вы могли заметить, что большая часть секторов на этой карте отмечены красным цветом."</color><br>Он указал в верхнюю часть карты, которая была сплошь красной.<br><color:instructor>"Красный - значит оккупирован врагом."</color>',
         play: ['click'],
         stop: [],
-      },
+        thoughts: [
+  { text: "О нет...", minLinks: 5, removeBelow: 4 },
+  { text: "Победим врага!", minLinks: 2, removeBelow: 1 },
+  { text: "Но как...", minLinks: 4, removeBelow: 2 }
+]},
       {
         text: '<em>Стоп... То есть почти все человеческие секторы были захвачены?</em><br>Я уставилась на карту. Инструктор выдержал паузу и тыкнул пальцем в одну из красных точек.<br><color:instructor>"Вот тут была наша столица. Марс. До тех пор, пока эти твари не уничтожили ее."</color>',
         play: ['click'],
         stop: [],
-      },
+        thoughts: [
+  { text: "О нет!", minLinks: 4, removeBelow: 2 },
+  { text: "На Марсе классно", minLinks: 10, removeBelow: 1 },
+  { text: "И что делать теперь?", minLinks: 4, removeBelow: 2 },
+  { text: "Видимо, мстить", minLinks: 4, removeBelow: 2 }
+]},
       {
         text: 'Инструктор вздохнул, убрал руку с карты и продолжил.<br><color:instructor>"Враг думал, что это сломит нас. Что заставит нас капитулировать. Но человечество не должно сдаваться. Инопланетные захватчики должны пожалеть о том, что посмели напасть на нас."</color>',
         play: ['click'],
         stop: [],
-      },
+        thoughts: [
+  { text: "Покажем им", minLinks: 4, removeBelow: 2 },
+  { text: "А... почему мы именно?", minLinks: 8, removeBelow: 2 },
+  { text: "Как же спать охото... сил нет", minLinks: 6, removeBelow: 2 }
+]},
       {
         text: '<color:instructor>"Вот тут..."</color><br>Он снова повернулся к карте и указал пальцем на белую точку в нижней части рядом с оккупированными территориями.<br><color:instructor>"...находимся мы. Главные силы ОЧС. Здесь мы принимаем бой. И этот бой решает судьбу человечества. Система, в которой мы находимся - является ключевой. Тут сконцентрированны главные ресурсные и промышленные силы ОЧС. Враг направил сюда свой сильнейший флот. И мы прямо сейчас отбиваем его атаку."</color>',
         play: ['click'],
         stop: [],
-      },
+        thoughts: [
+  { text: "Странно... я ничего не чувствую по этому поводу", minLinks: 3, removeBelow: 1 },
+  { text: "А должна я что-то чувствовать?", minLinks: 5, removeBelow: 2 },
+  { text: "Ну, видимо, будет бойня", minLinks: 6, removeBelow: 3 },
+  { text: "Как же не хочется умирать...", minLinks: 9, removeBelow: 8 }
+]},
       {
         text: 'Инструктор развернулся к нам.<br><color:instructor>"Если Объединенные Человеческие Силы смогут отбить эту атаку - это сможет задержать и так уже истощённого врага и дать человечеству время на подготовку к контратаке, но если мы потеряем Никс, то у человечества уже не будет шансов. Мы лишимсся наших главных ресурсов и поражение будет лишь вопросом времени... По этому мы должны показать врагу ад. Мы должны сделать все, для того, чтобы отбить эту атаку. И если мы сможем - это будет первой победой человечества, которая положит начало освобождению от гнёта захватчика."</color>',
         play: ['click'],
         stop: [],
-      },
+        thoughts: [
+  { text: "И в центре этого ада, видимо, мы", minLinks: 8, removeBelow: 6 },
+  { text: "Сделаем это", minLinks: 4, removeBelow: 2 },
+  { text: "Сделаем... после небольшого отдыха...", minLinks: 6, removeBelow: 4 }
+]},
       {
         text: '<color:instructor>"Вы тоже внесете свой вклад в бой..."</color>',
         play: ['click'],
         stop: [],
-      },
+        thoughts: [
+  { text: "Хорошо, сэр", minLinks: 4, removeBelow: 2 },
+  { text: "Принято, сэр", minLinks: 4, removeBelow: 2 },
+  { text: "Есть, сэр", minLinks: 4, removeBelow: 2 },
+  { text: "Есть хочется...", minLinks: 6, removeBelow: 1 },
+  { text: "Хочется вздремнуть...", minLinks: 6, removeBelow: 1 },
+  { text: "Умирать не охото", minLinks: 8, removeBelow: 7 },
+  { text: "Так точно, сэр", minLinks: 4, removeBelow: 2 },
+  { text: "Ну конечно, заплатим цену, только не они, а я", minLinks: 9, removeBelow: 4 },
+  { text: "Это не справедливо", minLinks: 9, removeBelow: 1 }
+]},
       {
         text: 'Я прикрываю глаза. Как много всего произошло за пару часов...',
         play: ['click'],
@@ -877,22 +1107,13 @@ ambience1: createFilteredSource(audioMap.ambience1),
 ]
       },
       {
-        text: 'Смирив меня строгим взглядом, RK-381 кивнула перед собой. Я посмотрела вперед.',
-        play: ['click'],
-        stop: [],
-        thoughts: [
-  { text: "Точно... Инструктаж", minLinks: 4, removeBelow: 2 },
-  { text: "Я все пропустила уже?", minLinks: 4, removeBelow: 2 },
-  { text: "А про что нам говорили?", minLinks: 4, removeBelow: 2 }
-]
-      },
-      {
         text: 'Экран был уже выключен.<br><color:instructor>"Это далеко не все, что вам нужно знать. Остальное вы узнаете на следующих инструктажах."</color>',
         play: ['click'],
         stop: ['music1'],
         thoughts: [
   { text: "Я действительно все пропустила...", minLinks: 4, removeBelow: 2 },
-  { text: "Тут не было ничего важного, наверное", minLinks: 4, removeBelow: 2 }
+  { text: "Тут не было ничего важного, наверное", minLinks: 4, removeBelow: 2 },
+  { text: "Остальные инструктажи? О нет...", minLinks: 8, removeBelow: 6 }
 ]
       },
       {
@@ -909,7 +1130,11 @@ ambience1: createFilteredSource(audioMap.ambience1),
         stop: [],
         thoughts: [
   { text: "Он даже не извинился", minLinks: 4, removeBelow: 2 },
-  { text: "Вот бы его отпиздить!", minLinks: 1, removeBelow: 1 }
+  { text: "Вот бы его отпиздить!", minLinks: 1, removeBelow: 1 },
+  { text: "Он выглядит намного сильнее меня...", minLinks: 5, removeBelow: 3 },
+  { text: "Нужно мне смотреть по сторонам", minLinks: 4, removeBelow: 2 },
+  { text: "Пронесло...", minLinks: 4, removeBelow: 2 },
+  { text: "С прошлого раза бок еще болит", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -917,7 +1142,13 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "И чем я все это заслужила?", minLinks: 4, removeBelow: 2 },
+  { text: "Они разве не должны быть нам благодарны?", minLinks: 5, removeBelow: 3 },
+  { text: "Это их война", minLinks: 7, removeBelow: 4 },
+  { text: "Мне все это не нужно", minLinks: 6, removeBelow: 4 },
+  { text: "Я не просила меня делать", minLinks: 4, removeBelow: 2 },
+  { text: "Не справедливо...", minLinks: 6, removeBelow: 4 },
+  { text: "Пусть сами воюют вообще!", minLinks: 8, removeBelow: 6 }
 ]
       },
       {
@@ -925,7 +1156,16 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Угол разворота основных орудий...", minLinks: 4, removeBelow: 2 },
+  { text: "Калибр... угу...", minLinks: 4, removeBelow: 2 },
+  { text: "Цифры-цифры-цифры", minLinks: 4, removeBelow: 2 },
+  { text: "Толщина брони", minLinks: 4, removeBelow: 2 },
+  { text: "Силуэт вражеской техники", minLinks: 4, removeBelow: 2 },
+  { text: "Максимальная тяга движков...", minLinks: 4, removeBelow: 2 },
+  { text: "Дальность действия коммуникационного реле", minLinks: 4, removeBelow: 2 },
+  { text: "Колличество палуб Техлина", minLinks: 4, removeBelow: 2 },
+  { text: "Что такое корма?", minLinks: 4, removeBelow: 2 },
+  { text: "Гальюн... смешное слово!", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -933,7 +1173,14 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Она мне опять на ногу наступила...", minLinks: 4, removeBelow: 2 },
+  { text: "И смотрит потом так будто я виновата!", minLinks: 4, removeBelow: 2 },
+  { text: "Но зато извинилась", minLinks: 4, removeBelow: 2 },
+  { text: "Добрая", minLinks: 4, removeBelow: 2 },
+  { text: "А взгляд у нее строгий", minLinks: 4, removeBelow: 2 },
+  { text: "И вредная она вообще", minLinks: 4, removeBelow: 2 },
+  { text: "Или важная?", minLinks: 4, removeBelow: 2 },
+  { text: "Ну хоть не храпит!", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -941,7 +1188,14 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Как-то одиноко...", minLinks: 4, removeBelow: 2 },
+  { text: "Она толком и не говорит ни о чем", minLinks: 4, removeBelow: 2 },
+  { text: "Зато не ругается", minLinks: 4, removeBelow: 2 },
+  { text: "Надо бы её разговорить", minLinks: 4, removeBelow: 2 },
+  { text: "Интересно, а о чем она думает?", minLinks: 4, removeBelow: 2 },
+  { text: "А почему я так много говорю?", minLinks: 4, removeBelow: 2 },
+  { text: "Вот бы она болтливой была", minLinks: 4, removeBelow: 2 },
+  { text: "Скучно...", minLinks: 0, removeBelow: 0 }
 ]
       },
       {
@@ -949,7 +1203,11 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Нужно спросить...", minLinks: 4, removeBelow: 2 },
+  { text: "Нет, нужно просто сказать...", minLinks: 4, removeBelow: 2 },
+  { text: "Вот ничего в голову не приходит", minLinks: 4, removeBelow: 2 },
+  { text: "А как люди разговор начинают?", minLinks: 4, removeBelow: 2 },
+  { text: "Скажу что нибудь нейтральное", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -957,7 +1215,11 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Вот делать ей нечего!", minLinks: 4, removeBelow: 2 },
+  { text: "И к чемуона этим занята?", minLinks: 4, removeBelow: 2 },
+  { text: "Хотя, ей идет", minLinks: 4, removeBelow: 2 },
+  { text: "Выглядит важной", minLinks: 4, removeBelow: 2 },
+  { text: "Слишком важной", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -965,15 +1227,21 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Вроде нормальный вопрос", minLinks: 4, removeBelow: 2 },
+  { text: "Нейтрально и ненавязчиво", minLinks: 4, removeBelow: 2 },
+  { text: "У неё ресница странно дернулась...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
-        text: 'Отражение RK резко зыркнуло на меня, приподнимая бровь, которую она подводила. Она молчит...',
+        text: 'Отражение RK резко зыркнуло на меня, приподнимая бровь, которую только что подводила. Она молчит...',
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Слишком важная", minLinks: 4, removeBelow: 2 },
+  { text: "Да что не так снова то?", minLinks: 4, removeBelow: 2 },
+  { text: "Вот и как с ней вообще разговор завести?", minLinks: 4, removeBelow: 2 },
+  { text: "Какая же она вредная...", minLinks: 4, removeBelow: 2 },
+  { text: "Вот кто так вообще на людей смотрит?", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -981,7 +1249,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Вот так даже лучше", minLinks: 4, removeBelow: 2 },
+  { text: "Я бы и Восхождением могла подружиться", minLinks: 4, removeBelow: 2 },
+  { text: "Должно сработать", minLinks: 4, removeBelow: 2 },
+  { text: "Она так поймет, что ей тоже нужно говорить", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -989,7 +1260,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Какая же она злая...", minLinks: 4, removeBelow: 2 },
+  { text: "Да о чем угодно говорить!", minLinks: 4, removeBelow: 2 },
+  { text: "Она будто не рада что я её напарница", minLinks: 4, removeBelow: 2 },
+  { text: "Просто... невозможно", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -997,7 +1271,11 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Вот бы ей в крашенный глаз двинуть!", minLinks: 9, removeBelow: 8 },
+  { text: "Может попросить её накрасить меня?", minLinks: 4, removeBelow: 4 },
+  { text: "И все то я должна строить диалог...", minLinks: 4, removeBelow: 0 },
+  { text: "Сама бы спросила лучше чего!", minLinks: 6, removeBelow: 4 },
+  { text: "Только я говорю и я, нет сил уже...", minLinks: 9, removeBelow: 8 }
 ]
       },
       {
@@ -1005,7 +1283,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Алиса... она добрая!", minLinks: 4, removeBelow: 2 },
+  { text: "Идет ей косметика, конечно", minLinks: 4, removeBelow: 2 },
+  { text: "Может попросить меня накрасить?", minLinks: 4, removeBelow: 2 },
+  { text: "Ой нет, лень мне каждый день возиться у зеркала...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1013,7 +1294,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Какая же она грубая!", minLinks: 4, removeBelow: 2 },
+  { text: "Да откуда она знает чем я занята...", minLinks: 4, removeBelow: 2 },
+  { text: "А чем я занимаюсь, действительно...", minLinks: 4, removeBelow: 2 },
+  { text: "Вообще я учусь", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1021,7 +1305,15 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Мыло", minLinks: 4, removeBelow: 2 },
+  { text: "Душ", minLinks: 4, removeBelow: 2 },
+  { text: "Раковина", minLinks: 4, removeBelow: 2 },
+  { text: "И не стыдно ей в одном нижнем белье?", minLinks: 4, removeBelow: 2 },
+  { text: "Хоть бы футболку накинула...", minLinks: 4, removeBelow: 2 },
+  { text: "Я вот вообще порой прямо в одежде сплю", minLinks: 4, removeBelow: 2 },
+  { text: "Пол холодный...", minLinks: 4, removeBelow: 2 },
+  { text: "Кажется, лампочка скоро сгорит", minLinks: 4, removeBelow: 2 },
+  { text: "Болтик от обшивки отвалился...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1029,7 +1321,19 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Я рисую", minLinks: 4, removeBelow: 2 },
+  { text: "Я пилотировать штурмовика буду", minLinks: 2, removeBelow: 0 },
+  { text: "Я готовить люблю", minLinks: 4, removeBelow: 2 },
+  { text: "Я тебе щас в глаз двину, коза крашенная", minLinks: 9, removeBelow: 8 },
+  { text: "Я люблю музыку слушать", minLinks: 4, removeBelow: 2 },
+  { text: "Я люблю читать", minLinks: 4, removeBelow: 2 },
+  { text: "Я знаю кунг-фу!", minLinks: 8, removeBelow: 6 },
+  { text: "Я занята разработкой вакцины против КРС", minLinks: 8, removeBelow: 6 },
+  { text: "Я изучаю медицинское дело", minLinks: 6, removeBelow: 4 },
+  { text: "Я создаю чертежи для судов!", minLinks: 6, removeBelow: 4 },
+  { text: "Я петь умею", minLinks: 4, removeBelow: 2 },
+  { text: "И вообще, красить глазки это не хобби!", minLinks: 2, removeBelow: 1 },
+  { text: "Как-то вообще ничего правдивого на ум не приходит...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1037,7 +1341,13 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "...", minLinks: 4, removeBelow: 2 },
+  { text: "... ", minLinks: 4, removeBelow: 2 },
+  { text: "...  ", minLinks: 4, removeBelow: 2 },
+  { text: "...   ", minLinks: 4, removeBelow: 2 },
+  { text: " ...", minLinks: 4, removeBelow: 2 },
+  { text: "  ...", minLinks: 4, removeBelow: 2 },
+  { text: "   ... ", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1045,7 +1355,9 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Сработало..?", minLinks: 4, removeBelow: 2 },
+  { text: "Может она просто не думает?", minLinks: 4, removeBelow: 2 },
+  { text: "Вдруг у меня дар?", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1061,7 +1373,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Блин...", minLinks: 4, removeBelow: 2 },
+  { text: "Я дура", minLinks: 4, removeBelow: 2 },
+  { text: "Надо что-то еще придумать", minLinks: 4, removeBelow: 2 },
+  { text: "Какая же она холодная...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1069,7 +1384,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click', 'alarm1'],
         stop: [],
         thoughts:[
-  
+  { text: "Я спасена!", minLinks: 4, removeBelow: 2 },
+  { text: "Вот бы еще подремать...", minLinks: 4, removeBelow: 2 },
+  { text: "Позавтракать бы...", minLinks: 4, removeBelow: 2 },
+  { text: "Уже пора?", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1077,7 +1395,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Надеюсь, это будет интересно", minLinks: 4, removeBelow: 2 },
+  { text: "Как-то даже не тревожно совсем", minLinks: 4, removeBelow: 2 },
+  { text: "А вдруг у меня талант в управлении штурмовиком?", minLinks: 4, removeBelow: 2 },
+  { text: "Покажу ей все на что способна!", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1085,7 +1406,12 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: ['alarm1'],
         thoughts:[
-  
+  { text: "И почему эти костюмы... такие?", minLinks: 4, removeBelow: 2 },
+  { text: "Чувствую себя неловко...", minLinks: 4, removeBelow: 2 },
+  { text: "Стыдно...", minLinks: 4, removeBelow: 2 },
+  { text: "А ей все равно абсолютно!", minLinks: 4, removeBelow: 2 },
+  { text: "Провод в кожу впился...", minLinks: 4, removeBelow: 2 },
+  { text: "И эти... липучки... ужасно...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1093,7 +1419,12 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "А я плохо выгляжу?", minLinks: 4, removeBelow: 2 },
+  { text: "Я даже в зеркало сегодня не посмотрелась...", minLinks: 4, removeBelow: 2 },
+  { text: "Да я всегда прекрасно выгляжу!", minLinks: 4, removeBelow: 2 },
+  { text: "Какая-же она добрая", minLinks: 4, removeBelow: 2 },
+  { text: "Ага... имплант? Точно...", minLinks: 4, removeBelow: 2 },
+  { text: "Может попросить её другие костюмы нам дать?", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1101,7 +1432,13 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Красиво!", minLinks: 0, removeBelow: 0 },
+  { text: "И этим мне надо управлять?", minLinks: 0, removeBelow: 0 },
+  { text: "А это что такое мигает?", minLinks: 0, removeBelow: 0 },
+  { text: "Голова кругом...", minLinks: 0, removeBelow: 0 },
+  { text: "И этот... костюм... мне сосредоточиться не позволяет!", minLinks: 0, removeBelow: 0 },
+  { text: "Ага, ну что такое Eject я знаю... только кнопка сломанна...", minLinks: 0, removeBelow: 0 },
+  { text: "А вот это знакомое... нет... нет, что это?", minLinks: 0, removeBelow: 0 }
 ]
       },
       {
@@ -1109,7 +1446,11 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Какая она умная!", minLinks: 4, removeBelow: 2 },
+  { text: "Ну она мне все объяснит", minLinks: 4, removeBelow: 2 },
+  { text: "И откуда она все это знает?", minLinks: 4, removeBelow: 2 },
+  { text: "А может просто вид делает?", minLinks: 4, removeBelow: 2 },
+  { text: "Дернуть случайный тумблер?", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1125,7 +1466,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "И что это значит вообще?", minLinks: 4, removeBelow: 2 },
+  { text: "Какая-же она молчаливая...", minLinks: 4, removeBelow: 2 },
+  { text: "Ну а мне то что делать?", minLinks: 4, removeBelow: 2 },
+  { text: "Может просто сидеть?", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1133,7 +1477,14 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "А?", minLinks: 4, removeBelow: 2 },
+  { text: "На голосовом управлении?", minLinks: 4, removeBelow: 2 },
+  { text: "А имплант тогда зачем?", minLinks: 4, removeBelow: 2 },
+  { text: "И чего она смотрит..?", minLinks: 4, removeBelow: 2 },
+  { text: "Она ведь... не пялится на меня?", minLinks: 8, removeBelow: 6 },
+  { text: "Вот всегда она так", minLinks: 4, removeBelow: 2 },
+  { text: "Может имплант позволяет мысли читать?", minLinks: 4, removeBelow: 2 },
+  { text: "На ум ну вообще ничего не приходит", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1141,7 +1492,13 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Ну скажи что нибудь!", minLinks: 4, removeBelow: 2 },
+  { text: "Чего она от меня ждет вообще?", minLinks: 4, removeBelow: 2 },
+  { text: "Может сработает?", minLinks: 4, removeBelow: 2 },
+  { text: "А может я бракованная?", minLinks: 4, removeBelow: 2 },
+  { text: "Не хочу в утиль...", minLinks: 4, removeBelow: 2 },
+  { text: "Может меня в уборщики перевести?", minLinks: 4, removeBelow: 2 },
+  { text: "Не вышел из меня пилот...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1149,7 +1506,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Как же ей все легко дается...", minLinks: 4, removeBelow: 2 },
+  { text: "Ну вот и как она это сделала?", minLinks: 4, removeBelow: 2 },
+  { text: "А вдруг она будет стрелять, а я буду... другое делать?", minLinks: 4, removeBelow: 2 },
+  { text: "И вообще я не создана для насилия", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1157,7 +1517,11 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Какого врага?", minLinks: 4, removeBelow: 2 },
+  { text: "Спусковой..? А, эта штука как на пушках... оружии?", minLinks: 4, removeBelow: 2 },
+  { text: "Ну это такое перекрестие я знаю!", minLinks: 4, removeBelow: 2 },
+  { text: "И как это вообще через экран целится?", minLinks: 4, removeBelow: 2 },
+  { text: "Не понимаю...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1165,7 +1529,14 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Враги!", minLinks: 4, removeBelow: 2 },
+  { text: "Ура..?", minLinks: 4, removeBelow: 2 },
+  { text: "В бой?", minLinks: 4, removeBelow: 2 },
+  { text: "Застрелить экран", minLinks: 4, removeBelow: 2 },
+  { text: "Воюй давай!", minLinks: 4, removeBelow: 2 },
+  { text: "Глазки болят теперь...", minLinks: 6, removeBelow: 4 },
+  { text: "Да какие враги то хоть...", minLinks: 8, removeBelow: 6 },
+  { text: "Вот помог бы кто лучше...", minLinks: 8, removeBelow: 6 }
 ]
       },
       {
@@ -1173,7 +1544,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Какая-же она мудрая", minLinks: 4, removeBelow: 2 },
+  { text: "Ну хоть кто-то подсказал нормально...", minLinks: 4, removeBelow: 2 },
+  { text: "Уже понятней", minLinks: 4, removeBelow: 2 },
+  { text: "Нужно попробовать", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1182,7 +1556,18 @@ ambience1: createFilteredSource(audioMap.ambience1),
         stop: [],
         clickblock: true,
         thoughts: [
-  { text: "Битый пиксель...", minLinks: 1, removeBelow: 1, interactive: true }
+  { text: "Битый пиксель...", minLinks: 1, removeBelow: 1, interactive: true },
+  { text: "Пыль какая-то...", minLinks: 3, removeBelow: 1 },
+  { text: "Лампочки мигают... нет, это на панели", minLinks: 2, removeBelow: 1 },
+  { text: "Да не могу я думать... мне провода в тело впились!", minLinks: 4, removeBelow: 1 },
+  { text: "Есть охота...", minLinks: 4, removeBelow: 2 },
+  { text: "Пахнет тут очень странно", minLinks: 4, removeBelow: 2 },
+  { text: "Ну вот экран как экран", minLinks: 4, removeBelow: 2 },
+  { text: "Может просто смотреть на экран долго?", minLinks: 4, removeBelow: 2 },
+  { text: "Ничего не происходит...", minLinks: 4, removeBelow: 2 },
+  { text: "Как же сложно!", minLinks: 4, removeBelow: 2 },
+  { text: "И кто это придумал вообще?", minLinks: 4, removeBelow: 2 },
+  { text: "А может я не хочу?", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1190,7 +1575,13 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Ого!", minLinks: 2, removeBelow: 1 },
+  { text: "Удобно!", minLinks: 2, removeBelow: 1 },
+  { text: "Я смогла!", minLinks: 2, removeBelow: 1 },
+  { text: "Классно!", minLinks: 2, removeBelow: 1 },
+  { text: "А это становится веселее", minLinks: 4, removeBelow: 2 },
+  { text: "Не так и сложно оказалось...", minLinks: 4, removeBelow: 2 },
+  { text: "Этот костюм меня убивает...", minLinks: 4, removeBelow: 1 }
 ]
       },
       {
@@ -1199,7 +1590,15 @@ ambience1: createFilteredSource(audioMap.ambience1),
         stop: [],
         clickblock: true,
         thoughts: [
-  { text: "Инженер!", minLinks: 1, removeBelow: 1, interactive: true }
+  { text: "Инженер!", minLinks: 1, removeBelow: 1, interactive: true },
+  { text: "Смерть врагам человечества!", minLinks: 6, removeBelow: 4 },
+  { text: "Вообще, мне этот квадрат вот ничего не сделал", minLinks: 4, removeBelow: 2 },
+  { text: "Умри..?", minLinks: 2, removeBelow: 0 },
+  { text: "Пиу!?", minLinks: 2, removeBelow: 0 },
+  { text: "Стреляй давай...", minLinks: 4, removeBelow: 2 },
+  { text: "Ну не хочу я вот... и все тут!", minLinks: 6, removeBelow: 4 },
+  { text: "Зачем мне это вообще нужно?", minLinks: 8, removeBelow: 6 },
+  { text: "Насилие - это плохо", minLinks: 8, removeBelow: 6 }
 ]
       },
       {
@@ -1207,7 +1606,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Есть!", minLinks: 4, removeBelow: 2 },
+  { text: "У меня получилось!", minLinks: 4, removeBelow: 2 },
+  { text: "Это весело!", minLinks: 4, removeBelow: 2 },
+  { text: "Еще нужно один уничтожить!", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1215,7 +1617,11 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: ['insolitum'],
         thoughts:[
-  
+  { text: "А?!", minLinks: 4, removeBelow: 2 },
+  { text: "Уши...", minLinks: 4, removeBelow: 2 },
+  { text: "Что это за шум?", minLinks: 4, removeBelow: 2 },
+  { text: "Это не к добру...", minLinks: 4, removeBelow: 2 },
+  { text: "У меня только получаться начало", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1223,7 +1629,13 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click', 'part3'],
         stop: [],
         thoughts:[
-  
+  { text: "Желтое... звено? Это мы", minLinks: 4, removeBelow: 2 },
+  { text: "А мы уже в кабинах!", minLinks: 4, removeBelow: 2 },
+  { text: "Вообще... я довольно спокойна", minLinks: 4, removeBelow: 2 },
+  { text: "Видимо, вот и все обучение", minLinks: 4, removeBelow: 2 },
+  { text: "Наверное, по ходу разберемся", minLinks: 4, removeBelow: 2 },
+  { text: "А как же тренировка?", minLinks: 4, removeBelow: 2 },
+  { text: "Что еще за боевая задача..?", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1231,7 +1643,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Ай, не приятно!", minLinks: 4, removeBelow: 2 },
+  { text: "Я чувствую... тяжесть...", minLinks: 4, removeBelow: 2 },
+  { text: "Мы летим в бой...", minLinks: 4, removeBelow: 2 },
+  { text: "Хоть бы все вышло...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1239,7 +1654,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "А как?!", minLinks: 4, removeBelow: 2 },
+  { text: "А, вот этот... нет, не эта кнопка", minLinks: 4, removeBelow: 2 },
+  { text: "Сама бы и запустила...", minLinks: 4, removeBelow: 2 },
+  { text: "Как же она любит командовать...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1248,7 +1666,13 @@ ambience1: createFilteredSource(audioMap.ambience1),
         stop: [],
         clickblock: true,
         thoughts: [
-  { text: "Оживи!", minLinks: 4, removeBelow: 2, interactive: true }
+  { text: "Оживи!", minLinks: 4, removeBelow: 2, interactive: true },
+  { text: "Работай...", minLinks: 4, removeBelow: 2 },
+  { text: "Запускайся", minLinks: 4, removeBelow: 2 },
+  { text: "Полетели?", minLinks: 4, removeBelow: 2 },
+  { text: "Вот бы этот костюм снять уже...", minLinks: 8, removeBelow: 6 },
+  { text: "Вж-ж-ж?", minLinks: 6, removeBelow: 4 },
+  { text: "А он заправлен вообще?", minLinks: 10, removeBelow: 8 }
 ]
       },
       {
@@ -1256,7 +1680,12 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "О-о-о!", minLinks: 4, removeBelow: 2 },
+  { text: "Ой...", minLinks: 4, removeBelow: 2 },
+  { text: "А?", minLinks: 4, removeBelow: 2 },
+  { text: "Ага...", minLinks: 4, removeBelow: 2 },
+  { text: "Так...", minLinks: 4, removeBelow: 2 },
+  { text: "Угу-м...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1264,7 +1693,12 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Синхронно!", minLinks: 4, removeBelow: 2 },
+  { text: "А мы... 10 штурмовик, вроде?", minLinks: 4, removeBelow: 2 },
+  { text: "Вот бы это кончилось поскорей", minLinks: 4, removeBelow: 2 },
+  { text: "Видимо, обучения больше не будет...", minLinks: 4, removeBelow: 2 },
+  { text: "А может это такое обучение и есть?", minLinks: 4, removeBelow: 2 },
+  { text: "Хоть бы это все не в заправду...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1272,15 +1706,23 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Какая она собранная!", minLinks: 4, removeBelow: 2 },
+  { text: "Жаль не я скомандовала...", minLinks: 4, removeBelow: 2 },
+  { text: "Кажется, она первый пилот...", minLinks: 4, removeBelow: 2 },
+  { text: "Эх, а я всего-ли вторая...", minLinks: 4, removeBelow: 2 },
+  { text: "Голова закружилась...", minLinks: 4, removeBelow: 2 },
+  { text: "Мне от ускорения еще сильнее провода впились!", minLinks: 8, removeBelow: 6 }
 ]
       },
       {
-        text: 'Я наконец собравшись с мысллями нажимаю на кнопку на панели и включаю радар. На экране начинают появляться бесчисленные вражеские сигнатуры, а Телхин судя по всему стал удаляться.',
+        text: 'Наконец собравшись с мыслями я нажимаю на кнопку на панели и включаю радар. На экране начинают появляться бесчисленные вражеские сигнатуры, а Телхин судя по всему стал удаляться.',
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Такое чувство... будто я стала меньше весить...", minLinks: 4, removeBelow: 2 },
+  { text: "Их... очень много!", minLinks: 4, removeBelow: 2 },
+  { text: "И это вот всех их надо перестрелять?", minLinks: 4, removeBelow: 2 },
+  { text: "Хочется уже обратно вернуться...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1288,7 +1730,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Нас тоже много!", minLinks: 4, removeBelow: 2 },
+  { text: "Наверняка мы сильнее", minLinks: 4, removeBelow: 2 },
+  { text: "Как ровно выстроились...", minLinks: 4, removeBelow: 2 },
+  { text: "Какая же она умелая!", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1296,7 +1741,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Может мы и не первые в бой пойдем?", minLinks: 4, removeBelow: 2 },
+  { text: "Особо и не нервничаю... ", minLinks: 4, removeBelow: 2 },
+  { text: "Ну думаю справимся", minLinks: 4, removeBelow: 2 },
+  { text: "Нас будут наверняка прикрывать", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1304,7 +1752,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Первый это командир... удобно!", minLinks: 4, removeBelow: 2 },
+  { text: "И у нас план есть", minLinks: 4, removeBelow: 2 },
+  { text: "Ну все точно будет хорошо", minLinks: 4, removeBelow: 2 },
+  { text: "Раз он так уверен, то я уже и не переживаю совсем", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1312,7 +1763,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Так они маленькие совсем", minLinks: 4, removeBelow: 2 },
+  { text: "Наверняка легко будет", minLinks: 4, removeBelow: 2 },
+  { text: "Раз их много, значит слабые", minLinks: 4, removeBelow: 2 },
+  { text: "У них и плана никакого нет, видимо", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1320,7 +1774,11 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Э-э-э... десятый? Это я", minLinks: 4, removeBelow: 2 },
+  { text: "Мне ответить?", minLinks: 4, removeBelow: 2 },
+  { text: "Или молчать?", minLinks: 4, removeBelow: 2 },
+  { text: "Или она ответит?", minLinks: 4, removeBelow: 2 },
+  { text: "Ну она тут главная, разберется", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1328,7 +1786,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Чувствую... нетерпение?", minLinks: 4, removeBelow: 2 },
+  { text: "Да, мы точно справимся", minLinks: 4, removeBelow: 2 },
+  { text: "Вряд-ли это так сложно", minLinks: 4, removeBelow: 2 },
+  { text: "Разберемся и вернемся на Телхин", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1336,7 +1797,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Ну вот у нас и задачи поделены", minLinks: 4, removeBelow: 2 },
+  { text: "Стрелять то я уже умею!", minLinks: 4, removeBelow: 2 },
+  { text: "Вот как спросит в следующий раз чем я занимаюсь...", minLinks: 4, removeBelow: 2 },
+  { text: "Наверняка это мое призвание", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1345,7 +1809,13 @@ ambience1: createFilteredSource(audioMap.ambience1),
         stop: [],
         clickblock: true,
         thoughts: [
-  { text: "Битый пиксель", minLinks: 4, removeBelow: 2, interactive: true }
+  { text: "Битый пиксель", minLinks: 4, removeBelow: 2, interactive: true },
+  { text: "Проклятый костюм...", minLinks: 4, removeBelow: 2 },
+  { text: "Как-то подташнивает", minLinks: 4, removeBelow: 2 },
+  { text: "Почему-то я едва кресло чувствую", minLinks: 4, removeBelow: 2 },
+  { text: "Ноги затекли", minLinks: 4, removeBelow: 2 },
+  { text: "Так... навестись на...", minLinks: 4, removeBelow: 2 },
+  { text: "Спать перехотелось", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1353,7 +1823,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Легче стало...", minLinks: 4, removeBelow: 2 },
+  { text: "Орудия так медленно разворачиваются", minLinks: 4, removeBelow: 2 },
+  { text: "Стало сложнее...", minLinks: 4, removeBelow: 2 },
+  { text: "Пока справляюсь", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1362,7 +1835,11 @@ ambience1: createFilteredSource(audioMap.ambience1),
         stop: [],
         clickblock: true,
         thoughts: [
-  { text: "Инженер", minLinks: 1, removeBelow: 1, interactive: true }
+  { text: "Инженер", minLinks: 1, removeBelow: 1, interactive: true },
+  { text: "Быстрые они...", minLinks: 4, removeBelow: 2 },
+  { text: "Руки вспотели немного...", minLinks: 4, removeBelow: 2 },
+  { text: "А если они стрелять будут в ответ?", minLinks: 4, removeBelow: 2 },
+  { text: "Может предупредительный... нет-нет, надо стрелять сразу!", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1370,7 +1847,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Ха!", minLinks: 4, removeBelow: 2 },
+  { text: "Легко", minLinks: 4, removeBelow: 2 },
+  { text: "Это точно мое призвание", minLinks: 4, removeBelow: 2 },
+  { text: "Надеюсь, она мной гордится", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1378,7 +1858,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "В куда?", minLinks: 4, removeBelow: 2 },
+  { text: "Что-то промелькнуло в космосе...", minLinks: 4, removeBelow: 2 },
+  { text: "Алло?", minLinks: 4, removeBelow: 2 },
+  { text: "Это плохо...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1386,7 +1869,11 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click', 'radiodeath'],
         stop: [],
         thoughts:[
-  
+  { text: "Ушам больно...", minLinks: 4, removeBelow: 2 },
+  { text: "Нет...", minLinks: 4, removeBelow: 2 },
+  { text: "Не может быть...", minLinks: 4, removeBelow: 2 },
+  { text: "Они наверняка... уклонились... я надеюсь...", minLinks: 4, removeBelow: 2 },
+  { text: "Пожалуйста...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1394,7 +1881,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Что теперь делать...", minLinks: 4, removeBelow: 2 },
+  { text: "Обратно лететь?", minLinks: 4, removeBelow: 2 },
+  { text: "Драться?", minLinks: 4, removeBelow: 2 },
+  { text: "Она опять молчит... наверняка придумала что-то", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1402,7 +1892,9 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Или не придумала...", minLinks: 4, removeBelow: 2 },
+  { text: "Она ведь не собирается..?", minLinks: 4, removeBelow: 2 },
+  { text: "Какая-же она наивная...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1410,7 +1902,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Нам... мы все...", minLinks: 4, removeBelow: 2 },
+  { text: "Может управление у нее отобрать?", minLinks: 4, removeBelow: 2 },
+  { text: "А как управлять движением...", minLinks: 4, removeBelow: 2 },
+  { text: "Она нас погубит!", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1418,7 +1913,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Может..? Нет-нет, нам это не поможет точно", minLinks: 4, removeBelow: 2 },
+  { text: "Она не хочет верить...", minLinks: 4, removeBelow: 2 },
+  { text: "Да что с ней такое?!", minLinks: 4, removeBelow: 2 },
+  { text: "И что делать...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1426,7 +1924,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Какая-же она дура!", minLinks: 4, removeBelow: 2 },
+  { text: "На нас заходят!", minLinks: 4, removeBelow: 2 },
+  { text: "Угробит нас...", minLinks: 4, removeBelow: 2 },
+  { text: "Лучше бы я вела...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1434,7 +1935,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Больно!", minLinks: 4, removeBelow: 2 },
+  { text: "В глазах плывет...", minLinks: 4, removeBelow: 2 },
+  { text: "Я проваливаюсь...", minLinks: 4, removeBelow: 2 },
+  { text: "Пахнет кровью...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1442,7 +1946,12 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: ['part3'],
         thoughts:[
-  
+  { text: "Пожили и хватит", minLinks: 8, removeBelow: 7 },
+  { text: "Хотя бы умерла быстро", minLinks: 8, removeBelow: 7 },
+  { text: "Ну полетали и хватит", minLinks: 8, removeBelow: 7 },
+  { text: "Жаль я её на место не поставила", minLinks: 8, removeBelow: 7 },
+  { text: "Быть пилотом - отстой", minLinks: 8, removeBelow: 7 },
+  { text: "Лучше кроликом бы появилась", minLinks: 8, removeBelow: 7 }
 ]
       },
       {
@@ -1458,7 +1967,15 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Нужно предпринять меры", minLinks: 2, removeBelow: 1 },
+  { text: "Взять командование на себя", minLinks: 3, removeBelow: 2 },
+  { text: "Восстановить строй", minLinks: 4, removeBelow: 3 },
+  { text: "Сформировать стратегию", minLinks: 5, removeBelow: 4 },
+  { text: "Продержаться", minLinks: 6, removeBelow: 5 },
+  { text: "Дать Телхину время", minLinks: 7, removeBelow: 6 },
+  { text: "Я справлюсь", minLinks: 8, removeBelow: 7 },
+  { text: "Так просто не погибну", minLinks: 9, removeBelow: 8 },
+  { text: "Я все сделаю", minLinks: 10, removeBelow: 9 }
 ]
       },
       {
@@ -1466,7 +1983,15 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Им нужен лидер", minLinks: 2, removeBelow: 1 },
+  { text: "Сделаю что смогу", minLinks: 3, removeBelow: 2 },
+  { text: "Сфокусируйся...", minLinks: 4, removeBelow: 3 },
+  { text: "Ничего не кончено пока я жива", minLinks: 5, removeBelow: 4 },
+  { text: "Я исполню свою задачу", minLinks: 6, removeBelow: 5 },
+  { text: "Продержусь", minLinks: 7, removeBelow: 6 },
+  { text: "Я мыслю, а дроны нет", minLinks: 8, removeBelow: 7 },
+  { text: "Нас меньше, но еще кто-то остался", minLinks: 9, removeBelow: 8 },
+  { text: "Иначе никак", minLinks: 10, removeBelow: 9 }
 ]
       },
       {
@@ -1474,7 +1999,15 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Си-Эф более не в состоянии продолжать бой", minLinks: 2, removeBelow: 1 },
+  { text: "Хоть бы мгновение на то, чтобы проверить что с ней...", minLinks: 3, removeBelow: 2 },
+  { text: "Буду вести бой за двоих", minLinks: 4, removeBelow: 3 },
+  { text: "Нельзя просто так сложить руки", minLinks: 5, removeBelow: 4 },
+  { text: "Дождусь пока она не придет в себя", minLinks: 6, removeBelow: 5 },
+  { text: "Ей должно стать лучше...", minLinks: 7, removeBelow: 6 },
+  { text: "Хоть бы она была жива...", minLinks: 8, removeBelow: 7 },
+  { text: "Я здесь умирать не планирую", minLinks: 9, removeBelow: 8 },
+  { text: "И оставлять её тоже не собираюсь", minLinks: 10, removeBelow: 9 }
 ]
       },
       {
@@ -1482,7 +2015,15 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Построить звено", minLinks: 2, removeBelow: 1 },
+  { text: "Составить план", minLinks: 3, removeBelow: 2 },
+  { text: "Использовать преимущество в скорости", minLinks: 4, removeBelow: 3 },
+  { text: "Брать малые группы", minLinks: 5, removeBelow: 4 },
+  { text: "Не подставляться", minLinks: 6, removeBelow: 5 },
+  { text: "Выйграть время", minLinks: 7, removeBelow: 6 },
+  { text: "Должно получится", minLinks: 8, removeBelow: 7 },
+  { text: "Будем держаться до последнего", minLinks: 9, removeBelow: 8 },
+  { text: "Просто так не сдадимся", minLinks: 10, removeBelow: 9 }
 ]
       },
       {
@@ -1490,7 +2031,15 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Нет... нет... ", minLinks: 2, removeBelow: 1 },
+  { text: "Их правда больше нет", minLinks: 3, removeBelow: 2 },
+  { text: "Теперь я за них отвечаю", minLinks: 4, removeBelow: 3 },
+  { text: "Отвечаю за Телхин", minLinks: 5, removeBelow: 4 },
+  { text: "Отвечаю за неё", minLinks: 6, removeBelow: 5 },
+  { text: "Нельзя их подвести", minLinks: 7, removeBelow: 6 },
+  { text: "Сфокусируйся", minLinks: 8, removeBelow: 7 },
+  { text: "Я справлюсь", minLinks: 9, removeBelow: 8 },
+  { text: "Я обязанна справится", minLinks: 10, removeBelow: 9 }
 ]
       },
       {
@@ -1498,7 +2047,15 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Построение есть", minLinks: 2, removeBelow: 1 },
+  { text: "План есть", minLinks: 3, removeBelow: 2 },
+  { text: "Задачи распределены", minLinks: 4, removeBelow: 3 },
+  { text: "Теперь нужно быть бдительной", minLinks: 5, removeBelow: 4 },
+  { text: "Будем аккуратны", minLinks: 6, removeBelow: 5 },
+  { text: "Направление атаки сформированно", minLinks: 7, removeBelow: 6 },
+  { text: "Тыл под моей защитой", minLinks: 8, removeBelow: 7 },
+  { text: "Будем старатся и бой за нами", minLinks: 9, removeBelow: 8 },
+  { text: "Телхин дождется подмоги", minLinks: 10, removeBelow: 9 }
 ]
       },
       {
@@ -1506,7 +2063,15 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Аккуратно", minLinks: 2, removeBelow: 1 },
+  { text: "Понемногу", minLinks: 3, removeBelow: 2 },
+  { text: "Мимо нас не пройдут", minLinks: 4, removeBelow: 3 },
+  { text: "Пока мы стоим, бой за нами", minLinks: 5, removeBelow: 4 },
+  { text: "Держимся", minLinks: 6, removeBelow: 5 },
+  { text: "Не подставляемся", minLinks: 7, removeBelow: 6 },
+  { text: "Действуем умнее", minLinks: 8, removeBelow: 7 },
+  { text: "Главное не расслабляться", minLinks: 9, removeBelow: 8 },
+  { text: "Мы справимся", minLinks: 10, removeBelow: 9 }
 ]
       },
       {
@@ -1514,7 +2079,15 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Прекрасно!", minLinks: 2, removeBelow: 1 },
+  { text: "Все идет по плану", minLinks: 3, removeBelow: 2 },
+  { text: "Это странно...", minLinks: 4, removeBelow: 3 },
+  { text: "Что-то не так?", minLinks: 5, removeBelow: 4 },
+  { text: "Нельзя отвлекаться, я в бою", minLinks: 6, removeBelow: 5 },
+  { text: "Будем двигаться от того что есть", minLinks: 7, removeBelow: 6 },
+  { text: "Пожалуй, стоит отойти обратно", minLinks: 8, removeBelow: 7 },
+  { text: "Перегрупируемся и снова вступим в бой", minLinks: 9, removeBelow: 8 },
+  { text: "Нужно узнать статус штурмовиков", minLinks: 10, removeBelow: 9 }
 ]
       },
       {
@@ -1522,7 +2095,15 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Нужно менять построение", minLinks: 2, removeBelow: 1 },
+  { text: "Быть непредсказуймыми", minLinks: 3, removeBelow: 2 },
+  { text: "Разделиться по двое?", minLinks: 4, removeBelow: 3 },
+  { text: "Может заходить линией?", minLinks: 5, removeBelow: 4 },
+  { text: "Или взять малые группы в кольцо...", minLinks: 6, removeBelow: 5 },
+  { text: "Может у Телхина есть план действий на эту ситуацию?", minLinks: 7, removeBelow: 6 },
+  { text: "Нужно выйти с Телхином на связь", minLinks: 8, removeBelow: 7 },
+  { text: "Си-Эф все еще не пришла в себя...", minLinks: 9, removeBelow: 8 },
+  { text: "Она бы мне очень помогла сейчас", minLinks: 10, removeBelow: 9 }
 ]
       },
       {
@@ -1530,7 +2111,15 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Это хорошо!", minLinks: 2, removeBelow: 1 },
+  { text: "Мы справляемся", minLinks: 3, removeBelow: 2 },
+  { text: "Что-то... что-то не так", minLinks: 4, removeBelow: 3 },
+  { text: "Прийди уже в себя, прошу...", minLinks: 5, removeBelow: 4 },
+  { text: "Хоть бы она была жива...", minLinks: 6, removeBelow: 5 },
+  { text: "Без нее сложнее... не знаю даже как это...", minLinks: 7, removeBelow: 6 },
+  { text: "Нужно сфокусироваться", minLinks: 8, removeBelow: 7 },
+  { text: "Она вернется в сознание", minLinks: 9, removeBelow: 8 },
+  { text: "Пора скомандовать им о перегрупировке", minLinks: 10, removeBelow: 9 }
 ]
       },
       {
@@ -1538,7 +2127,15 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Всего на миг отвлеклась!", minLinks: 2, removeBelow: 1 },
+  { text: "Одной гораздо тяжелее...", minLinks: 3, removeBelow: 2 },
+  { text: "Нужно уходить", minLinks: 4, removeBelow: 3 },
+  { text: "Еще не все потерянно", minLinks: 5, removeBelow: 4 },
+  { text: "Перегрупируемся...", minLinks: 6, removeBelow: 5 },
+  { text: "Как она там?", minLinks: 7, removeBelow: 6 },
+  { text: "Не могу даже посмотреть на секунду на неё...", minLinks: 8, removeBelow: 7 },
+  { text: "Нельзя отвлекаться, иначе штурмовик выйдет из контроля", minLinks: 9, removeBelow: 8 },
+  { text: "Нужно сохранять контроль", minLinks: 10, removeBelow: 9 }
 ]
       },
       {
@@ -1554,7 +2151,15 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Я не знаю что тут можно сделать...", minLinks: 2, removeBelow: 1 },
+  { text: "Слишком поздно...", minLinks: 3, removeBelow: 2 },
+  { text: "Я не смогла...", minLinks: 4, removeBelow: 3 },
+  { text: "Я подвела их...", minLinks: 5, removeBelow: 4 },
+  { text: "Я подвела её...", minLinks: 6, removeBelow: 5 },
+  { text: "Я не могу одна это сделать...", minLinks: 7, removeBelow: 6 },
+  { text: "Нельзя чтобы все так кончилось...", minLinks: 8, removeBelow: 7 },
+  { text: "Что мне делать...", minLinks: 9, removeBelow: 8 },
+  { text: "Одной слишком тяжело...", minLinks: 10, removeBelow: 9 }
 ]
       },
       {
@@ -1566,11 +2171,17 @@ ambience1: createFilteredSource(audioMap.ambience1),
 ]
       },
       {
-        text: 'Я медленно открываю глаза и вижу залитый моей кровью пол.',
+        text: 'Я медленно открываю глаза и вижу парящие в невесомости блестящие красные шарики...',
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Это... что? Кровь..?", minLinks: 4, removeBelow: 2 },
+  { text: "Голова гудит... ужасно", minLinks: 1, removeBelow: 1 },
+  { text: "Меня сейчас вырвет...", minLinks: 6, removeBelow: 4 },
+  { text: "Что... что со мной?", minLinks: 6, removeBelow: 4 },
+  { text: "Хотя бы... жива..?", minLinks: 8, removeBelow: 6 },
+  { text: "Я... умираю?", minLinks: 4, removeBelow: 2 },
+  { text: "Мне очень страшно...", minLinks: 2, removeBelow: 1 }
 ]
       },
       {
@@ -1578,7 +2189,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Нет... опять моя кровь?", minLinks: 4, removeBelow: 2 },
+  { text: "Как же тошно...", minLinks: 1, removeBelow: 1 },
+  { text: "Не вижу ничего...", minLinks: 3, removeBelow: 1 },
+  { text: "В ушах звенит", minLinks: 6, removeBelow: 4 }
 ]
       },
       {
@@ -1586,7 +2200,13 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Нет...", minLinks: 4, removeBelow: 2 },
+  { text: "Я не хочу...", minLinks: 4, removeBelow: 2 },
+  { text: "Страшно!", minLinks: 4, removeBelow: 2 },
+  { text: "Только не это... нет!", minLinks: 4, removeBelow: 2 },
+  { text: "Где... где я?", minLinks: 4, removeBelow: 2 },
+  { text: "И почему...", minLinks: 4, removeBelow: 2 },
+  { text: "Что..?", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1594,7 +2214,16 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Я умру..?", minLinks: 1, removeBelow: 1 },
+  { text: "Умру!", minLinks: 1, removeBelow: 1 },
+  { text: "Это конец!", minLinks: 1, removeBelow: 1 },
+  { text: "Все...", minLinks: 1, removeBelow: 1 },
+  { text: "За что же все мне это...", minLinks: 1, removeBelow: 1 },
+  { text: "Я не хочу...", minLinks: 1, removeBelow: 1 },
+  { text: "Не хочу так... не хочу...", minLinks: 1, removeBelow: 1 },
+  { text: "Я хочу жить...", minLinks: 1, removeBelow: 1 },
+  { text: "Просто... и все...", minLinks: 1, removeBelow: 1 },
+  { text: "Не справедливо...", minLinks: 1, removeBelow: 1 }
 ]
       },
       {
@@ -1602,7 +2231,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "А?", minLinks: 4, removeBelow: 2 },
+  { text: "Снова тошнит...", minLinks: 4, removeBelow: 2 },
+  { text: "Я тут умираю, а она от меня что-то хочет...", minLinks: 4, removeBelow: 2 },
+  { text: "Может спрашивает живая ли я вообще?", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1610,7 +2242,12 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "... нахуя..?", minLinks: 8, removeBelow: 6 },
+  { text: "Да я уже неделю как Си-Эф!", minLinks: 2, removeBelow: 1 },
+  { text: "На..?", minLinks: 4, removeBelow: 2 },
+  { text: "У-у-у-у... болит все...", minLinks: 4, removeBelow: 2 },
+  { text: "Ну Телхин я знаю!", minLinks: 2, removeBelow: 1 },
+  { text: "Немо... нем... о-о-о... а?", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1618,7 +2255,14 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Не могу я так...", minLinks: 4, removeBelow: 2 },
+  { text: "Это все...", minLinks: 4, removeBelow: 2 },
+  { text: "Почему я?", minLinks: 4, removeBelow: 2 },
+  { text: "И зачем мне... это...", minLinks: 4, removeBelow: 2 },
+  { text: "Просто умру в этой коробке...", minLinks: 4, removeBelow: 2 },
+  { text: "Вот так просто... и все...", minLinks: 4, removeBelow: 2 },
+  { text: "Не справедливо...", minLinks: 4, removeBelow: 2 },
+  { text: "Просто хочу убежать... убежать... убежать... некуда...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1626,7 +2270,13 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Почему умирать так страшно..?", minLinks: 4, removeBelow: 2 },
+  { text: "Это просто пытка...", minLinks: 4, removeBelow: 2 },
+  { text: "Кошмар...", minLinks: 4, removeBelow: 2 },
+  { text: "Ужас!", minLinks: 4, removeBelow: 2 },
+  { text: "Я всего этого не заслужила!", minLinks: 4, removeBelow: 2 },
+  { text: "Что я вообще сделала...", minLinks: 4, removeBelow: 2 },
+  { text: "Я ничего совсем в своей жизни не сделала...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1634,7 +2284,17 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Это... просто не заканчивается...", minLinks: 4, removeBelow: 2 },
+  { text: "Стены давят... как же тут узко!", minLinks: 4, removeBelow: 2 },
+  { text: "Некуда сбежать...", minLinks: 4, removeBelow: 2 },
+  { text: "Никто не поможет...", minLinks: 4, removeBelow: 2 },
+  { text: "Умрем...", minLinks: 4, removeBelow: 2 },
+  { text: "Умрем долго...", minLinks: 4, removeBelow: 2 },
+  { text: "Умрем мучительно...", minLinks: 4, removeBelow: 2 },
+  { text: "Умрем одни...", minLinks: 4, removeBelow: 2 },
+  { text: "Умрем ни за что...", minLinks: 4, removeBelow: 2 },
+  { text: "Умрем страшной смертью...", minLinks: 4, removeBelow: 2 },
+  { text: "Умрем на смерть... как глупо... глупо умрем...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1642,7 +2302,13 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "А-а-а? Слышу...", minLinks: 4, removeBelow: 2 },
+  { text: "Я еще не оглохла...", minLinks: 4, removeBelow: 2 },
+  { text: "Как же долго я умираю...", minLinks: 4, removeBelow: 2 },
+  { text: "Хорошо что хоть она со мной...", minLinks: 4, removeBelow: 2 },
+  { text: "Плохо что она со мной...", minLinks: 4, removeBelow: 2 },
+  { text: "Она этого не заслужила...", minLinks: 4, removeBelow: 2 },
+  { text: "Какая-же она... мне... её ужасно жаль...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1650,7 +2316,12 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Может я и не умираю..?", minLinks: 4, removeBelow: 2 },
+  { text: "Руки ватные совсем... не слушаются...", minLinks: 4, removeBelow: 2 },
+  { text: "Хочется заплакать... не хочу я Телхин вызывать...", minLinks: 4, removeBelow: 2 },
+  { text: "Хочется обратно вернуться...", minLinks: 4, removeBelow: 2 },
+  { text: "Может к черту все это?", minLinks: 4, removeBelow: 2 },
+  { text: "Пахнет здесь ужасно...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1659,7 +2330,15 @@ ambience1: createFilteredSource(audioMap.ambience1),
         stop: [],
         clickblock: true,
         thoughts: [
-  { text: "Телхин", minLinks: 1, removeBelow: 1, interactive: true }
+  { text: "Телхин", minLinks: 1, removeBelow: 1, interactive: true },
+  { text: "Спасите...", minLinks: 4, removeBelow: 2 },
+  { text: "Хватит с нас!", minLinks: 4, removeBelow: 2 },
+  { text: "Мы все что могли сделали!", minLinks: 4, removeBelow: 2 },
+  { text: "Не заслужи мы этого!", minLinks: 4, removeBelow: 2 },
+  { text: "За что они так с нами?", minLinks: 4, removeBelow: 2 },
+  { text: "Они ведь просто избавились от нас...", minLinks: 4, removeBelow: 2 },
+  { text: "Мы ведь живые, между прочим... и за что так с нами?", minLinks: 4, removeBelow: 2 },
+  { text: "Все в пустую... столько жизней...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1668,7 +2347,14 @@ ambience1: createFilteredSource(audioMap.ambience1),
         stop: [],
         clickblock: true,
         thoughts: [
-  { text: "Телхин", minLinks: 1, removeBelow: 1, interactive: true }
+  { text: "Телхин", minLinks: 1, removeBelow: 1, interactive: true },
+  { text: "Тишина...", minLinks: 4, removeBelow: 2 },
+  { text: "Боятся ответить?", minLinks: 4, removeBelow: 2 },
+  { text: "Надеюсь им стыдно!", minLinks: 4, removeBelow: 2 },
+  { text: "Им должно быть стыдно!", minLinks: 4, removeBelow: 2 },
+  { text: "Все это не справедливо!", minLinks: 4, removeBelow: 2 },
+  { text: "Почему мы здесь, а они там?", minLinks: 4, removeBelow: 2 },
+  { text: "Это ведь их бой! Не наш!", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1677,7 +2363,14 @@ ambience1: createFilteredSource(audioMap.ambience1),
         stop: [],
         clickblock: true,
         thoughts: [
-  { text: "Телхин", minLinks: 1, removeBelow: 1, interactive: true }
+  { text: "Телхин", minLinks: 1, removeBelow: 1, interactive: true },
+  { text: "Это не заканчивается...", minLinks: 4, removeBelow: 2 },
+  { text: "Ужасная пытка...", minLinks: 4, removeBelow: 2 },
+  { text: "Я уже хочу умереть наконец...", minLinks: 4, removeBelow: 2 },
+  { text: "Просто ужасно... плохо... тошно... ", minLinks: 4, removeBelow: 2 },
+  { text: "Я не могу так... не могу... нет...", minLinks: 4, removeBelow: 2 },
+  { text: "Хватит...", minLinks: 0, removeBelow: 0 },
+  { text: "Не могу больше...", minLinks: 0, removeBelow: 0 }
 ]
       },
       {
@@ -1686,7 +2379,20 @@ ambience1: createFilteredSource(audioMap.ambience1),
         stop: [],
         clickblock: true,
         thoughts: [
-  { text: "Телхин", minLinks: 1, removeBelow: 1, interactive: true }
+  { text: "Телхин", minLinks: 1, removeBelow: 1, interactive: true },
+  { text: "Все бестолку...", minLinks: 4, removeBelow: 2 },
+  { text: "Бестолковый Телхин...", minLinks: 4, removeBelow: 2 },
+  { text: "Бес-Телхин...", minLinks: 4, removeBelow: 2 },
+  { text: "Просто все... нет сил...", minLinks: 4, removeBelow: 2 },
+  { text: "Хуже просто быть не может...", minLinks: 4, removeBelow: 2 },
+  { text: "Никакого смысла нет в этом...", minLinks: 4, removeBelow: 2 },
+  { text: "Нет смысла в борьбе...", minLinks: 4, removeBelow: 2 },
+  { text: "В нас нет смысла...", minLinks: 4, removeBelow: 2 },
+  { text: "В нашей смерти нет смысла...", minLinks: 4, removeBelow: 2 },
+  { text: "В этой войне нет смысла...", minLinks: 4, removeBelow: 2 },
+  { text: "Все напрасно...", minLinks: 4, removeBelow: 2 },
+  { text: "Страдания ради страданий...", minLinks: 4, removeBelow: 2 },
+  { text: "Ненавижу их...", minLinks: 0, removeBelow: 0 }
 ]
       },
       {
@@ -1703,7 +2409,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Это конец...", minLinks: 4, removeBelow: 2 },
+  { text: "Это наша смерть...", minLinks: 4, removeBelow: 2 },
+  { text: "Все...", minLinks: 4, removeBelow: 2 },
+  { text: "Это конец всему...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1711,7 +2420,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Это им кара...", minLinks: 4, removeBelow: 2 },
+  { text: "За все...", minLinks: 4, removeBelow: 2 },
+  { text: "Их нет...", minLinks: 4, removeBelow: 2 },
+  { text: "Это не справедливо... все равно... мне их жаль... ужасно жаль...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1719,7 +2431,11 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Дышать нечем...", minLinks: 4, removeBelow: 2 },
+  { text: "Не могу больше плакать...", minLinks: 4, removeBelow: 2 },
+  { text: "Не могу больше так жить...", minLinks: 4, removeBelow: 2 },
+  { text: "Это вечный кошмар...", minLinks: 4, removeBelow: 2 },
+  { text: "Сколько я уже здесь..?", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1727,7 +2443,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "А может я уже умерла?", minLinks: 4, removeBelow: 2 },
+  { text: "Нет... вдруг я правда... в каком-то посмертье?", minLinks: 4, removeBelow: 2 },
+  { text: "Ад для бестолковых репликантов...", minLinks: 4, removeBelow: 2 },
+  { text: "Коробка смерти... даже стоять нельзя...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1735,15 +2454,26 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Да пошла ты...", minLinks: 4, removeBelow: 2 },
+  { text: "Добей меня просто...", minLinks: 4, removeBelow: 2 },
+  { text: "Всезнайка!", minLinks: 4, removeBelow: 2 },
+  { text: "Деловитая!", minLinks: 4, removeBelow: 2 },
+  { text: "Дура!", minLinks: 4, removeBelow: 2 },
+  { text: "Умница!", minLinks: 4, removeBelow: 2 },
+  { text: "Красавица!", minLinks: 4, removeBelow: 2 },
+  { text: "Командирша!", minLinks: 4, removeBelow: 2 },
+  { text: "Сучка...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
-        text: 'Слезы скапливаются на моем лице.<br><color:cf>"Почемуу все так... Почему..."</color>',
+        text: 'Слезы скапливаются на моем лице.<br><color:cf>"Почему все так... Почему-у-у..."</color>',
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Вот бы не думать вообще...", minLinks: 1, removeBelow: 1 },
+  { text: "Надоело...", minLinks: 1, removeBelow: 1 },
+  { text: "Думай не думай, а все одно...", minLinks: 1, removeBelow: 1 },
+  { text: "Ничего не вышло...", minLinks: 1, removeBelow: 1 }
 ]
       },
       {
@@ -1751,7 +2481,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Ей тоже плохо...", minLinks: 4, removeBelow: 2 },
+  { text: "И она не плачет... как..?", minLinks: 4, removeBelow: 2 },
+  { text: "Как же мне её жаль...", minLinks: 4, removeBelow: 2 },
+  { text: "Бедняжка...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1759,7 +2492,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Глаза у нее выразительные...", minLinks: 4, removeBelow: 2 },
+  { text: "Может поэтому и не плачет?", minLinks: 4, removeBelow: 2 },
+  { text: "За тени боится..?", minLinks: 4, removeBelow: 2 },
+  { text: "Целый день подводила их...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1767,7 +2503,12 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Хотелось бы чтобы все было иначе...", minLinks: 4, removeBelow: 2 },
+  { text: "Как угодно, но не так...", minLinks: 4, removeBelow: 2 },
+  { text: "Без всего этого...", minLinks: 4, removeBelow: 2 },
+  { text: "Я заслужила лучшего!", minLinks: 4, removeBelow: 2 },
+  { text: "Она заслуживает еще большего...", minLinks: 4, removeBelow: 2 },
+  { text: "Мне... надо её поблагодарить что была рядом...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1775,7 +2516,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Больно! Все еще больно...", minLinks: 4, removeBelow: 2 },
+  { text: "Боль-боль-боль... сплошная боль!", minLinks: 4, removeBelow: 2 },
+  { text: "Дура... переживает за меня", minLinks: 4, removeBelow: 2 },
+  { text: "Поблагодарить её нужно", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1783,7 +2527,10 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Да они даже добивать нас не хотят...", minLinks: 4, removeBelow: 2 },
+  { text: "Какие же мы жалкие...", minLinks: 4, removeBelow: 2 },
+  { text: "Ничего даже не сделали...", minLinks: 4, removeBelow: 2 },
+  { text: "В пустую все...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1791,7 +2538,12 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Еще одна коробка... еще меньше чем эта...", minLinks: 4, removeBelow: 2 },
+  { text: "Не хочу я в коробку...", minLinks: 4, removeBelow: 2 },
+  { text: "Это единственный путь отсюда...", minLinks: 4, removeBelow: 2 },
+  { text: "Билет вникуда...", minLinks: 4, removeBelow: 2 },
+  { text: "Выглядит как гроб...", minLinks: 4, removeBelow: 2 },
+  { text: "Как-то жарко стало...", minLinks: 4, removeBelow: 2 }
 ]
       },
       {
@@ -1799,7 +2551,11 @@ ambience1: createFilteredSource(audioMap.ambience1),
         play: ['click'],
         stop: [],
         thoughts:[
-  
+  { text: "Холодно... опять...", minLinks: 4, removeBelow: 2 },
+  { text: "Пожалуйста, выживи...", minLinks: 4, removeBelow: 2 },
+  { text: "Все кончилось...", minLinks: 4, removeBelow: 2 },
+  { text: "Наконец-то... отдых...", minLinks: 4, removeBelow: 2 },
+  { text: "Все...", minLinks: 4, removeBelow: 2 }
 ]
       },
     ];
