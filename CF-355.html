@@ -302,9 +302,13 @@ window.addEventListener('load', async () => {
 
   <audio id="radiodeath" src="sound/kventa/radiodeath.wav"></audio>
 
-  <audio id="part3" src="sound/kventa/part3.mp3"></audio>
+  <audio id="part3" src="sound/kventa/part3.mp3" loop></audio>
 
-  <audio id="insolitum" src="sound/kventa/insolitum.mp3"></audio>
+  <audio id="insolitum" src="sound/kventa/insolitum.mp3" loop></audio>
+
+  <audio id="radiotelkhin" src="sound/kventa/Radiotelkhin.wav" loop></audio>
+
+  <audio id="final" src="sound/kventa/Final.mp3"></audio>
 
 
   <script>
@@ -428,6 +432,10 @@ async function startMarsSequence() {
       part3: document.getElementById('part3'),
 
       insolitum: document.getElementById('insolitum'),
+
+      radiotelkhin: document.getElementById('radiotelkhin'),
+
+      final: document.getElementById('final'),
       
     };
 
@@ -460,13 +468,14 @@ ambience1: createFilteredSource(audioMap.ambience1),
         text: '...',
         play: ['ambience1', 'music1', 'click'],
         stop: [],
+        eqMode: true,
         thoughts: [
   { text: "Моя первая мысль", minLinks: 1, removeBelow: 1 },
   { text: "Где я?", minLinks: 6, removeBelow: 4 },
   { text: "Ощущения приятные", minLinks: 6, removeBelow: 4 },
   { text: "Я плаваю?", minLinks: 4, removeBelow: 2 }
 ],
-        filterOn: ['ambience1']
+        filterOn: ['ambience1'],
       },
       {
         text: 'Тепло...',
@@ -696,7 +705,7 @@ ambience1: createFilteredSource(audioMap.ambience1),
   { text: "Кто я такая?", minLinks: 4, removeBelow: 3 }
 ]},
       {
-        text: '<color:alice>"Прямо сейчас Телхин участвует в бою. Мы находимся в тылу и подготавливаем таких как ты для управления штурмовиками. Через месяц ты вылетаешь в бой."</color>',
+        text: '<color:alice>"Прямо сейчас Телхин участвует в бою. Мы находимся в тылу и подготавливаем таких как ты для управления штурмовиками. Через неделю ты вылетаешь в бой."</color>',
         play: ['click'],
         stop: []
       ,
@@ -1462,7 +1471,7 @@ ambience1: createFilteredSource(audioMap.ambience1),
 ]
       },
       {
-        text: 'В ответ RK лишь многозносительно постучала по саоему виску пальцем, не отрываясь от оперирования контрольной панелью.',
+        text: 'В ответ RK лишь многозначительно постучала по саоему виску пальцем, не отрываясь от оперирования контрольной панелью.',
         play: ['click'],
         stop: [],
         thoughts:[
@@ -1519,7 +1528,7 @@ ambience1: createFilteredSource(audioMap.ambience1),
         thoughts:[
   { text: "Какого врага?", minLinks: 4, removeBelow: 2 },
   { text: "Спусковой..? А, эта штука как на пушках... оружии?", minLinks: 4, removeBelow: 2 },
-  { text: "Ну это такое перекрестие я знаю!", minLinks: 4, removeBelow: 2 },
+  { text: "Ну что такое перекрестие я знаю!", minLinks: 4, removeBelow: 2 },
   { text: "И как это вообще через экран целится?", minLinks: 4, removeBelow: 2 },
   { text: "Не понимаю...", minLinks: 4, removeBelow: 2 }
 ]
@@ -1843,7 +1852,7 @@ ambience1: createFilteredSource(audioMap.ambience1),
 ]
       },
       {
-        text: 'С удивительной точностью очереди автоматических орудий поражали одну цель за другой, стерая их с радаров. Другие штурмовики из нашей группы иоже подключились и вскоре небольшой рой дронов был полностью уничтожен.',
+        text: 'С удивительной точностью очереди автоматических орудий поражали одну цель за другой, стерая их с радаров. Другие штурмовики из нашей группы тоже подключились и вскоре небольшой рой дронов был полностью уничтожен.',
         play: ['click'],
         stop: [],
         thoughts:[
@@ -1964,7 +1973,7 @@ ambience1: createFilteredSource(audioMap.ambience1),
       },
       {
         text: 'Я поворачиваю голову на соседнее кресло. Она выглядит более не способной продолжать бой. И от нашей эскадры ничего не осталось. Построения нет, командир уничтожен. Только шесть наших штурмовиков.',
-        play: ['click'],
+        play: ['click', 'final'],
         stop: [],
         thoughts:[
   { text: "Нужно предпринять меры", minLinks: 2, removeBelow: 1 },
@@ -2298,7 +2307,7 @@ ambience1: createFilteredSource(audioMap.ambience1),
 ]
       },
       {
-        text: 'RK отстегивается от кресло и ловко ныряет под мое сидение, протягивая мне мою слетевшую гарнитуру.<br><color:rk>"Настройся на частоту Телхина немедленно. Я буду поддерживать работу реле через аварийное питание сколько смогу."</color>',
+        text: 'RK отстегивается от кресла и ловко ныряет под мое сидение, протягивая мне мою слетевшую гарнитуру.<br><color:rk>"Настройся на частоту Телхина немедленно. Я буду поддерживать работу реле через аварийное питание сколько смогу."</color>',
         play: ['click'],
         stop: [],
         thoughts:[
@@ -2343,7 +2352,7 @@ ambience1: createFilteredSource(audioMap.ambience1),
       },
       {
         text: '<color:cf>"П-прием... Телхин?"</color>',
-        play: ['click'],
+        play: ['click', 'radiotelkhin'],
         stop: [],
         clickblock: true,
         thoughts: [
@@ -2499,7 +2508,7 @@ ambience1: createFilteredSource(audioMap.ambience1),
 ]
       },
       {
-        text: '<color:rk>"Мы не должны были здесь оказаться..."</color>',
+        text: '<color:cf>"Мы не должны были здесь оказаться..."</color>',
         play: ['click'],
         stop: [],
         thoughts:[
@@ -2614,6 +2623,27 @@ ambience1: createFilteredSource(audioMap.ambience1),
       interactiveThoughtWasAlive = false;
       const slide = slides[currentSlide];
       const { play, stop, filterOn = [], filterOff = [], clickblock = false } = slide;
+      if (slide.eqMode) {
+        if (!analyser) {
+          const anyAudio = Object.values(audioMap).find(a => !a.paused && a.duration > 0);
+          if (anyAudio) {
+            marsTrackNode = audioCtx.createMediaElementSource(anyAudio);
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 64;
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+            marsTrackNode.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            isMarsEQ = true;
+            drawLinks = drawLinksMars;
+          }
+        } else {
+          isMarsEQ = true;
+          drawLinks = drawLinksMars;
+        }
+      } else {
+        isMarsEQ = false;
+        drawLinks = window.drawLinksOriginal || drawLinks;
+      }
 
       stop?.forEach(id => {
         const audio = audioMap[id];
