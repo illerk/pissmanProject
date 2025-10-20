@@ -2624,26 +2624,40 @@ ambience1: createFilteredSource(audioMap.ambience1),
       const slide = slides[currentSlide];
       const { play, stop, filterOn = [], filterOff = [], clickblock = false } = slide;
       if (slide.eqMode) {
-        if (!analyser) {
-          const anyAudio = Object.values(audioMap).find(a => !a.paused && a.duration > 0);
-          if (anyAudio) {
-            marsTrackNode = audioCtx.createMediaElementSource(anyAudio);
+        const playingAudio = Object.values(audioMap).find(a => !a.paused && a.currentTime > 0 && !a.ended);
+        
+        if (playingAudio) {
+          try {
+            if (marsTrackNode) marsTrackNode.disconnect();
+            if (analyser) analyser.disconnect();
+
+            marsTrackNode = audioCtx.createMediaElementSource(playingAudio);
             analyser = audioCtx.createAnalyser();
             analyser.fftSize = 64;
             dataArray = new Uint8Array(analyser.frequencyBinCount);
+
             marsTrackNode.connect(analyser);
             analyser.connect(audioCtx.destination);
+
             isMarsEQ = true;
             drawLinks = drawLinksMars;
+            console.log("EQ-режим активирован для:", playingAudio.id);
+          } catch (e) {
+            console.warn("EQ-setup error:", e);
           }
         } else {
           isMarsEQ = true;
           drawLinks = drawLinksMars;
+          console.log("EQ-режим включён без источника");
         }
       } else {
-        isMarsEQ = false;
-        drawLinks = window.drawLinksOriginal || drawLinks;
+        if (isMarsEQ) {
+          isMarsEQ = false;
+          drawLinks = window.drawLinksOriginal || drawLinks;
+          console.log("EQ-режим выключен");
+        }
       }
+
 
       stop?.forEach(id => {
         const audio = audioMap[id];
