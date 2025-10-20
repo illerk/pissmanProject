@@ -452,6 +452,7 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
 
 const filters = {
 ambience1: createFilteredSource(audioMap.ambience1),
+final: createFilteredSource(audioMap.final)
 };
     const slides = [
 
@@ -468,7 +469,6 @@ ambience1: createFilteredSource(audioMap.ambience1),
         text: '...',
         play: ['ambience1', 'music1', 'click'],
         stop: [],
-        eqMode: true,
         thoughts: [
   { text: "Моя первая мысль", minLinks: 1, removeBelow: 1 },
   { text: "Где я?", minLinks: 6, removeBelow: 4 },
@@ -1974,6 +1974,7 @@ ambience1: createFilteredSource(audioMap.ambience1),
       {
         text: 'Я поворачиваю голову на соседнее кресло. Она выглядит более не способной продолжать бой. И от нашей эскадры ничего не осталось. Построения нет, командир уничтожен. Только шесть наших штурмовиков.',
         play: ['click', 'final'],
+        eqMode: true,
         stop: [],
         thoughts:[
   { text: "Нужно предпринять меры", minLinks: 2, removeBelow: 1 },
@@ -2624,39 +2625,32 @@ ambience1: createFilteredSource(audioMap.ambience1),
       const slide = slides[currentSlide];
       const { play, stop, filterOn = [], filterOff = [], clickblock = false } = slide;
       if (slide.eqMode) {
-        const playingAudio = Object.values(audioMap).find(a => !a.paused && a.currentTime > 0 && !a.ended);
-        
-        if (playingAudio) {
-          try {
-            if (marsTrackNode) marsTrackNode.disconnect();
-            if (analyser) analyser.disconnect();
-
-            marsTrackNode = audioCtx.createMediaElementSource(playingAudio);
+        try {
+          if (!analyser) {
             analyser = audioCtx.createAnalyser();
             analyser.fftSize = 64;
             dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-            marsTrackNode.connect(analyser);
-            analyser.connect(audioCtx.destination);
-
-            isMarsEQ = true;
-            drawLinks = drawLinksMars;
-            console.log("EQ-режим активирован для:", playingAudio.id);
-          } catch (e) {
-            console.warn("EQ-setup error:", e);
           }
-        } else {
+
+          const anyFilter = Object.values(filters)[0];
+          if (anyFilter && !anyFilter._eqLinked) {
+            anyFilter.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            anyFilter._eqLinked = true;
+          }
+
           isMarsEQ = true;
           drawLinks = drawLinksMars;
-          console.log("EQ-режим включён без источника");
+          console.log("EQ-режим активен (через существующий фильтр)");
+        } catch (err) {
+          console.warn("EQ activation error:", err);
         }
       } else {
-        if (isMarsEQ) {
-          isMarsEQ = false;
-          drawLinks = window.drawLinksOriginal || drawLinks;
-          console.log("EQ-режим выключен");
-        }
+        isMarsEQ = false;
+        drawLinks = window.drawLinksOriginal || drawLinks;
+        console.log("EQ-режим выключен");
       }
+
 
 
       stop?.forEach(id => {
