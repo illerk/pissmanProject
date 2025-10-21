@@ -1975,6 +1975,7 @@ final: createFilteredSource(audioMap.final)
         text: 'Я поворачиваю голову на соседнее кресло. Она выглядит более не способной продолжать бой. И от нашей эскадры ничего не осталось. Построения нет, командир уничтожен. Только шесть наших штурмовиков.',
         play: ['click', 'final'],
         eqMode: true,
+        eqSource: 'final',
         stop: [],
         thoughts:[
   { text: "Нужно предпринять меры", minLinks: 2, removeBelow: 1 },
@@ -2625,6 +2626,7 @@ final: createFilteredSource(audioMap.final)
       interactiveThoughtWasAlive = false;
       const slide = slides[currentSlide];
       const { play, stop, filterOn = [], filterOff = [], clickblock = false } = slide;
+      const eqSourceId = slide.eqSource || 'ambience1';
       if (slide.eqMode) {
         try {
           if (!analyser) {
@@ -2633,7 +2635,7 @@ final: createFilteredSource(audioMap.final)
             dataArray = new Uint8Array(analyser.frequencyBinCount);
           }
 
-          const anyFilter = Object.values(filters)[0];
+          const anyFilter = filters[eqSourceId];
           if (anyFilter && !anyFilter._eqLinked) {
             anyFilter.connect(analyser);
             analyser.connect(audioCtx.destination);
