@@ -2649,10 +2649,26 @@ final: createFilteredSource(audioMap.final)
           console.warn("EQ activation error:", err);
         }
       } else {
-        isMarsEQ = false;
-        drawLinks = window.drawLinksOriginal || drawLinks;
-        console.log("EQ-режим выключен");
-      }
+      isMarsEQ = false;
+      drawLinks = window.drawLinksOriginal || drawLinks;
+      console.log("EQ-режим выключен (плавно)");
+
+      try {
+        const anyFilter = filters[eqSourceId] || Object.values(filters)[0];
+        if (anyFilter && anyFilter._eqLinked && analyser) {
+          try { anyFilter.disconnect(analyser); } catch(e) {}
+          anyFilter._eqLinked = false;
+        }
+        if (analyser) {
+          try { analyser.disconnect(); } catch(e) {}
+        }
+        analyser = null;
+        dataArray = null;
+      } catch (err) { console.warn(err); }
+
+      particles.forEach(p => { p.eqAlphaTarget = 1; });
+      links.forEach(l => { l.eqAlphaTarget = 1; });
+    }
 
 
 
@@ -3455,6 +3471,30 @@ function updateThoughtsFromClusters(clusters) {
 
   if (typeof updateAndDrawThoughtFragments === 'function') updateAndDrawThoughtFragments(ctx);
 
+
+const ALPHA_RECOVER_SPEED = 0.06;
+
+particles.forEach(p => {
+  if (p.eqAlphaTarget !== undefined) {
+    if (p.eqAlpha === undefined) p.eqAlpha = 1;
+    p.eqAlpha += (p.eqAlphaTarget - p.eqAlpha) * ALPHA_RECOVER_SPEED;
+    if (Math.abs(p.eqAlpha - p.eqAlphaTarget) < 0.005) {
+      p.eqAlpha = p.eqAlphaTarget;
+      delete p.eqAlphaTarget;
+    }
+  }
+});
+
+links.forEach(l => {
+  if (l.eqAlphaTarget !== undefined) {
+    if (l.eqAlpha === undefined) l.eqAlpha = 1;
+    l.eqAlpha += (l.eqAlphaTarget - l.eqAlpha) * ALPHA_RECOVER_SPEED;
+    if (Math.abs(l.eqAlpha - l.eqAlphaTarget) < 0.005) {
+      l.eqAlpha = l.eqAlphaTarget;
+      delete l.eqAlphaTarget;
+    }
+  }
+});
 
   requestAnimationFrame(animateParticles);
 
