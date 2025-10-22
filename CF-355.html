@@ -225,44 +225,57 @@ window.addEventListener('load', async () => {
   let loaded = 0;
 
   const updateProgress = () => {
-    const percent = Math.round((loaded / total) * 100);
+    const percent = Math.floor((loaded / total) * 100);
     loadingPercent.textContent = percent + '%';
     const offset = 283 - (283 * percent / 100);
     loadingProgress.style.strokeDashoffset = offset;
   };
 
-  updateProgress();
-
-  async function preloadAudio(audio) {
+  async function fullyPreloadAudio(audio) {
     return new Promise(resolve => {
-      let done = false;
-
-      const finish = () => {
-        if (done) return;
-        done = true;
+      let finished = false;
+      const onReady = () => {
+        if (finished) return;
+        finished = true;
+        loaded++;
+        updateProgress();
+        resolve();
+      };
+      const onError = () => {
+        if (finished) return;
+        console.warn(`Ошибка загрузки аудио: ${audio.src}`);
+        finished = true;
         loaded++;
         updateProgress();
         resolve();
       };
 
-      audio.addEventListener('canplaythrough', finish, { once: true });
-      audio.addEventListener('error', finish, { once: true });
-      setTimeout(finish, 5000);
+      audio.addEventListener('canplaythrough', onReady, { once: true });
+      audio.addEventListener('error', onError, { once: true });
 
       try {
         audio.load();
       } catch {
-        finish();
+        onError();
       }
     });
   }
 
-  await Promise.all(audioElements.map(preloadAudio));
+  updateProgress();
+
+  await Promise.all(audioElements.map(a => fullyPreloadAudio(a)));
+
+  loadingPercent.textContent = '100%';
+  const offset = 283 - (283 * 100 / 100);
+  loadingProgress.style.strokeDashoffset = offset;
+
+  await new Promise(res => setTimeout(res, 400));
 
   loadingScreen.style.transition = 'opacity 1s ease';
   loadingScreen.style.opacity = 0;
   setTimeout(() => loadingScreen.remove(), 1000);
 });
+
 </script>
 </div>
 <div id="customCursor"></div>
@@ -309,6 +322,16 @@ window.addEventListener('load', async () => {
   <audio id="radiotelkhin" src="sound/kventa/Radiotelkhin.wav" loop></audio>
 
   <audio id="final" src="sound/kventa/Final.mp3"></audio>
+
+  <audio id="big_alarm" src="sound/kventa/Big_alarm.wav"></audio>
+
+  <audio id="door_opening" src="sound/kventa/Door_opening.wav"></audio>
+
+  <audio id="take_off" src="sound/kventa/Take_off.wav"></audio>
+
+  <audio id="launching" src="sound/kventa/launching.wav"></audio>
+
+  <audio id="fail" src="sound/kventa/fail.wav"></audio>
 
 
   <script>
@@ -436,6 +459,16 @@ async function startMarsSequence() {
       radiotelkhin: document.getElementById('radiotelkhin'),
 
       final: document.getElementById('final'),
+
+      big_alarm: document.getElementById('big_alarm'),
+
+      door_opening: document.getElementById('door_opening'),
+
+      take_off: document.getElementById('take_off'),
+
+      launching: document.getElementById('launching'),
+
+      fail: document.getElementById('fail'),
       
     };
 
@@ -1623,7 +1656,7 @@ final: createFilteredSource(audioMap.final)
       },
       {
         text: 'От оглушительной тревоги я потеряла концентрацию и перекрестие исчезло.',
-        play: ['click'],
+        play: ['click', 'big_alarm'],
         stop: ['insolitum'],
         thoughts:[
   { text: "А?!", minLinks: 4, removeBelow: 2 },
@@ -1686,8 +1719,8 @@ final: createFilteredSource(audioMap.final)
       },
       {
         text: 'Что-то под штурмовиком щелкнуло и загудело. Боевая машина начала опускаться вниз и оказалась под ангаром. Тут очень темно, а когда отверстие сверху захлопнулось - темнота стала кромешной.',
-        play: ['click'],
-        stop: [],
+        play: ['click', 'door_opening', 'launching'],
+        stop: ['big_alarm'],
         thoughts:[
   { text: "О-о-о!", minLinks: 4, removeBelow: 2 },
   { text: "Ой...", minLinks: 4, removeBelow: 2 },
@@ -1712,7 +1745,7 @@ final: createFilteredSource(audioMap.final)
       },
       {
         text: 'Перед нами открылся шлюз, заполняя пространство блеклым светом. Наш штурмовик сорвался с места и в иллюминаторе на черном космосе начали проявляться едва заметные звезды.<br>RK говорит:<br><color:rk>"Штурмовик 10 вылетел"</color><br>Ее слова дулировались в гарнитуре.',
-        play: ['click'],
+        play: ['click', 'take_off'],
         stop: [],
         thoughts:[
   { text: "Какая она собранная!", minLinks: 4, removeBelow: 2 },
@@ -2195,6 +2228,22 @@ final: createFilteredSource(audioMap.final)
       },
       {
         text: 'Я медленно открываю глаза и вижу парящие в невесомости блестящие красные шарики...',
+        yellowAnimated: [
+          {
+            text: "connecting the neural interface",
+            dots: true,
+            final: "---[UNKNOWN ERROR]---",
+            play: [], 
+            endPlay: ["fail"] 
+          },
+          {
+            text: "cognitive support activation",
+            dots: true,
+            final: "---[UNKNOWN ERROR]---",
+            play: [],
+            endPlay: ["fail"]
+          }
+        ],
         play: ['click'],
         stop: [],
         thoughts:[
@@ -2352,7 +2401,6 @@ final: createFilteredSource(audioMap.final)
         play: ['click'],
         stop: [],
         clickblock: true,
-        delay: 3000,
         thoughts: [
   { text: "Телхин", minLinks: 1, removeBelow: 1, interactive: true },
   { text: "Спасите...", minLinks: 4, removeBelow: 2 },
@@ -2370,7 +2418,6 @@ final: createFilteredSource(audioMap.final)
         play: ['click', 'radiotelkhin'],
         stop: [],
         clickblock: true,
-        delay: 3000,
         thoughts: [
   { text: "Телхин", minLinks: 1, removeBelow: 1, interactive: true },
   { text: "Тишина...", minLinks: 4, removeBelow: 2 },
@@ -2387,7 +2434,6 @@ final: createFilteredSource(audioMap.final)
         play: ['click'],
         stop: [],
         clickblock: true,
-        delay: 3000,
         thoughts: [
   { text: "Телхин", minLinks: 1, removeBelow: 1, interactive: true },
   { text: "Это не заканчивается...", minLinks: 4, removeBelow: 2 },
@@ -2404,7 +2450,6 @@ final: createFilteredSource(audioMap.final)
         play: ['click'],
         stop: [],
         clickblock: true,
-        delay: 3000,
         thoughts: [
   { text: "Телхин", minLinks: 1, removeBelow: 1, interactive: true },
   { text: "Все бестолку...", minLinks: 4, removeBelow: 2 },
@@ -2427,9 +2472,8 @@ final: createFilteredSource(audioMap.final)
         play: ['click'],
         stop: [],
         clickblock: true,
-        delay: 3000,
         thoughts: [
-  { text: "Телхин", minLinks: 1, removeBelow: 1, interactive: true }
+  { text: "Телхин...", minLinks: 1, removeBelow: 1, interactive: true }
 ]
       },
       {
@@ -3242,22 +3286,23 @@ function checkInteractiveThoughts() {
   const slide = slides[currentSlide];
   const slideHadInteractive = slide && slide.thoughts && slide.thoughts.some(t => t.interactive);
 
-if (!hasInteractive && slideHadInteractive && interactiveThoughtWasAlive) {
-  interactiveThoughtWasAlive = false;
-  blockAdvanceByInteractive = false;
+  if (!hasInteractive && slideHadInteractive && interactiveThoughtWasAlive) {
+    interactiveThoughtWasAlive = false;
+    blockAdvanceByInteractive = false;
 
-  const delay = (slide && slide.delay) ? Number(slide.delay) : 0;
-  if (delay > 0) {
-    setTimeout(() => {
-      if (!blockAdvanceUntilCF377Ends && !yellowAnimationActive) {
-        showNextSlide();
-      }
-    }, delay);
-  } else {
+    thoughtTemplates = [];
+    activeThoughts = [];
+
+    if (linkMap && linkMap.clear) linkMap.clear();
+    breakingLinks = [];
+    previousClusterRecords = [];
+    nextClusterUid = 1;
+    resetParticleHomes();
+
     showNextSlide();
   }
 }
-}
+
 
 function updateThoughtsFromClusters(clusters) {
   const now = performance.now();
