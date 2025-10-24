@@ -333,6 +333,24 @@ window.addEventListener('load', async () => {
 
   <audio id="fail" src="sound/kventa/fail.wav"></audio>
 
+  <audio id="radiofx1" src="sound/kventa/Radiofx1.wav"></audio>
+  <audio id="radiofx2" src="sound/kventa/Radiofx2.wav"></audio>
+  <audio id="radiofx3" src="sound/kventa/Radiofx3.wav"></audio>
+
+  <audio id="explosions" src="sound/kventa/Explosions.wav"></audio>
+
+  <audio id="tinnitus" src="sound/kventa/Tinnitus.wav"></audio>
+
+  <audio id="aliceroom" src="sound/kventa/AliceRoom.wav" loop></audio>
+
+  <audio id="classroom" src="sound/kventa/Classroom.wav" loop></audio>
+
+  <audio id="fieringfx" src="sound/kventa/Fierinhfx.wav"></audio>
+
+  <audio id="kill" src="sound/kventa/Kill.wav"></audio>
+
+  <audio id="bigroom" src="sound/kventa/Bigroom.wav" loop></audio>
+
 
   <script>
 
@@ -469,6 +487,26 @@ async function startMarsSequence() {
       launching: document.getElementById('launching'),
 
       fail: document.getElementById('fail'),
+
+      radiofx1: document.getElementById('radiofx1'),
+
+      radiofx2: document.getElementById('radiofx2'),
+
+      radiofx3: document.getElementById('radiofx3'),
+
+      explosions: document.getElementById('explosions'),
+
+      tinnitus: document.getElementById('tinnitus'),
+
+      aliceroom: document.getElementById('aliceroom'),
+
+      classroom: document.getElementById('classroom'),
+
+      fieringfx: document.getElementById('fieringfx'),
+
+      kill: document.getElementById('kill'),
+
+      bigroom: document.getElementById('bigroom'),
       
     };
 
@@ -489,15 +527,6 @@ final: createFilteredSource(audioMap.final)
 };
     const slides = [
 
-      {
-        text: '...',
-        play: ['ambience1', 'music1', 'click'],
-        stop: [],
-        thoughts: [
-  
-],
-        filterOn: ['ambience1']
-      },
       {
         text: '...',
         play: ['ambience1', 'music1', 'click'],
@@ -624,7 +653,7 @@ final: createFilteredSource(audioMap.final)
 ]},
       {
         text: '<em>Яркий свет. Ослепительный свет. ...Фонарик?</em>"',
-        play: ['click'],
+        play: ['click', 'aliceroom'],
         stop: []
       ,
   thoughts: [
@@ -776,8 +805,8 @@ final: createFilteredSource(audioMap.final)
 ]},
       {
         text: '<em>Некоторое время спустя я вышла в коридор общей зоны</em><br>Идя по коридору я видела людей. Многие спешили куда-то. Кажется офицер шел по коридору впереди. Рядом находящиеся члены экипажа отдавали ему честь. В этом жесте не было энтузиазма. Лишь заученное до рефлекса механическое движение. Сам офицер никак не реагировал и просто шел дальше.',
-        play: ['click'],
-        stop: []
+        play: ['click', 'bigroom'],
+        stop: ['aliceroom']
       ,
   thoughts: [
   { text: "Какие все занятые", minLinks: 2, removeBelow: 1 },
@@ -1002,8 +1031,8 @@ final: createFilteredSource(audioMap.final)
 ]},
       {
         text: '<color:rk>"Так точно."</color><br>RK-381 Коротко кивнула и помогла мне войти в класс. Внутри было довольно много других репликантов. И, кажется, у всех были янтарные глаза... Интересно.',
-        play: ['click'],
-        stop: [],
+        play: ['click', 'classroom'],
+        stop: ['bigroom'],
         thoughts: [
   { text: "Девушки...", minLinks: 1, removeBelow: 1 },
   { text: "Парни...", minLinks: 1, removeBelow: 1 },
@@ -1054,7 +1083,7 @@ final: createFilteredSource(audioMap.final)
   { text: "Но как...", minLinks: 4, removeBelow: 2 }
 ]},
       {
-        text: '<em>Стоп... То есть почти все человеческие секторы были захвачены?</em><br>Я уставилась на карту. Инструктор выдержал паузу и тыкнул пальцем в одну из красных точек.<br><color:instructor>"Вот тут была наша столица. [[Марс|Столица ЦПСС]]. До тех пор, пока эти твари не уничтожили ее."</color>',
+        text: '<em>Стоп... То есть почти все человеческие секторы были захвачены?</em><br>Я уставилась на карту. Инструктор выдержал паузу и тыкнул пальцем в одну из красных точек.<br><color:instructor>"Вот тут наша столица. [[Марс|Столица ЦПСС]]. Большая часть сил ОЧС сейчас сконцентрирована там. Ресурсы из Никса уходят туда для подготовки к обороне"</color>',
         play: ['click'],
         stop: [],
         thoughts: [
@@ -1064,7 +1093,7 @@ final: createFilteredSource(audioMap.final)
   { text: "Видимо, мстить", minLinks: 4, removeBelow: 2 }
 ]},
       {
-        text: 'Инструктор вздохнул, убрал руку с карты и продолжил.<br><color:instructor>"Враг думал, что это сломит нас. Что заставит нас капитулировать. Но человечество не должно сдаваться. Инопланетные захватчики должны пожалеть о том, что посмели напасть на нас."</color>',
+        text: 'Инструктор вздохнул, убрал руку с карты и продолжил.<br><color:instructor>"Враг хочет сломить нас. Хочет заставить нас капитулировать. Но человечество не должно сдаваться. Инопланетные захватчики должны пожалеть о том, что посмели напасть на нас."</color>',
         play: ['click'],
         stop: [],
         thoughts: [
@@ -1109,7 +1138,7 @@ final: createFilteredSource(audioMap.final)
       {
         text: 'Я прикрываю глаза. Как много всего произошло за пару часов...',
         play: ['click'],
-        stop: [],
+        stop: ['classroom'],
         thoughts: [
   { text: "Инструктор говворил...", minLinks: 4, removeBelow: 2 },
   { text: "Про что он там говорил?", minLinks: 4, removeBelow: 2 },
@@ -1119,7 +1148,7 @@ final: createFilteredSource(audioMap.final)
       },
       {
         text: 'Внезапная резкая боль в боку заставляет меня открыть глаза.',
-        play: ['click'],
+        play: ['click', 'classroom'],
         stop: [],
         thoughts: [
   { text: "Больно!", minLinks: 4, removeBelow: 2 },
@@ -1161,7 +1190,7 @@ final: createFilteredSource(audioMap.final)
       {
         text: 'День за днем мы проходили тоскливые инструктажи...',
         play: ['click', 'insolitum'],
-        stop: [],
+        stop: ['classroom'],
         thoughts:[
   
 ]
@@ -1645,7 +1674,7 @@ final: createFilteredSource(audioMap.final)
       },
       {
         text: 'Квадрат исчезает, а в голове что-то приятно щелкает и я чувствую какое-то странное удовлетворение, будто я действительно дала отпор своему обидчику. Хочется еще...',
-        play: ['click'],
+        play: ['click', 'kill'],
         stop: [],
         thoughts:[
   { text: "Есть!", minLinks: 4, removeBelow: 2 },
@@ -1656,7 +1685,7 @@ final: createFilteredSource(audioMap.final)
       },
       {
         text: 'От оглушительной тревоги я потеряла концентрацию и перекрестие исчезло.',
-        play: ['click', 'big_alarm'],
+        play: ['click', 'big_alarm', 'explosions'],
         stop: ['insolitum'],
         thoughts:[
   { text: "А?!", minLinks: 4, removeBelow: 2 },
@@ -1744,7 +1773,7 @@ final: createFilteredSource(audioMap.final)
 ]
       },
       {
-        text: 'Перед нами открылся шлюз, заполняя пространство блеклым светом. Наш штурмовик сорвался с места и в иллюминаторе на черном космосе начали проявляться едва заметные звезды.<br>RK говорит:<br><color:rk>"Штурмовик 10 вылетел"</color><br>Ее слова дулировались в гарнитуре.',
+        text: 'Перед нами открылся шлюз, заполняя пространство блеклым светом. Наш штурмовик сорвался с места и в иллюминаторе на черном космосе начали проявляться едва заметные звезды.<br>RK говорит:<br><color:rk>"Штурмовик 10 вылетел"</color><br>Ее слова дублировались в гарнитуре.',
         play: ['click', 'take_off'],
         stop: [],
         thoughts:[
@@ -1886,7 +1915,7 @@ final: createFilteredSource(audioMap.final)
       },
       {
         text: 'С удивительной точностью очереди автоматических орудий поражали одну цель за другой, стерая их с радаров. Другие штурмовики из нашей группы тоже подключились и вскоре небольшой рой дронов был полностью уничтожен.',
-        play: ['click'],
+        play: ['click', 'fieringfx', 'kill'],
         stop: [],
         thoughts:[
   { text: "Ха!", minLinks: 4, removeBelow: 2 },
@@ -1898,7 +1927,7 @@ final: createFilteredSource(audioMap.final)
       {
         text: 'Наш штурмовик сменил курс и мы начали возвращаться к основному построению. Из гарнитуры раздалось:<br>"Отлично. Первая группа - возвращайтесь в..."',
         play: ['click'],
-        stop: [],
+        stop: ['fieringfx'],
         thoughts:[
   { text: "В куда?", minLinks: 4, removeBelow: 2 },
   { text: "Что-то промелькнуло в космосе...", minLinks: 4, removeBelow: 2 },
@@ -2431,7 +2460,7 @@ final: createFilteredSource(audioMap.final)
       },
       {
         text: 'Стуки по обшивке становятся более гулкими.<br><color:cf>"Телхин!... Меня слышно?"</color>',
-        play: ['click'],
+        play: ['click',],
         stop: [],
         clickblock: true,
         thoughts: [
@@ -2447,7 +2476,7 @@ final: createFilteredSource(audioMap.final)
       },
       {
         text: '<color:cf>"Кто-нибудь прием... Пожалуйста..."</color><br>Я больше не могу сдерживаться и начинаю реветь.',
-        play: ['click'],
+        play: ['click',],
         stop: [],
         clickblock: true,
         thoughts: [
@@ -2469,7 +2498,7 @@ final: createFilteredSource(audioMap.final)
       },
       {
         text: '...',
-        play: ['click'],
+        play: ['click',],
         stop: [],
         clickblock: true,
         thoughts: [
