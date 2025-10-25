@@ -201,6 +201,7 @@
       -ms-user-select: none;
       -moz-user-select: none;
     }
+    
   </style>
 </head>
 <div id="loading-screen">
@@ -285,6 +286,9 @@ window.addEventListener('load', async () => {
   <div id="container">
     <button id="startBtn">начать</button>
   </div>
+  <div id="waitDots" style="display:none;">
+  <span>.</span><span>.</span><span>.</span>
+  </div>
   <span id="yellowAnimatedGlobal" class="yellow-animated" style="display:none"></span>
 
   <audio id="marsTrack" src="sound/kventa/Mars_Special_Track.mp3"></audio>
@@ -351,6 +355,10 @@ window.addEventListener('load', async () => {
 
   <audio id="bigroom" src="sound/kventa/Bigroom.wav" loop></audio>
 
+  <audio id="space" src="sound/kventa/Space.wav" loop></audio>
+
+  <audio id="headlock" src="sound/kventa/Headlock.wav"></audio>
+
 
   <script>
 
@@ -410,6 +418,13 @@ async function startMarsSequence() {
     { text: 'Где в их тени прятались местные жители, когда жарко', time: 73 },
     { text: 'Они были похожи на нас, не во всём, конечно, но всё-таки', time: 76 },
     { text: 'В целом без какой-то там оголтелой экзотики', time: 79 },
+    { text: 'Иная форма ушей, пальцы рук другие по длине', time: 81 },
+    { text: 'Но умирать им было так же страшно, как тебе или мне', time: 84 },
+    { text: '<h1>Марс</h1>', time: 87 },
+    { text: 'Бог войны, не слышащий молитвы', time: 88 },
+    { text: 'Вали с Олимпа — пушки на пол, к чёрту битвы', time: 90 },
+    { text: 'Я заебался прописывать таймкоды. Потом допилю пасхалку, целую ❤', time: 93 },
+
   ];
 
   const marsSlides = marsSlideTimings.map(s => createSlide({ text: s.text, play: ['click'] }));
@@ -508,6 +523,10 @@ async function startMarsSequence() {
       kill: document.getElementById('kill'),
 
       bigroom: document.getElementById('bigroom'),
+
+      space: document.getElementById('space'),
+
+      headlock: document.getElementById('headlock'),
       
     };
 
@@ -524,7 +543,8 @@ function createFilteredSource(audioElement, type = 'lowpass', freq = 500) {
 
 const filters = {
 ambience1: createFilteredSource(audioMap.ambience1),
-final: createFilteredSource(audioMap.final)
+final: createFilteredSource(audioMap.final),
+space: createFilteredSource(audioMap.space),
 };
     const slides = [
 
@@ -580,7 +600,7 @@ final: createFilteredSource(audioMap.final)
   
 ]},
       {
-        text: '<em>Сквозь глухую темноту слышно:</em><br><br><span style="color: #ffe066;">"Сорок семь здоровы... Троих на утилизацию..."</span>',
+        text: '<em>Сквозь глухую темноту слышно:</em><br><br><color:staff2>"Сорок семь здоровы... Троих на утилизацию..."</color>',
         play: ['click'],
         stop: []
       ,
@@ -595,7 +615,7 @@ final: createFilteredSource(audioMap.final)
         stop: []
       },
       {
-        text: '"Здоровых отправьте на имплантацию и разделите на группы."',
+        text: '<color:staff2>"Здоровых отправьте на имплантацию и разделите на группы."</color>',
         play: ['click'],
         stop: []
       ,
@@ -673,7 +693,7 @@ final: createFilteredSource(audioMap.final)
   { text: "Не люблю докторов...", minLinks: 4, removeBelow: 3 }
 ]},
       {
-        text: '"Она в сознании..."<br><br>Мужчина отдал планшет девушке и вышел из комнаты',
+        text: '<color:staff2>"Она в сознании..."</color><br><br>Мужчина отдал планшет девушке и вышел из комнаты',
         play: ['click'],
         stop: []
       ,
@@ -884,7 +904,7 @@ final: createFilteredSource(audioMap.final)
         
       },
       {
-        text: '"Да пошла ты нахуй, сука!"<br>Затем стальной нос его ботинка врезался в мой бок. Какая ужасная боль...',
+        text: '<color:staff1>"Да пошла ты нахуй, сука!"</color><br>Затем стальной нос его ботинка врезался в мой бок. Какая ужасная боль...',
         play: ['click'],
         stop: []
       ,
@@ -976,7 +996,7 @@ final: createFilteredSource(audioMap.final)
 ]
       },
       {
-        text: 'Я вздохнула и слегка улыбнулась, глядя на ее отражение.<br>- <color:cf>Спасибо, что помогла.</color>',
+        text: 'Я вздохнула и слегка улыбнулась, глядя на ее отражение.<br><color:cf>"Спасибо, что помогла."</color>',
         play: ['click'],
         stop: [],
         thoughts:[
@@ -1084,7 +1104,7 @@ final: createFilteredSource(audioMap.final)
   { text: "Но как...", minLinks: 4, removeBelow: 2 }
 ]},
       {
-        text: '<em>Стоп... То есть почти все человеческие секторы были захвачены?</em><br>Я уставилась на карту. Инструктор выдержал паузу и тыкнул пальцем в одну из красных точек.<br><color:instructor>"Вот тут наша столица. [[Марс|Столица ЦПСС]]. Большая часть сил ОЧС сейчас сконцентрирована там. Ресурсы из Никса уходят туда для подготовки к обороне"</color>',
+        text: '<em>Стоп... То есть почти все человеческие секторы были захвачены?</em><br>Я уставилась на карту. Инструктор выдержал паузу и тыкнул пальцем в одну из синих точек.<br><color:instructor>"Вот тут наша столица. [[Марс|Столица ЦПСС]]. Большая часть сил ОЧС сейчас сконцентрирована там. Ресурсы из Никса уходят туда для подготовки к обороне"</color>',
         play: ['click'],
         stop: [],
         thoughts: [
@@ -2249,8 +2269,8 @@ final: createFilteredSource(audioMap.final)
       },
       {
         text: '...',
-        play: ['click'],
-        stop: [],
+        play: ['click', 'space', 'tinnitus'],
+        stop: ['final'],
         eqMode: false,
         thoughts:[
   
@@ -2530,8 +2550,9 @@ final: createFilteredSource(audioMap.final)
       },
       {
         text: 'Я медленно стягиваю гарнитуру с головы, не веря своим глазам. Начинает тошнить...',
-        play: ['click'],
+        play: ['click', 'headlock'],
         stop: ['radiotelkhin'],
+        filterOn: ['space'],
         thoughts:[
   { text: "Дышать нечем...", minLinks: 4, removeBelow: 2 },
   { text: "Не могу больше плакать...", minLinks: 4, removeBelow: 2 },
@@ -2670,7 +2691,12 @@ final: createFilteredSource(audioMap.final)
   alice: "#30d5c8",
   rk: "#F5BA0A",
   instructor: "#ff6666",
-  cf: "#3ecfff"
+  cf: "#3ecfff",
+  announcement: "#32CD32",
+  staff1: "#B22222",
+  staff2: "#C71585",
+  staff3: "#DCDCDC",
+  staff4: "#808000"
 };
 
   function renderAnnotatedText(text) {
@@ -2734,7 +2760,6 @@ final: createFilteredSource(audioMap.final)
 
           isMarsEQ = true;
           drawLinks = drawLinksMars;
-          console.log("EQ-режим активен (через существующий фильтр)");
         } catch (err) {
           console.warn("EQ activation error:", err);
         }
@@ -3743,4 +3768,3 @@ links.forEach(l => {
 
 </body>
 </html>
-
