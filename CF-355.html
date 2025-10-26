@@ -1584,7 +1584,7 @@ space: createFilteredSource(audioMap.space),
 ]
       },
       {
-        text: '<em>Кажется... Я должна сделать... Что-то?</em><br><color:cf>"Активирую систему поддержкки...?"</color><br>Я уставилась на RK в ответ. Наверное, я выгляжу беспомощно, поскольку именно так я себя и чувствую.',
+        text: '<em>Кажется... Я должна сделать... Что-то?</em><br><color:cf>"Активирую систему поддержки...?"</color><br>Я уставилась на RK в ответ. Наверное, я выгляжу беспомощно, поскольку именно так я себя и чувствую.',
         play: ['click'],
         stop: [],
         thoughts:[
@@ -1785,7 +1785,7 @@ space: createFilteredSource(audioMap.space),
 ]
       },
       {
-        text: 'В гарнитуре раздаются почти в унисон голоса других пилотов:<br>"Штурмовик 4 вылетел!"<br>"Штурмовик 6 вылетел!"<br>"Штурмовик 7 вылетел!"',
+        text: 'В гарнитуре раздаются почти в унисон голоса других пилотов:<br><color:staff2>"Штурмовик 4 вылетел!"</color><br><color:staff5>"Штурмовик 6 вылетел!"</color><br><color:staff6>"Штурмовик 7 вылетел!"</color>',
         play: ['click'],
         stop: [],
         thoughts:[
@@ -1973,7 +1973,7 @@ space: createFilteredSource(audioMap.space),
 ]
       },
       {
-        text: 'По связи раздались слова, перемешивающиеся друг с другом:<br><color:staff2>"Что произошло?"</color><br>"Первый штурмовик на связи?"<br>"Что случилось с построением?.."',
+        text: 'По связи раздались слова, перемешивающиеся друг с другом:<br><color:staff2>"Что произошло?"</color><br><color:staff5>"Первый штурмовик на связи?"</color><br><color:staff8>"Что случилось с построением?.."</color>',
         play: ['click'],
         stop: [],
         thoughts:[
@@ -2059,7 +2059,7 @@ space: createFilteredSource(audioMap.space),
 ]
       },
       {
-        text: 'Я поворачиваю голову на соседнее кресло. Она выглядит более не способной продолжать бой. И от нашей эскадры ничего не осталось. Построения нет, командир уничтожен. Только шесть наших штурмовиков.',
+        text: 'Я поворачиваю голову на соседнее кресло и смотрю на CF-355. Она выглядит более не способной продолжать бой. И от нашей эскадры ничего не осталось. Построения нет, командир уничтожен. Только шесть наших штурмовиков.',
         play: ['click', 'final'],
         stop: [],
         eqMode: true,
@@ -2212,7 +2212,7 @@ space: createFilteredSource(audioMap.space),
 ]
       },
       {
-        text: '"Восьмой докладывает - нам оказывается минимальное сопротивление"<br>"Второй докладывает - по нам пришлось несколько ударов, но мы пока в строю."',
+        text: '<color:staff7>"Восьмой докладывает - нам оказывается минимальное сопротивление"</color><br><color:staff9>"Второй докладывает - по нам пришлось несколько ударов, но мы пока в строю."</color>',
         play: ['click'],
         stop: [],
         eqMode: true,
@@ -2687,7 +2687,7 @@ space: createFilteredSource(audioMap.space),
       },
     ];
 
-    let currentSlide = -1;
+    let currentSlide = 130;
     let readyForClick = false;
     let yellowAnimationActive = false;
 
@@ -2697,10 +2697,15 @@ space: createFilteredSource(audioMap.space),
   instructor: "#ff6666",
   cf: "#3ecfff",
   announcement: "#32CD32",
-  staff1: "#ff0000ff",
+  staff1: "#602a2aff",
   staff2: "#C71585",
-  staff3: "#DCDCDC",
-  staff4: "#808000"
+  staff3: "#5c87a6ff",
+  staff4: "#808000",
+  staff5: "#4629ffff",
+  staff6: "#ff8ff4ff",
+  staff7: "#91ff9cff",
+  staff8: "#098945ff",
+  staff9: "#68ad0fff",
 };
 
   function renderAnnotatedText(text) {
