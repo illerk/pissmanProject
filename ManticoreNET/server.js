@@ -58,10 +58,7 @@ app.use('/:prefix/avatars', express.static(path.join(__dirname, 'public', 'avata
 app.use('/:prefix/posts', express.static(path.join(__dirname, 'public', 'posts')));
 app.use('/:prefix', express.static(path.join(__dirname, 'public')));
 
-// mount API router at multiple entry points to tolerate proxy rewrite or not
-app.use('/api', api);
-app.use('/:prefix/api', api);
-app.use(API_BASE, api); // keep existing mount (if BASE_PATH env used)
+const api = express.Router();
 
 
 if (!fs.existsSync(USERS_FILE)) {
@@ -389,7 +386,11 @@ app.get("/api/unread/:username", async (req, res) => {
 });
 
 // after defining all api.* routes:
+// register API mounts (do this AFTER api is defined)
+app.use('/api', api);
+app.use('/:prefix/api', api);
 app.use(API_BASE, api);
+
 
 // adjust WebSocket server to listen on path `${BASE_PATH}/ws`
 const server = http.createServer(app);
