@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ManticoreNET</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-header">
+    <div class="logo">ManticoreNET</div>
+    <div class="search">Search people, posts...</div>
+  </div>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="nav-item" id="nav-profile">Profile</div>
+      <div class="nav-item" id="nav-contacts">Contacts</div>
+      <div class="nav-item" id="nav-feed">Feed</div>
+      <div class="nav-item" id="nav-messages">Messages</div>
+    </aside>
+
+    <main class="content">
+      <div class="card">
+        <h1 style="margin-top:0">Welcome!</h1>
+        <p>Navigation: Profile / Messages / Gallery</p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const user = localStorage.getItem('currentUser');
+    if (!user) {
+      window.location.href = "index.html";
+    } else {
+      document.body.classList.add('logged-in');
+    }
+
+    const navContacts = document.getElementById('nav-contacts');
+    if (navContacts) {
+      navContacts.addEventListener('click', () => {
+        if (!localStorage.getItem('currentUser')) return window.location.href = 'index.html';
+        window.location.href = 'profile.html#contacts';
+      });
+    }
+
+    const navProfile = document.getElementById('nav-profile');
+    if (navProfile) {
+      navProfile.addEventListener('click', () => {
+        if (!localStorage.getItem('currentUser')) return window.location.href = 'index.html';
+        window.location.href = 'profile.html';
+      });
+    }
+
+    const navFeed = document.getElementById('nav-feed');
+    if (navFeed) {
+      navFeed.addEventListener('click', () => {
+        if (!localStorage.getItem('currentUser')) return;
+        window.location.href = 'feed.html';
+      });
+    }
+
+    const navMessages = document.getElementById('nav-messages');
+    if (navMessages) {
+      navMessages.addEventListener('click', () => {
+        if (!localStorage.getItem('currentUser')) return window.location.href = 'index.html';
+        window.location.href = 'messages.html';
+      });
+    }
+
+    (async function showMenuUnread() {
+      const user = localStorage.getItem('currentUser');
+      if (!user) return;
+      try {
+        const res = await fetch(`/api/unread/${encodeURIComponent(user)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data || !data.success) return;
+        const total = data.total || 0;
+        if (total > 0 && navMessages) {
+          let mb = navMessages.querySelector('.unread-badge');
+          if (!mb) {
+            mb = document.createElement('span');
+            mb.className = 'unread-badge';
+            mb.style.marginLeft = '8px';
+            navMessages.appendChild(mb);
+          }
+          mb.textContent = total > 99 ? '99+' : String(total);
+          mb.style.display = '';
+        }
+      } catch(e){}
+    })();
+  </script>
+</body>
+</html>

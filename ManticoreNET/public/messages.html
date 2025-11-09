@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Messages — ManticoreNET</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-header">
+    <div class="logo">ManticoreNET</div>
+    <div class="search" id="headerSearch">Messages</div>
+    <div class="header-actions">
+      <button id="logoutTopBtn">Logout</button>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="nav-item" id="nav-profile">Profile</div>
+      <div class="nav-item" id="nav-contacts">Contacts</div>
+      <div class="nav-item" id="nav-feed">Feed</div>
+      <div class="nav-item" id="nav-messages">Messages</div>
+    </aside>
+
+    <main class="content">
+      <div class="card" style="display:flex; gap:12px; max-width:1000px">
+        <div style="width:260px">
+          <h3>Contacts</h3>
+          <div id="contactsPane" style="display:flex; flex-direction:column; gap:8px; max-height:70vh; overflow:auto"></div>
+        </div>
+
+        <div style="flex:1">
+          <div class="card" id="chatCard" style="padding:12px">
+            <div id="chatHeader" style="font-weight:700">Select a contact</div>
+            <div id="messagesPane" style="margin-top:8px; height:56vh; overflow:auto; display:flex; flex-direction:column; gap:8px; padding-right:8px"></div>
+
+            <div id="composer" style="margin-top:12px; display:flex; gap:12px; align-items:flex-start">
+              <textarea id="msgInput" placeholder="Type a message (Enter — send, Shift+Enter — newline)"
+                rows="1"
+                style="flex:1; padding:8px; background:transparent; border:1px solid rgba(255,255,255,0.08); color:#fff; min-height:1.6em; max-height:300px; resize:vertical; overflow:auto"></textarea>
+
+              <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end; width:72px">
+                <input id="msgImage" type="file" accept="image/*" title="Attach image">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="overlay" class="overlay"><img id="overlayImg" src=""></div>
+
+  <script type="module" src="messages.js"></script>
+</body>
+</html>

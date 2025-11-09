@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Feed — ManticoreNET</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-header">
+    <div class="logo">ManticoreNET</div>
+    <div class="search" id="headerSearch">Feed</div>
+    <div class="header-actions">
+      <button id="logoutTopBtn">Logout</button>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="nav-item" id="nav-profile">Profile</div>
+      <div class="nav-item" id="nav-contacts">Contacts</div>
+      <div class="nav-item" id="nav-feed">Feed</div>
+      <div class="nav-item" id="nav-messages">Messages</div>
+    </aside>
+
+    <main class="content">
+      <div class="card" id="newPostCardFeed" style="max-width:820px; margin-top:0">
+        <h3 style="margin:0 0 8px 0">Create post</h3>
+        <textarea id="postTextFeed" placeholder="What's happening at Manticore?" style="width:100%; min-height:80px; background:transparent; border:1px solid rgba(255,255,255,0.08); color:#fff; padding:8px"></textarea>
+        <div style="margin-top:8px; display:flex; gap:8px; align-items:center">
+          <input id="postImageInputFeed" type="file" accept="image/*">
+          <button id="createPostBtnFeed">Post</button>
+        </div>
+      </div>
+
+      <div class="card" style="max-width:820px; margin-top:12px">
+        <h3 style="margin:0 0 8px 0">Feed</h3>
+        <div id="feedPosts" style="display:flex; flex-direction:column; gap:12px"></div>
+      </div>
+    </main>
+  </div>
+
+  <div id="overlay" class="overlay"><img id="overlayImg" src=""></div>
+
+  <script type="module" src="feed.js"></script>
+
+  <script>
+    (async function showMenuUnread() {
+      const user = localStorage.getItem('currentUser');
+      if (!user) return;
+      try {
+        const res = await fetch(`/api/unread/${encodeURIComponent(user)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data || !data.success) return;
+        const total = data.total || 0;
+        const navMessages = document.getElementById('nav-messages');
+        if (total > 0 && navMessages) {
+          let mb = navMessages.querySelector('.unread-badge');
+          if (!mb) {
+            mb = document.createElement('span');
+            mb.className = 'unread-badge';
+            mb.style.marginLeft = '8px';
+            navMessages.appendChild(mb);
+          }
+          mb.textContent = total > 99 ? '99+' : String(total);
+          mb.style.display = '';
+        }
+      } catch(e){}
+    })();
+  </script>
+</body>
+</html>

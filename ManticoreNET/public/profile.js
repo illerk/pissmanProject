@@ -1,0 +1,490 @@
+// compute base
+const BASE = location.pathname.replace(/\/[^/]*$/, '');
+
+const currentUser = localStorage.getItem("currentUser");
+if (!currentUser) {
+  window.location.href = "index.html";
+}
+document.body.classList.add("logged-in");
+
+const headerLabel = document.getElementById("headerLabel");
+const headerSearch = document.getElementById("headerSearch");
+const logoutTopBtn = document.getElementById("logoutTopBtn");
+
+const profileCard = document.getElementById("profileCard");
+const viewFields = document.getElementById("viewFields");
+const editFields = document.getElementById("editFields");
+const ageText = document.getElementById("ageText");
+const genderText = document.getElementById("genderText");
+const ageInput = document.getElementById("ageInput");
+const genderSelect = document.getElementById("genderSelect");
+const editBtn = document.getElementById("editBtn");
+const uploadBtn = document.getElementById("uploadBtn");
+const fileInput = document.getElementById("fileInput");
+const saveBtn = document.getElementById("saveBtn");
+
+const newPostCard = document.getElementById("newPostCard");
+const postText = document.getElementById("postText");
+const postImageInput = document.getElementById("postImageInput");
+const createPostBtn = document.getElementById("createPostBtn");
+
+const postsListCard = document.getElementById("postsListCard");
+const postsList = document.getElementById("postsList");
+
+const contactsView = document.getElementById("contactsView");
+const contactsList = document.getElementById("contactsList");
+const navContacts = document.getElementById("nav-contacts");
+const navProfile = document.getElementById("nav-profile");
+
+const avatarEl = document.getElementById("avatar");
+const overlay = document.getElementById("overlay");
+const overlayImg = document.getElementById("overlayImg");
+const status = document.getElementById("status");
+
+let editMode = false;
+let viewingUser = currentUser;
+let currentProfile = {};
+const userCache = {};
+
+// small helpers
+function showStatus(msg, isError = true) {
+  status.textContent = msg;
+  status.style.color = isError ? "#f66" : "#8f8";
+}
+async function fetchJson(url, opts) {
+  try {
+    const full = url.startsWith('/') ? (BASE + url) : (BASE + '/' + url.replace(/^\//, ''));
+    const res = await fetch(full, opts);
+    const data = await res.json();
+    return { ok: res.ok, data };
+  } catch (e) {
+    return { ok: false, data: { error: "Network error" } };
+  }
+}
+function formatFutureDate(ts) {
+  const d = new Date(Number(ts));
+  d.setFullYear(d.getFullYear() + 313);
+  return d.toLocaleString();
+}
+async function getUserProfile(username) {
+  if (!username) return null;
+  if (userCache[username]) return userCache[username];
+  const r = await fetchJson(`/api/user/${encodeURIComponent(username)}`);
+  if (r.ok && r.data.success) {
+    userCache[username] = r.data.profile;
+    return r.data.profile;
+  }
+  return null;
+}
+
+function setEditMode(on) {
+  editMode = !!on;
+  editFields.style.display = editMode ? "" : "none";
+  viewFields.style.display = editMode ? "none" : "";
+  uploadBtn.style.display = editMode ? "" : "none";
+  saveBtn.style.display = editMode ? "" : "none";
+  editBtn.textContent = editMode ? "Cancel" : "Edit";
+  if (editMode) {
+    ageInput.value = currentProfile.age ?? "";
+    genderSelect.value = currentProfile.gender ?? "";
+  } else {
+    ageText.textContent = currentProfile.age ?? "—";
+    genderText.textContent = currentProfile.gender ?? "—";
+    fileInput.value = "";
+  }
+}
+
+// show contacts view — hide posts list and profile card
+async function showContacts() {
+  headerSearch.textContent = "Contacts";
+  // keep headerLabel (profile name) unchanged
+  profileCard.style.display = "none";
+  contactsView.style.display = "";
+  newPostCard.style.display = "none";
+  postsListCard.style.display = "none";
+
+  contactsList.innerHTML = "Loading...";
+  const { ok, data } = await fetchJson("/api/users");
+  if (!ok || !data.users) {
+    contactsList.innerHTML = `<div style="color:#f66">Failed to load contacts</div>`;
+    return;
+  }
+  contactsList.innerHTML = "";
+  data.users.forEach(u => {
+    const item = document.createElement("div");
+    item.className = "contact-item";
+    item.style.display = "flex";
+    item.style.alignItems = "center";
+    item.style.gap = "12px";
+    item.style.padding = "8px";
+    item.style.border = "1px solid rgba(255,255,255,0.04)";
+    item.style.borderRadius = "6px";
+
+    const img = document.createElement("img");
+    img.src = u.avatar || "default-avatar.png";
+    img.style.width = "56px";
+    img.style.height = "56px";
+    img.style.objectFit = "cover";
+    img.style.borderRadius = "6px";
+    img.style.cursor = "pointer";
+    img.addEventListener("click", () => { overlayImg.src = img.src; overlay.classList.add("visible"); });
+
+    const info = document.createElement("div"); info.style.flex = "1";
+    const nameEl = document.createElement("div");
+    nameEl.textContent = u.username; nameEl.style.fontWeight = "600"; nameEl.style.cursor = "pointer";
+    nameEl.addEventListener("click", () => { loadProfile(u.username); });
+    const meta = document.createElement("div"); meta.style.color = "#aaa"; meta.style.fontSize = "0.9rem";
+    meta.textContent = `Age: ${u.age ?? '—'} · Gender: ${u.gender ?? '—'}`;
+
+    info.appendChild(nameEl); info.appendChild(meta);
+
+    const viewBtn = document.createElement("button"); viewBtn.textContent = "View";
+    viewBtn.addEventListener("click", () => { loadProfile(u.username); });
+
+    item.appendChild(img); item.appendChild(info); item.appendChild(viewBtn);
+    contactsList.appendChild(item);
+  });
+}
+
+// load posts for a user
+async function loadPosts(username, options = { preserveScroll: true }) {
+  // preserve scroll position if requested
+  const container = postsList;
+  const prevScroll = options.preserveScroll ? container.scrollTop : 0;
+  postsList.innerHTML = "Loading posts...";
+  const { ok, data } = await fetchJson(`/api/posts/${encodeURIComponent(username)}`);
+  if (!ok || !data.posts) {
+    postsList.innerHTML = `<div style="color:#f66">Failed to load posts</div>`;
+    return;
+  }
+  await renderPosts(data.posts);
+  // restore scroll
+  if (options.preserveScroll) {
+    // small timeout to ensure DOM layout applied
+    setTimeout(() => { container.scrollTop = prevScroll; }, 0);
+  }
+}
+
+// render posts sequentially to avoid race/double-appends
+async function renderPosts(posts) {
+  postsList.innerHTML = "";
+  if (!posts.length) { postsList.innerHTML = "<div style='color:#aaa'>No posts yet.</div>"; return; }
+
+  for (const post of posts) {
+    const el = document.createElement("div");
+    el.className = "post";
+    el.style.border = "1px solid rgba(255,255,255,0.04)";
+    el.style.padding = "12px";
+    el.style.borderRadius = "8px";
+    el.style.background = "linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00))";
+
+    const author = await getUserProfile(post.username);
+
+    const header = document.createElement("div");
+    header.style.display = "flex";
+    header.style.justifyContent = "space-between";
+    header.style.alignItems = "center";
+
+    const left = document.createElement("div");
+    left.style.display = "flex";
+    left.style.alignItems = "center";
+    left.style.gap = "8px";
+
+    const authorImg = document.createElement("img");
+    authorImg.src = (author && author.avatar) ? author.avatar : "default-avatar.png";
+    authorImg.style.width = "36px";
+    authorImg.style.height = "36px";
+    authorImg.style.objectFit = "cover";
+    authorImg.style.borderRadius = "6px";
+    authorImg.style.cursor = "pointer";
+    authorImg.addEventListener("click", () => { loadProfile(post.username); });
+
+    const nameDiv = document.createElement("div");
+    nameDiv.innerHTML = `<div style="font-weight:700">${post.username}</div>
+                         <div style="color:#999;font-size:0.85rem">${formatFutureDate(post.createdAt)}</div>`;
+
+    left.appendChild(authorImg); left.appendChild(nameDiv);
+    header.appendChild(left);
+    el.appendChild(header);
+
+    if (post.text) {
+      const txt = document.createElement("div"); txt.style.marginTop = "8px"; txt.textContent = post.text; el.appendChild(txt);
+    }
+    if (post.image) {
+      const img = document.createElement("img");
+      img.src = post.image + "?t=" + Date.now();
+      img.style.maxWidth = "100%";
+      img.style.marginTop = "8px";
+      img.style.borderRadius = "6px";
+      img.style.cursor = "pointer";
+      img.addEventListener("click", () => { overlayImg.src = img.src; overlay.classList.add("visible"); });
+      el.appendChild(img);
+    }
+
+    // actions
+    const actions = document.createElement("div");
+    actions.style.display = "flex"; actions.style.alignItems = "center"; actions.style.gap = "8px"; actions.style.marginTop = "10px";
+
+    const up = document.createElement("button"); up.textContent = "▲";
+    const down = document.createElement("button"); down.textContent = "▼";
+    const count = document.createElement("span"); count.textContent = (post.votes||[]).reduce((s,v)=>s+Number(v.vote),0);
+    count.style.minWidth = "28px"; count.style.textAlign = "center";
+    const myV = (post.votes||[]).find(v=>v.username===currentUser)?.vote ?? 0;
+    if (myV === 1) up.style.opacity = "0.9";
+    if (myV === -1) down.style.opacity = "0.9";
+
+    up.addEventListener("click", async () => {
+      const container = postsList;
+      const prev = container.scrollTop;
+      const { ok, data } = await fetchJson(`/api/posts/${post.id}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: currentUser, vote: 1 })
+      });
+      if (ok && data.success) {
+        post.votes = data.votes;
+        // reload posts preserving scroll
+        await loadPosts(viewingUser, { preserveScroll: true });
+        container.scrollTop = prev;
+      }
+    });
+    down.addEventListener("click", async () => {
+      const container = postsList;
+      const prev = container.scrollTop;
+      const { ok, data } = await fetchJson(`/api/posts/${post.id}/vote`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: currentUser, vote: -1 })
+      });
+      if (ok && data.success) { post.votes = data.votes; count.textContent = (post.votes||[]).reduce((s,v)=>s+Number(v.vote),0); await loadPosts(viewingUser, { preserveScroll:true }); container.scrollTop = prev; }
+    });
+
+    actions.appendChild(up); actions.appendChild(count); actions.appendChild(down);
+
+    if (post.username === currentUser) {
+      const delBtn = document.createElement("button"); delBtn.textContent = "Delete";
+      delBtn.addEventListener("click", async () => {
+        if (!confirm("Delete this post?")) return;
+        await fetch(`/api/posts/${post.id}`, {
+          method: "DELETE", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: currentUser })
+        });
+        await loadPosts(viewingUser);
+      });
+      actions.appendChild(delBtn);
+    }
+
+    const commentsToggle = document.createElement("button"); commentsToggle.textContent = `Comments (${(post.comments||[]).length})`;
+    actions.appendChild(commentsToggle);
+    el.appendChild(actions);
+
+    // comments area
+    const commentsArea = document.createElement("div"); commentsArea.style.display = "none"; commentsArea.style.marginTop = "10px";
+    const cl = document.createElement("div");
+
+    for (const c of (post.comments||[])) {
+      const ci = document.createElement("div");
+      ci.style.borderTop = "1px solid rgba(255,255,255,0.03)";
+      ci.style.padding = "8px 0";
+
+      const cHeader = document.createElement("div"); cHeader.style.display = "flex"; cHeader.style.alignItems = "center"; cHeader.style.gap = "8px";
+      const cAuthor = await getUserProfile(c.username);
+      const cImg = document.createElement("img");
+      cImg.src = (cAuthor && cAuthor.avatar) ? cAuthor.avatar : "default-avatar.png";
+      cImg.style.width = "28px"; cImg.style.height = "28px"; cImg.style.objectFit = "cover"; cImg.style.borderRadius = "6px"; cImg.style.cursor = "pointer";
+      cImg.addEventListener("click", () => { loadProfile(c.username); });
+
+      const cMeta = document.createElement("div");
+      cMeta.innerHTML = `<div style="font-weight:600">${c.username} <span style="color:#999;font-weight:400;font-size:0.85rem">· ${formatFutureDate(c.createdAt)}</span></div>
+                         <div style="margin-top:6px">${c.text}</div>`;
+
+      cHeader.appendChild(cImg); cHeader.appendChild(cMeta);
+      ci.appendChild(cHeader);
+
+      const cv = document.createElement("div"); cv.style.display = "flex"; cv.style.alignItems = "center"; cv.style.gap = "6px"; cv.style.marginTop = "6px";
+      const cup = document.createElement("button"); cup.textContent = "▲";
+      const cdown = document.createElement("button"); cdown.textContent = "▼";
+      const ccount = document.createElement("span"); ccount.textContent = (c.votes||[]).reduce((s,v)=>s+Number(v.vote),0);
+
+      cup.addEventListener("click", async () => {
+        const { ok } = await fetchJson(`/api/comments/${c.id}/vote`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: currentUser, vote: 1 })
+        });
+        if (ok) await loadPosts(viewingUser);
+      });
+      cdown.addEventListener("click", async () => {
+        const { ok } = await fetchJson(`/api/comments/${c.id}/vote`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: currentUser, vote: -1 })
+        });
+        if (ok) await loadPosts(viewingUser);
+      });
+
+      cv.appendChild(cup); cv.appendChild(ccount); cv.appendChild(cdown);
+      ci.appendChild(cv);
+      cl.appendChild(ci);
+    }
+
+    commentsArea.appendChild(cl);
+
+    // add comment form
+    const commentForm = document.createElement("div"); commentForm.style.marginTop = "8px";
+    const commentInput = document.createElement("input"); commentInput.placeholder = "Write a comment..."; commentInput.style.width = "70%";
+    const commentBtn = document.createElement("button"); commentBtn.textContent = "Comment";
+    commentBtn.addEventListener("click", async () => {
+      const txt = commentInput.value.trim();
+      if (!txt) return;
+      const { ok } = await fetchJson(`/api/posts/${post.id}/comments`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: currentUser, text: txt })
+      });
+      if (ok) {
+        commentInput.value = "";
+        await loadPosts(viewingUser);
+      }
+    });
+    commentForm.appendChild(commentInput); commentForm.appendChild(commentBtn);
+    commentsArea.appendChild(commentForm);
+
+    el.appendChild(commentsArea);
+    commentsToggle.addEventListener("click", () => { commentsArea.style.display = commentsArea.style.display === "none" ? "" : "none"; });
+
+    postsList.appendChild(el);
+  }
+}
+
+// load profile (single entry point)
+async function loadProfile(username = currentUser) {
+  viewingUser = username;
+  const isOwn = viewingUser === currentUser;
+
+  headerLabel.textContent = viewingUser;
+  headerSearch.textContent = isOwn ? "Profile" : `${viewingUser}'s Profile`;
+
+  // show profile card and posts list
+  contactsView.style.display = "none";
+  profileCard.style.display = "";
+  postsListCard.style.display = "";
+  newPostCard.style.display = isOwn ? "" : "none";
+
+  // load profile data
+  const { ok, data } = await fetchJson(`/api/user/${encodeURIComponent(viewingUser)}`);
+  if (!ok || !data.success) {
+    showStatus(data.error || "Failed to load profile");
+    return;
+  }
+  currentProfile = data.profile;
+  avatarEl.src = currentProfile.avatar || "default-avatar.png";
+  ageText.textContent = currentProfile.age ?? "—";
+  genderText.textContent = currentProfile.gender ?? "—";
+  setEditMode(false);
+
+  // load posts for this user
+  await loadPosts(viewingUser);
+}
+
+// nav bindings
+if (navContacts) navContacts.addEventListener("click", () => { showContacts(); });
+if (navProfile) navProfile.addEventListener("click", () => { loadProfile(currentUser); });
+
+// file upload for avatar (only active in edit mode)
+fileInput.addEventListener("change", async () => {
+  if (!editMode) return;
+  const f = fileInput.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const dataUrl = reader.result;
+    showStatus("Uploading avatar...", false);
+    const { ok } = await fetchJson("/api/avatar", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: currentUser, image: dataUrl })
+    });
+    if (ok) {
+      // refresh profile avatar
+      const p = await getUserProfile(currentUser);
+      userCache[currentUser] = null; // clear cache so next getUserProfile fetches updated avatar
+      await loadProfile(viewingUser);
+    } else {
+      showStatus("Upload failed");
+    }
+  };
+  reader.readAsDataURL(f);
+});
+
+// edit/save handlers (only for own profile)
+editBtn.addEventListener("click", async () => {
+  if (viewingUser !== currentUser) return;
+  if (!editMode) setEditMode(true);
+  else await loadProfile(viewingUser); // cancel -> reload profile
+});
+saveBtn.addEventListener("click", async () => {
+  if (viewingUser !== currentUser) return;
+  const age = ageInput.value;
+  const gender = genderSelect.value;
+  const { ok } = await fetchJson("/api/profile", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: currentUser, age, gender })
+  });
+  if (ok) await loadProfile(viewingUser);
+});
+
+// create post (only for own profile)
+createPostBtn.addEventListener("click", async () => {
+  if (viewingUser !== currentUser) return;
+  const text = postText.value.trim();
+  const f = postImageInput.files[0];
+  if (f) {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUrl = reader.result;
+      const { ok } = await fetchJson("/api/posts", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: currentUser, text, image: dataUrl })
+      });
+      if (ok) { postText.value = ""; postImageInput.value = ""; await loadPosts(viewingUser); }
+    };
+    reader.readAsDataURL(f);
+  } else {
+    const { ok } = await fetchJson("/api/posts", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: currentUser, text })
+    });
+    if (ok) { postText.value = ""; await loadPosts(viewingUser); }
+  }
+});
+
+// logout top
+if (logoutTopBtn) logoutTopBtn.addEventListener("click", () => {
+  localStorage.removeItem("currentUser");
+  document.body.classList.remove("logged-in");
+  window.location.href = "index.html";
+});
+
+// init: respect ?user= and #contacts, run only once
+(async function init() {
+  const params = new URLSearchParams(location.search);
+  const userParam = params.get('user');
+  if (userParam) {
+    await loadProfile(userParam);
+    return;
+  }
+  if (location.hash === '#contacts') {
+    await showContacts();
+    return;
+  }
+  await loadProfile();
+})();
+
+// added: make Upload avatar button open file picker
+uploadBtn.addEventListener("click", () => {
+  fileInput.click();
+});
+
+// added: close overlay when clicking background or the image
+overlay.addEventListener("click", () => {
+  overlay.classList.remove("visible");
+});
+overlayImg.addEventListener("click", () => {
+  overlay.classList.remove("visible");
+});

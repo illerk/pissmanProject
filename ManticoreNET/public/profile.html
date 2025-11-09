@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile — ManticoreNET</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-header">
+    <div class="logo">ManticoreNET</div>
+    <div class="search" id="headerSearch">Profile</div>
+    <div class="header-actions">
+      <button id="logoutTopBtn">Logout</button>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="nav-item" id="nav-profile">Profile</div>
+      <div class="nav-item" id="nav-contacts">Contacts</div>
+      <div class="nav-item" id="nav-feed">Feed</div>
+      <div class="nav-item" id="nav-messages">Messages</div>
+    </aside>
+
+    <main class="content">
+      <div class="card" style="max-width:640px" id="profileCard">
+        <h2 id="headerLabel" style="margin:0 0 12px 0"></h2>
+
+        <div style="display:flex; gap:18px; align-items:center; flex-wrap:wrap">
+          <div style="text-align:center">
+            <img id="avatar" src="default-avatar.png" alt="avatar">
+            <div style="margin-top:8px; font-size:0.9rem; color:#aaa">Click avatar to view</div>
+          </div>
+
+          <div style="flex:1; min-width:220px">
+            <div id="viewFields">
+              <div id="ageDisplay">Age: <span id="ageText">—</span></div>
+              <div style="margin-top:8px">Gender: <span id="genderText">—</span></div>
+            </div>
+
+            <div id="editFields" style="display:none">
+              <label>Age</label>
+              <input id="ageInput" placeholder="Age" type="number" min="0">
+              <label style="margin-top:8px;display:block">Gender</label>
+              <select id="genderSelect">
+                <option value="">-</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div style="margin-top:12px; display:flex; gap:8px">
+              <button id="editBtn">Edit</button>
+              <button id="uploadBtn" style="display:none">Upload avatar</button>
+              <input id="fileInput" type="file" accept="image/*" style="display:none">
+              <button id="saveBtn" style="display:none">Save profile</button>
+            </div>
+            <p id="status" style="margin-top:8px;color:#aaa"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="newPostCard" style="max-width:820px; display:none; margin-top:12px">
+        <h3 style="margin:0 0 8px 0">Create post</h3>
+        <textarea id="postText" placeholder="What's happening at Manticore?" style="width:100%; min-height:80px; background:transparent; border:1px solid rgba(255,255,255,0.08); color:#fff; padding:8px"></textarea>
+        <div style="margin-top:8px; display:flex; gap:8px; align-items:center">
+          <input id="postImageInput" type="file" accept="image/*">
+          <button id="createPostBtn">Post</button>
+        </div>
+      </div>
+
+      <div class="card" id="postsListCard" style="max-width:820px; margin-top:12px">
+        <h3 style="margin:0 0 8px 0">Posts</h3>
+        <div id="postsList" style="display:flex; flex-direction:column; gap:12px"></div>
+      </div>
+
+      <div class="card" id="contactsView" style="max-width:820px; display:none; margin-top:12px">
+        <h2 style="margin:0 0 12px 0">Contacts</h2>
+        <div id="contactsList" style="display:flex; flex-direction:column; gap:10px"></div>
+      </div>
+    </main>
+  </div>
+
+  <div id="overlay" class="overlay"><img id="overlayImg" src=""></div>
+
+  <script type="module" src="profile.js"></script>
+
+  <script>
+    const navFeed = document.getElementById('nav-feed');
+    if (navFeed) {
+      navFeed.addEventListener('click', () => {
+        if (!localStorage.getItem('currentUser')) return window.location.href = 'index.html';
+        window.location.href = 'feed.html';
+      });
+    }
+
+    const navMessages = document.getElementById('nav-messages');
+    if (navMessages) {
+      navMessages.addEventListener('click', () => {
+        if (!localStorage.getItem('currentUser')) return window.location.href = 'index.html';
+        window.location.href = 'messages.html';
+      });
+    }
+
+    (async function showMenuUnread() {
+      const user = localStorage.getItem('currentUser');
+      if (!user) return;
+      try {
+        const res = await fetch(`/api/unread/${encodeURIComponent(user)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data || !data.success) return;
+        const total = data.total || 0;
+        const navMessages = document.getElementById('nav-messages');
+        if (total > 0 && navMessages) {
+          let mb = navMessages.querySelector('.unread-badge');
+          if (!mb) {
+            mb = document.createElement('span');
+            mb.className = 'unread-badge';
+            mb.style.marginLeft = '8px';
+            navMessages.appendChild(mb);
+          }
+          mb.textContent = total > 99 ? '99+' : String(total);
+          mb.style.display = '';
+        }
+      } catch(e){}
+    })();
+  </script>
+</body>
+</html>
