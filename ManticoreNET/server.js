@@ -6,6 +6,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import http from "http";
 import WebSocket, { WebSocketServer } from "ws";
+const API_BASE = 'http://localhost:3000';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
