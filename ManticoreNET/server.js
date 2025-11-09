@@ -13,23 +13,28 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const BASE_PATH = process.env.BASE_PATH || "";
+
+const BASE_PATH = process.env.BASE_PATH || ""; // e.g. "/ManticoreNET"
 
 const USERS_FILE = path.join(__dirname, "users.json");
 const POSTS_FILE = path.join(__dirname, "posts.json");
 const MESSAGES_FILE = path.join(__dirname, "messages.json");
 
+
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
+
 if (BASE_PATH) {
   app.use((req, res, next) => {
+   
     if (req.url.startsWith(BASE_PATH + "/api")) {
       req.url = req.url.slice(BASE_PATH.length);
     }
     next();
   });
 }
+
 
 if (BASE_PATH) {
   app.use(BASE_PATH, express.static(path.join(__dirname, "public")));
@@ -216,7 +221,7 @@ api.delete("/posts/:id", async (req, res) => {
   if (posts[idx].username !== username) return res.status(403).json({ error: "Not allowed" });
 
   if (posts[idx].image) {
-    const imgPath = path.join(__dirname, "public", posts[idx].image.replace(/^\
+    const imgPath = path.join(__dirname, "public", posts[idx].image.replace(/^\//,""));
     if (fs.existsSync(imgPath)) await fs.remove(imgPath);
   }
   posts.splice(idx,1);
@@ -257,6 +262,7 @@ api.post("/posts/:id/comments", async (req, res) => {
   res.json({ success: true, comment });
 });
 
+
 api.post("/comments/:id/vote", async (req, res) => {
   const { id } = req.params;
   const { username, vote } = req.body;
@@ -278,16 +284,20 @@ api.post("/comments/:id/vote", async (req, res) => {
   if (!found) return res.status(404).json({ error: "Comment not found" });
 });
 
+
 api.get("/posts", async (req, res) => {
   const posts = await fs.readJson(POSTS_FILE);
+  // newest first
   const sorted = posts.slice().sort((a, b) => b.createdAt - a.createdAt);
   res.json({ success: true, posts: sorted });
 });
+
 
 function convoKey(a, b) {
   const arr = [String(a), String(b)].sort();
   return arr.join("--");
 }
+
 
 async function saveMessage(a, b, message) {
   const messages = await fs.readJson(MESSAGES_FILE);
@@ -301,6 +311,7 @@ async function saveMessage(a, b, message) {
   await fs.writeJson(MESSAGES_FILE, messages, { spaces: 2 });
 }
 
+
 async function loadConversation(a, b) {
   const messages = await fs.readJson(MESSAGES_FILE);
   const key = convoKey(a, b);
@@ -308,14 +319,17 @@ async function loadConversation(a, b) {
   return convo ? convo.messages : [];
 }
 
+
 app.get("/api/messages/:a/:b", async (req, res) => {
   const { a, b } = req.params;
   if (!a || !b) return res.status(400).json({ error: "Missing users" });
+
 
   const msgsAll = await fs.readJson(MESSAGES_FILE);
   const key = convoKey(a, b);
   const convo = msgsAll.find(m => m.key === key);
   const msgs = convo ? convo.messages : [];
+
 
   let changed = false;
   for (const m of msgs) {
@@ -326,18 +340,20 @@ app.get("/api/messages/:a/:b", async (req, res) => {
     }
   }
   if (changed) {
+
     await fs.writeJson(MESSAGES_FILE, msgsAll, { spaces: 2 });
   }
 
   res.json({ success: true, messages: msgs });
 });
 
+
 app.get("/api/unread/:username", async (req, res) => {
   const { username } = req.params;
   if (!username) return res.status(400).json({ error: "Missing username" });
 
   const messages = await fs.readJson(MESSAGES_FILE);
-  const counts = {};
+  const counts = {}; 
   let total = 0;
   for (const convo of messages) {
     for (const m of convo.messages || []) {
@@ -352,12 +368,14 @@ app.get("/api/unread/:username", async (req, res) => {
   res.json({ success: true, unread: counts, total });
 });
 
+
 app.use(API_BASE, api);
+
 
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-const clients = new Map();
+const clients = new Map(); // username -> ws
 
 wss.on("connection", (ws) => {
   let username = null;
@@ -383,14 +401,17 @@ wss.on("connection", (ws) => {
         text: text ?? "",
         image: image ?? null,
         createdAt: Date.now(),
-        readBy: [from]
+        readBy: [from] // sender has 'read' the message
       };
+
       await saveMessage(from, to, message);
+
 
       const recipientWs = clients.get(to);
       if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
         recipientWs.send(JSON.stringify({ type: "message", message }));
       }
+
       if (clients.get(from) && clients.get(from).readyState === WebSocket.OPEN) {
         clients.get(from).send(JSON.stringify({ type: "message", message }));
       }
