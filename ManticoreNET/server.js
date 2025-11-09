@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const USERS_FILE = path.join(__dirname, "users.json");
 const POSTS_FILE = path.join(__dirname, "posts.json");
 const MESSAGES_FILE = path.join(__dirname, "messages.json");
@@ -22,22 +22,35 @@ const API_BASE = (BASE_PATH === "/") ? "/api" : (BASE_PATH + "/api");
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
-// NEW: if requests arrive as /<prefix>/api/..., rewrite req.url so app routes mounted at /api/... match.
-// This allows running under a sub-path (e.g. /ManticoreNET) without requiring BASE_PATH env.
+// NEW: normalize proxied requests that may include a prefix or '/public' segment.
+// This handles requests coming from nginx proxy (e.g. /ManticoreNET/api/... or /ManticoreNET/public/...)
 app.use((req, res, next) => {
-  const idx = req.url.indexOf("/api/");
-  if (idx > 0) {
-    req.url = req.url.slice(idx); // strip leading prefix so "/ManticoreNET/api/login" -> "/api/login"
-  }
-  next();
+	// If URL contains /api/ somewhere later, strip everything before it so routes mounted at /api/... match.
+	const apiIndex = req.url.indexOf("/api/");
+	if (apiIndex > 0) {
+		req.url = req.url.slice(apiIndex);
+		return next();
+	}
+	// If URL is prefixed with "/public/", strip that prefix so static files served from /public are reachable.
+	if (req.url.startsWith("/public/")) {
+		req.url = req.url.slice("/public".length); // "/public/xyz" -> "/xyz"
+		return next();
+	}
+	// If nginx proxies with a base path like /ManticoreNET/, strip that base if present (for static files).
+	// Detect common pattern: "/ManticoreNET/<rest>"
+	const m = req.url.match(/^\/[A-Za-z0-9_-]+(\/.*)$/);
+	if (m) {
+		// only strip when the remaining path looks like an app path (e.g. starts with /api/ or /avatars/ or /index.html or /profile.html)
+		const rest = m[1] || "/";
+		if (rest.startsWith("/api/") || rest.startsWith("/avatars/") || rest.startsWith("/posts/") ||
+			rest === "/" || rest.endsWith(".html") || rest.endsWith(".css") || rest.endsWith(".js")) {
+			req.url = rest;
+		}
+	}
+	return next();
 });
 
-
-if (BASE_PATH && BASE_PATH !== "/") {
-  app.use(BASE_PATH, express.static(path.join(__dirname, "public")));
-} else {
-  app.use(express.static(path.join(__dirname, "public")));
-}
+app.use(express.static(path.join(__dirname, "public")));
 
 
 const api = express.Router();
