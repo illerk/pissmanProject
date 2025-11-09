@@ -52,10 +52,12 @@ app.use((req, res, next) => {
 
 // serve static both at root and under BASE_PATH (if running behind sub-path proxy)
 app.use(express.static(path.join(__dirname, "public")));
-if (BASE_PATH) {
-	// also make assets available under the base path (e.g. /ManticoreNET/avatars/...)
-	app.use(BASE_PATH, express.static(path.join(__dirname, "public")));
-}
+
+// also serve static assets under a one-segment prefix (e.g. /ManticoreNET/avatars/...)
+// this makes nginx without rewrite still work
+app.use('/:prefix/avatars', express.static(path.join(__dirname, 'public', 'avatars')));
+app.use('/:prefix/posts', express.static(path.join(__dirname, 'public', 'posts')));
+app.use('/:prefix', express.static(path.join(__dirname, 'public')));
 
 const api = express.Router();
 
