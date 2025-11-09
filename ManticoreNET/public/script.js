@@ -7,10 +7,20 @@ function showStatus(msg, isError = true) {
   status.style.color = isError ? "#f66" : "#8f8";
 }
 
+function getBasePath() {
+  let p = location.pathname || "/";
+  if (p === "/") return "/";
+  if (!p.endsWith("/")) {
+    if (p.includes(".")) p = p.replace(/\/[^\/]*$/, "/");
+    else p = p + "/";
+  }
+  return p;
+}
+
 async function postJson(url, body) {
   try {
-    // build URL relative to current document location so sub-paths are preserved
-    const full = new URL(url, location.href).href;
+    const cleaned = String(url).replace(/^\/+/, "");
+    const full = location.origin + getBasePath() + cleaned;
     const res = await fetch(full, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -49,11 +49,22 @@ ws.addEventListener("message", (ev) => {
   }
 });
 
-// helper fetch — strip leading slashes and resolve relative to current page
+// add helper to compute base path
+function getBasePath() {
+  let p = location.pathname || "/";
+  if (p === "/") return "/";
+  if (!p.endsWith("/")) {
+    if (p.includes(".")) p = p.replace(/\/[^\/]*$/, "/");
+    else p = p + "/";
+  }
+  return p;
+}
+
+// helper fetch — strip leading slashes and build absolute URL using origin + basePath
 async function fetchJson(url, opts) {
   try {
-    const cleaned = String(url).replace(/^\/+/, ""); // "api/..." or "api/..."
-    const full = new URL(cleaned, location.href).href;
+    const cleaned = String(url).replace(/^\/+/, "");
+    const full = location.origin + getBasePath() + cleaned;
     const r = await fetch(full, opts);
     return { ok: r.ok, data: await r.json() };
   } catch (e) { return { ok: false, data: null }; }
@@ -64,7 +75,7 @@ function resolveAssetPath(p) {
   if (!p) return '';
   if (p.startsWith('http') || p.startsWith('data:')) return p;
   const clean = String(p).replace(/^\/+/, '');
-  return new URL(clean, location.href).href;
+  return location.origin + getBasePath() + clean;
 }
 
 // inline default avatar (SVG) to avoid 404

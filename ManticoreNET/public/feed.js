@@ -15,11 +15,23 @@ const basePath = location.pathname.replace(/\/[^/]*$/, '');
 const proto = location.protocol === "https:" ? "wss" : "ws";
 const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
-// unified fetch — strip leading slashes and resolve relative to page
+// replace unified fetch and resolveAssetPath with robust base-aware versions
+function getBasePath() {
+  let p = location.pathname || "/";
+  if (p === "/") return "/";
+  // if path ends with '/', keep; if it's a filename (contains a dot) remove last segment; else append '/'
+  if (!p.endsWith("/")) {
+    if (p.includes(".")) p = p.replace(/\/[^\/]*$/, "/");
+    else p = p + "/";
+  }
+  return p;
+}
+
+// unified fetch — build absolute URL using origin + basePath
 async function fetchJson(url, opts) {
   try {
     const cleaned = String(url).replace(/^\/+/, "");
-    const full = new URL(cleaned, location.href).href;
+    const full = location.origin + getBasePath() + cleaned;
     const r = await fetch(full, opts);
     const data = await r.json();
     return { ok: r.ok, data };
@@ -33,7 +45,7 @@ function resolveAssetPath(p) {
   if (!p) return '';
   if (p.startsWith('http') || p.startsWith('data:')) return p;
   const clean = String(p).replace(/^\/+/, '');
-  return new URL(clean, location.href).href;
+  return location.origin + getBasePath() + clean;
 }
 
 function formatFutureDate(ts) {
