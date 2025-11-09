@@ -34,11 +34,32 @@ function formatFutureDate(ts) {
 }
 
 const userCache = {};
+function resolveAssetPath(p) {
+  if (!p) return '';
+  if (p.startsWith('http') || p.startsWith('data:')) return p;
+  if (p.startsWith('/')) {
+    // basePath might be "" or "/ManticoreNET"
+    return (basePath || '') + p;
+  }
+  // relative path -> resolve relative to current document
+  return new URL(p, location.href).href;
+}
+
 async function getUserProfile(username) {
   if (!username) return null;
-  if (userCache[username]) return userCache[username];
-  const r = await fetchJson(`/api/user/${encodeURIComponent(username)}`);
-  if (r.ok && r.data.success) { userCache[username] = r.data.profile; return r.data.profile; }
+  if (userCache[username]) {
+    // normalize avatar path in cache on first use
+    const cp = userCache[username];
+    if (cp && cp.avatar) cp._avatarUrl = resolveAssetPath(cp.avatar);
+    return userCache[username];
+  }
+  const r = await fetchJson(`api/user/${encodeURIComponent(username)}`);
+  if (r.ok && r.data.success) {
+    const prof = r.data.profile;
+    prof._avatarUrl = prof.avatar ? resolveAssetPath(prof.avatar) : resolveAssetPath('default-avatar.png');
+    userCache[username] = prof;
+    return prof;
+  }
   return null;
 }
 
@@ -49,7 +70,7 @@ async function loadFeed(options = { preserveScroll: true }) {
   const container = feedPosts;
   const prevScroll = options.preserveScroll ? container.scrollTop : 0;
   feedPosts.innerHTML = 'Loading...';
-  const { ok, data } = await fetchJson('/api/posts');
+  const { ok, data } = await fetchJson('api/posts');
   if (!ok || !data.posts) { feedPosts.innerHTML = '<div style="color:#f66">Failed to load feed</div>'; return; }
   await renderPosts(data.posts);
   if (options.preserveScroll) {
@@ -80,7 +101,7 @@ async function renderPosts(posts) {
     left.style.gap = '8px';
 
     const authorImg = document.createElement('img');
-    authorImg.src = author?.avatar || 'default-avatar.png';
+    authorImg.src = author?._avatarUrl || resolveAssetPath('default-avatar.png');
     authorImg.style.width = '36px';
     authorImg.style.height = '36px';
     authorImg.style.objectFit = 'cover';
@@ -100,7 +121,7 @@ async function renderPosts(posts) {
     el.appendChild(header);
 
     if (post.text) { const txt = document.createElement('div'); txt.style.marginTop='8px'; txt.textContent = post.text; el.appendChild(txt); }
-    if (post.image) { const img = document.createElement('img'); img.src = post.image ? new URL(post.image, location.href).href : ''; img.style.maxWidth='100%'; img.style.marginTop='8px'; img.style.borderRadius='6px'; img.style.cursor='pointer'; img.addEventListener('click', ()=>{ document.getElementById('overlayImg').src = img.src; document.getElementById('overlay').classList.add('visible'); }); el.appendChild(img); }
+    if (post.image) { const img = document.createElement('img'); img.src = resolveAssetPath(post.image); img.style.maxWidth='100%'; img.style.marginTop='8px'; img.style.borderRadius='6px'; img.style.cursor='pointer'; img.addEventListener('click', ()=>{ document.getElementById('overlayImg').src = img.src; document.getElementById('overlay').classList.add('visible'); }); el.appendChild(img); }
 
     const actions = document.createElement('div');
     actions.style.display = 'flex';
@@ -119,7 +140,7 @@ async function renderPosts(posts) {
     up.addEventListener('click', async () => {
       const container = feedPosts;
       const prev = container.scrollTop;
-      const { ok, data } = await fetchJson(`/api/posts/${post.id}/vote`, {
+      const { ok, data } = await fetchJson(`api/posts/${post.id}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: currentUser, vote: 1 })
@@ -133,7 +154,7 @@ async function renderPosts(posts) {
     down.addEventListener('click', async () => {
       const container = feedPosts;
       const prev = container.scrollTop;
-      const { ok, data } = await fetchJson(`/api/posts/${post.id}/vote`, {
+      const { ok, data } = await fetchJson(`api/posts/${post.id}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: currentUser, vote: -1 })
@@ -153,7 +174,7 @@ async function renderPosts(posts) {
       const delBtn = document.createElement('button'); delBtn.textContent = 'Delete';
       delBtn.addEventListener('click', async () => {
         if (!confirm('Delete this post?')) return;
-        const res = await fetch(`/api/posts/${post.id}`, {
+        const res = await fetch(new URL(`api/posts/${post.id}`, location.href).href, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: currentUser })
@@ -192,7 +213,7 @@ async function renderPosts(posts) {
       const cdown = document.createElement('button'); cdown.textContent='▼';
       const ccount = document.createElement('span'); ccount.textContent = voteCount(c.votes);
       cup.addEventListener('click', async ()=> {
-        const { ok } = await fetchJson(`/api/comments/${c.id}/vote`, {
+        const { ok } = await fetchJson(`api/comments/${c.id}/vote`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: currentUser, vote: 1 })
@@ -200,7 +221,7 @@ async function renderPosts(posts) {
         if (ok) loadFeed();
       });
       cdown.addEventListener('click', async ()=> {
-        const { ok } = await fetchJson(`/api/comments/${c.id}/vote`, {
+        const { ok } = await fetchJson(`api/comments/${c.id}/vote`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: currentUser, vote: -1 })
@@ -220,7 +241,7 @@ async function renderPosts(posts) {
     commentBtn.addEventListener('click', async ()=> {
       const txt = commentInput.value.trim();
       if (!txt) return;
-      const { ok } = await fetchJson(`/api/posts/${post.id}/comments`, {
+      const { ok } = await fetchJson(`api/posts/${post.id}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: currentUser, text: txt })
