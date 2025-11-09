@@ -107,7 +107,6 @@
       const user = localStorage.getItem('currentUser');
       if (!user) return;
       try {
-        // build URL relative to current page so subpath (/ManticoreNET) is preserved
         const full = new URL(`api/unread/${encodeURIComponent(user)}`, location.href).href;
         const res = await fetch(full);
         if (!res.ok) return;

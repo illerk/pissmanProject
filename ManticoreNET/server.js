@@ -50,12 +50,8 @@ app.use((req, res, next) => {
 	return next();
 });
 
-// serve static both at root and under BASE_PATH (if running behind sub-path proxy)
 app.use(express.static(path.join(__dirname, "public")));
-if (BASE_PATH) {
-	// also make assets available under the base path (e.g. /ManticoreNET/avatars/...)
-	app.use(BASE_PATH, express.static(path.join(__dirname, "public")));
-}
+
 
 const api = express.Router();
 
@@ -385,10 +381,7 @@ app.get("/api/unread/:username", async (req, res) => {
 });
 
 // after defining all api.* routes:
-app.use('/api', api);
-if (API_BASE && API_BASE !== '/api') {
-  app.use(API_BASE, api);
-}
+app.use(API_BASE, api);
 
 // adjust WebSocket server to listen on path `${BASE_PATH}/ws`
 const server = http.createServer(app);

@@ -49,13 +49,23 @@ ws.addEventListener("message", (ev) => {
   }
 });
 
-// unified fetch that resolves relative to current page (preserves sub-path)
+// helper fetch — strip leading slashes and resolve relative to current page
 async function fetchJson(url, opts) {
   try {
-    const full = new URL(url, location.href).href; // e.g. "api/users" -> "/ManticoreNET/api/users"
+    const cleaned = String(url).replace(/^\/+/, ""); // "api/..." or "api/..."
+    const full = new URL(cleaned, location.href).href;
     const r = await fetch(full, opts);
     return { ok: r.ok, data: await r.json() };
   } catch (e) { return { ok: false, data: null }; }
+}
+
+// resolve asset path (avatars, posts) to respect subpath hosting
+function resolveAssetPath(p) {
+  if (!p) return '';
+  if (p.startsWith('http') || p.startsWith('data:')) return p;
+  // strip leading slash and resolve relative to current location
+  const clean = String(p).replace(/^\/+/, '');
+  return new URL(clean, location.href).href;
 }
 
 // add: cache for user profiles/avatars
@@ -203,6 +213,7 @@ async function appendMessage(m, mine) {
 
   // get avatar for message sender
   const avatarSrc = await getUserAvatar(m.from);
+  img.src = resolveAssetPath(avatarSrc || 'default-avatar.png');
 
   const img = document.createElement("img");
   img.src = avatarSrc;
@@ -221,7 +232,9 @@ async function appendMessage(m, mine) {
     content.appendChild(txt);
   }
   if (m.image) {
-    const im = document.createElement("img"); im.src = m.image; im.style.maxWidth = "240px"; im.style.marginTop="6px"; im.style.borderRadius="6px"; im.style.cursor="pointer";
+    const im = document.createElement("img");
+    im.src = resolveAssetPath(m.image);
+    im.style.maxWidth = "240px"; im.style.marginTop="6px"; im.style.borderRadius="6px"; im.style.cursor="pointer";
     im.addEventListener("click", ()=> { overlayImg.src = im.src; overlay.classList.add("visible"); });
     content.appendChild(im);
   }
