@@ -7,20 +7,11 @@ function showStatus(msg, isError = true) {
   status.style.color = isError ? "#f66" : "#8f8";
 }
 
-function getBasePath() {
-  let p = location.pathname || "/";
-  if (p === "/") return "/";
-  if (!p.endsWith("/")) {
-    if (p.includes(".")) p = p.replace(/\/[^\/]*$/, "/");
-    else p = p + "/";
-  }
-  return p;
-}
-
+const BASE_PREFIX = "/ManticoreNET";
 async function postJson(url, body) {
   try {
     const cleaned = String(url).replace(/^\/+/, "");
-    const full = location.origin + getBasePath() + cleaned;
+    const full = location.origin + BASE_PREFIX + "/" + cleaned;
     const res = await fetch(full, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

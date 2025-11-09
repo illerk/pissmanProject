@@ -107,11 +107,8 @@
       const user = localStorage.getItem('currentUser');
       if (!user) return;
       try {
-        // build full API URL using origin + basePath so requests go to /<prefix>/api/...
-
-        const base = (function(){ let p=location.pathname||"/"; if (p==="/") return "/"; if (!p.endsWith("/")) { if (p.includes(".")) p=p.replace(/\/[^\/]*$/,"/"); else p=p+"/"; } return p; })();
-        const full = location.origin + base + `api/unread/${encodeURIComponent(user)}`;
-        const res = await fetch(full);
+        const BASE_PREFIX = "/ManticoreNET";
+        const res = await fetch(location.origin + BASE_PREFIX + `/api/unread/${encodeURIComponent(user)}`);
          if (!res.ok) return;
          const data = await res.json();
          if (!data || !data.success) return;
