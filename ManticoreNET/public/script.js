@@ -7,11 +7,11 @@ function showStatus(msg, isError = true) {
   status.style.color = isError ? "#f66" : "#8f8";
 }
 
-const BASE = location.pathname.replace(/\/[^/]*$/, '');
-
 async function postJson(url, body) {
   try {
-    const res = await fetch(url.startsWith('/') ? (BASE + url) : (BASE + '/' + url.replace(/^\//, '')), {
+    // build URL relative to current document location so sub-paths are preserved
+    const full = new URL(url, location.href).href;
+    const res = await fetch(full, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body)
@@ -28,10 +28,12 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     showStatus("Enter username and password.");
     return;
   }
-  const { ok, data } = await postJson("/api/login", { username: username.value, password: password.value });
+  // NOTE: relative API path (no leading slash)
+  const { ok, data } = await postJson("api/login", { username: username.value, password: password.value });
   if (ok && data.success) {
     localStorage.setItem("currentUser", username.value);
-    window.location.href = (BASE || '/') + "/profile.html";
+    // navigate to profile page in same base path
+    window.location.href = new URL("profile.html", location.href).href;
   } else {
     showStatus(data.error || "Login failed.");
   }
@@ -42,7 +44,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     showStatus("Enter username and password.");
     return;
   }
-  const { ok, data } = await postJson("/api/register", { username: username.value, password: password.value });
+  const { ok, data } = await postJson("api/register", { username: username.value, password: password.value });
   if (ok && data.success) {
     showStatus("Account created! You can now log in.", false);
   } else {

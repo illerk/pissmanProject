@@ -1,1 +1,46 @@
-[]
+[
+  {
+    "key": "CF-355--RK-381",
+    "users": [
+      "RK-381",
+      "CF-355"
+    ],
+    "messages": [
+      {
+        "id": "mhs3m8wu-e7uiet",
+        "from": "RK-381",
+        "to": "CF-355",
+        "text": "Кофе принеси этой ведьме научной в склепе. Она опять орет на меня",
+        "image": null,
+        "createdAt": 1762716039582,
+        "readBy": [
+          "RK-381",
+          "CF-355"
+        ]
+      },
+      {
+        "id": "mhs3p7vz-lvlpsp",
+        "from": "CF-355",
+        "to": "RK-381",
+        "text": "☕",
+        "image": null,
+        "createdAt": 1762716178224,
+        "readBy": [
+          "CF-355",
+          "RK-381"
+        ]
+      },
+      {
+        "id": "mhs44b7q-qdyrkl",
+        "from": "CF-355",
+        "to": "RK-381",
+        "text": "<strong>мяу</strong>",
+        "image": null,
+        "createdAt": 1762716882374,
+        "readBy": [
+          "CF-355"
+        ]
+      }
+    ]
+  }
+]

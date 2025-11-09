@@ -11,9 +11,15 @@ const postImageInputFeed = document.getElementById('postImageInputFeed');
 const createPostBtnFeed = document.getElementById('createPostBtnFeed');
 const feedPosts = document.getElementById('feedPosts');
 
+const basePath = location.pathname.replace(/\/[^/]*$/, '');
+const proto = location.protocol === "https:" ? "wss" : "ws";
+const wsUrl = `${proto}://${location.host}${basePath}/ws`;
+
+// unified fetch
 async function fetchJson(url, opts) {
   try {
-    const res = await fetch(url, opts);
+    const full = new URL(url, location.href).href;
+    const res = await fetch(full, opts);
     const data = await res.json();
     return { ok: res.ok, data };
   } catch (e) {
@@ -94,7 +100,7 @@ async function renderPosts(posts) {
     el.appendChild(header);
 
     if (post.text) { const txt = document.createElement('div'); txt.style.marginTop='8px'; txt.textContent = post.text; el.appendChild(txt); }
-    if (post.image) { const img = document.createElement('img'); img.src = post.image + '?t=' + Date.now(); img.style.maxWidth='100%'; img.style.marginTop='8px'; img.style.borderRadius='6px'; img.style.cursor='pointer'; img.addEventListener('click', ()=>{ document.getElementById('overlayImg').src = img.src; document.getElementById('overlay').classList.add('visible'); }); el.appendChild(img); }
+    if (post.image) { const img = document.createElement('img'); img.src = post.image ? new URL(post.image, location.href).href : ''; img.style.maxWidth='100%'; img.style.marginTop='8px'; img.style.borderRadius='6px'; img.style.cursor='pointer'; img.addEventListener('click', ()=>{ document.getElementById('overlayImg').src = img.src; document.getElementById('overlay').classList.add('visible'); }); el.appendChild(img); }
 
     const actions = document.createElement('div');
     actions.style.display = 'flex';

@@ -1,1 +1,29 @@
-[]
+[
+  {
+    "id": "mhs3hndu-bsqzb9",
+    "username": "CF-355",
+    "text": "",
+    "image": "/posts/post-mhs3hndu-bsqzb9.jpeg",
+    "createdAt": 1762715825058,
+    "votes": [
+      {
+        "username": "RK-381",
+        "vote": 1
+      }
+    ],
+    "comments": [
+      {
+        "id": "mhs3teqc-ryb7",
+        "username": "RK-381",
+        "text": "...",
+        "createdAt": 1762716373716,
+        "votes": [
+          {
+            "username": "RK-381",
+            "vote": 1
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -51,9 +51,11 @@ function showStatus(msg, isError = true) {
   status.textContent = msg;
   status.style.color = isError ? "#f66" : "#8f8";
 }
+
+// unified fetch that resolves relative to current page (preserves sub-path)
 async function fetchJson(url, opts) {
   try {
-    const full = url.startsWith('/') ? (BASE + url) : (BASE + '/' + url.replace(/^\//, ''));
+    const full = new URL(url, location.href).href;
     const res = await fetch(full, opts);
     const data = await res.json();
     return { ok: res.ok, data };
@@ -422,7 +424,7 @@ saveBtn.addEventListener("click", async () => {
   if (viewingUser !== currentUser) return;
   const age = ageInput.value;
   const gender = genderSelect.value;
-  const { ok } = await fetchJson("/api/profile", {
+  const { ok } = await fetchJson("api/profile", {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username: currentUser, age, gender })
   });

@@ -22,6 +22,16 @@ const API_BASE = (BASE_PATH === "/") ? "/api" : (BASE_PATH + "/api");
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
+// NEW: if requests arrive as /<prefix>/api/..., rewrite req.url so app routes mounted at /api/... match.
+// This allows running under a sub-path (e.g. /ManticoreNET) without requiring BASE_PATH env.
+app.use((req, res, next) => {
+  const idx = req.url.indexOf("/api/");
+  if (idx > 0) {
+    req.url = req.url.slice(idx); // strip leading prefix so "/ManticoreNET/api/login" -> "/api/login"
+  }
+  next();
+});
+
 
 if (BASE_PATH && BASE_PATH !== "/") {
   app.use(BASE_PATH, express.static(path.join(__dirname, "public")));

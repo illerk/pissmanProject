@@ -17,10 +17,11 @@ const overlayImg = document.getElementById("overlayImg");
 const logoutTopBtn = document.getElementById("logoutTopBtn");
 if (logoutTopBtn) logoutTopBtn.addEventListener("click", () => { localStorage.removeItem("currentUser"); location.href = "index.html"; });
 
-// websocket
+// compute ws base (path part of current URL)
+const basePath = location.pathname.replace(/\/[^/]*$/, ''); // e.g. "/ManticoreNET"
 const proto = location.protocol === "https:" ? "wss" : "ws";
-// connect to WS under BASE + /ws
-const wsUrl = `${proto}://${location.host}${BASE}/ws`;
+// build ws URL relative to current location so sub-paths are respected
+const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 const ws = new WebSocket(wsUrl);
 ws.addEventListener("open", () => {
   ws.send(JSON.stringify({ type: "auth", username: currentUser }));
@@ -48,10 +49,10 @@ ws.addEventListener("message", (ev) => {
   }
 });
 
-// helper fetch uses BASE
+// unified fetch that resolves relative to current page (preserves sub-path)
 async function fetchJson(url, opts) {
   try {
-    const full = url.startsWith('/') ? (BASE + url) : (BASE + '/' + url.replace(/^\//, ''));
+    const full = new URL(url, location.href).href; // e.g. "api/users" -> "/ManticoreNET/api/users"
     const r = await fetch(full, opts);
     return { ok: r.ok, data: await r.json() };
   } catch (e) { return { ok: false, data: null }; }
@@ -140,7 +141,7 @@ let contacts = [];
 let selectedContact = null;
 async function loadContacts() {
   contactsPane.innerHTML = "Loading...";
-  const { ok, data } = await fetchJson("/api/users");
+  const { ok, data } = await fetchJson("api/users");
   if (!ok || !data.users) { contactsPane.innerHTML = "<div style='color:#f66'>Failed</div>"; return; }
   contacts = data.users.filter(u => u.username !== currentUser);
   contactsPane.innerHTML = "";
@@ -154,7 +155,7 @@ async function loadContacts() {
     img.src = u.avatar || "default-avatar.png";
     img.style.width="40px"; img.style.height="40px"; img.style.borderRadius="6px";
     img.style.objectFit = "cover";
-    img.addEventListener("click", ()=> location.href = `${BASE}/profile.html?user=${encodeURIComponent(u.username)}`);
+    img.addEventListener("click", ()=> location.href = new URL(`profile.html?user=${encodeURIComponent(u.username)}`, location.href).href);
     const name = document.createElement("div"); name.textContent = u.username; name.style.fontWeight="600";
     item.appendChild(img); item.appendChild(name);
 
