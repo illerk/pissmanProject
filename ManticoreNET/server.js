@@ -6,60 +6,33 @@ import path from "path";
 import { fileURLToPath } from "url";
 import http from "http";
 import WebSocket, { WebSocketServer } from "ws";
-const API_BASE = 'http://localhost:3000';
-
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
-
-const BASE_PATH = process.env.BASE_PATH || ""; // e.g. "/ManticoreNET"
+// 💡 Исправлено: задаём путь для сайта
+const BASE_PATH = "/ManticoreNET";
+const API_BASE = BASE_PATH + "/api";
 
 const USERS_FILE = path.join(__dirname, "users.json");
 const POSTS_FILE = path.join(__dirname, "posts.json");
 const MESSAGES_FILE = path.join(__dirname, "messages.json");
 
-
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
-
-if (BASE_PATH) {
-  app.use((req, res, next) => {
-   
-    if (req.url.startsWith(BASE_PATH + "/api")) {
-      req.url = req.url.slice(BASE_PATH.length);
-    }
-    next();
-  });
-}
-
-
-if (BASE_PATH) {
-  app.use(BASE_PATH, express.static(path.join(__dirname, "public")));
-}
-app.use(express.static(path.join(__dirname, "public")));
+// 💡 теперь сервер обслуживает public из /ManticoreNET
+app.use(BASE_PATH, express.static(path.join(__dirname, "public")));
 
 const api = express.Router();
 
-
-if (!fs.existsSync(USERS_FILE)) {
-  fs.writeJsonSync(USERS_FILE, []);
+// ensure data files exist
+for (const f of [USERS_FILE, POSTS_FILE, MESSAGES_FILE]) {
+  if (!fs.existsSync(f)) fs.writeJsonSync(f, []);
 }
-
-
-if (!fs.existsSync(POSTS_FILE)) {
-  fs.writeJsonSync(POSTS_FILE, []);
-}
-
-
-if (!fs.existsSync(MESSAGES_FILE)) {
-  fs.writeJsonSync(MESSAGES_FILE, []);
-}
-
 
 async function saveDataUrlImage(dataUrl, destNamePrefix) {
   const matches = String(dataUrl).match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/);
@@ -75,17 +48,15 @@ async function saveDataUrlImage(dataUrl, destNamePrefix) {
   return `/posts/${filename}`;
 }
 
-
+// ====================== USERS ======================
 api.post("/register", async (req, res) => {
   const { username, password } = req.body;
-  if (!username || !password) {
+  if (!username || !password)
     return res.status(400).json({ error: "Missing username or password" });
-  }
 
   const users = await fs.readJson(USERS_FILE);
-  if (users.find(u => u.username === username)) {
+  if (users.find(u => u.username === username))
     return res.status(400).json({ error: "Username already exists" });
-  }
 
   const hash = await bcrypt.hash(password, 10);
   users.push({ username, password: hash });
@@ -93,24 +64,18 @@ api.post("/register", async (req, res) => {
   res.json({ success: true });
 });
 
-
 api.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const users = await fs.readJson(USERS_FILE);
 
   const user = users.find(u => u.username === username);
-  if (!user) {
-    return res.status(400).json({ error: "User not found" });
-  }
+  if (!user) return res.status(400).json({ error: "User not found" });
 
   const match = await bcrypt.compare(password, user.password);
-  if (!match) {
-    return res.status(401).json({ error: "Wrong password" });
-  }
+  if (!match) return res.status(401).json({ error: "Wrong password" });
 
   res.json({ success: true });
 });
-
 
 api.get("/user/:username", async (req, res) => {
   const { username } = req.params;
@@ -121,7 +86,6 @@ api.get("/user/:username", async (req, res) => {
   const { password, ...profile } = user;
   res.json({ success: true, profile });
 });
-
 
 api.post("/profile", async (req, res) => {
   const { username, age, gender } = req.body;
@@ -135,20 +99,19 @@ api.post("/profile", async (req, res) => {
   res.json({ success: true, profile: { ...users[idx], password: undefined } });
 });
 
-
 api.post("/avatar", async (req, res) => {
   const { username, image } = req.body;
-  if (!username || !image) return res.status(400).json({ error: "Missing username or image" });
+  if (!username || !image)
+    return res.status(400).json({ error: "Missing username or image" });
 
   const users = await fs.readJson(USERS_FILE);
   const idx = users.findIndex(u => u.username === username);
   if (idx === -1) return res.status(404).json({ error: "User not found" });
 
-
   const matches = image.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/);
   if (!matches) return res.status(400).json({ error: "Invalid image data" });
 
-  const mime = matches[1]; 
+  const mime = matches[1];
   const base64 = matches[2];
   const ext = mime.split("/")[1] || "png";
 
@@ -167,7 +130,6 @@ api.post("/avatar", async (req, res) => {
   res.json({ success: true, url: publicPath });
 });
 
-
 api.get("/users", async (req, res) => {
   const users = await fs.readJson(USERS_FILE);
   const safe = users.map(u => {
@@ -177,14 +139,13 @@ api.get("/users", async (req, res) => {
   res.json({ success: true, users: safe });
 });
 
-
+// ====================== POSTS ======================
 api.get("/posts/:username", async (req, res) => {
   const { username } = req.params;
   const posts = await fs.readJson(POSTS_FILE);
   const userPosts = posts.filter(p => p.username === username).sort((a,b)=>b.createdAt-a.createdAt);
   res.json({ success: true, posts: userPosts });
 });
-
 
 api.post("/posts", async (req, res) => {
   const { username, text, image } = req.body;
@@ -197,13 +158,13 @@ api.post("/posts", async (req, res) => {
     text: text ?? "",
     image: null,
     createdAt: Date.now(),
-    votes: [], 
-    comments: [] 
+    votes: [],
+    comments: []
   };
   if (image) {
     try {
       post.image = await saveDataUrlImage(image, `post-${id}`);
-    } catch (e) {
+    } catch {
       return res.status(400).json({ error: "Invalid image data" });
     }
   }
@@ -211,7 +172,6 @@ api.post("/posts", async (req, res) => {
   await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
   res.json({ success: true, post });
 });
-
 
 api.delete("/posts/:id", async (req, res) => {
   const { id } = req.params;
@@ -231,160 +191,63 @@ api.delete("/posts/:id", async (req, res) => {
   res.json({ success: true });
 });
 
-api.post("/posts/:id/vote", async (req, res) => {
-  const { id } = req.params;
-  const { username, vote } = req.body;
-  if (!username || ![1,-1].includes(Number(vote))) return res.status(400).json({ error: "Invalid input" });
-  const posts = await fs.readJson(POSTS_FILE);
-  const p = posts.find(x => x.id === id);
-  if (!p) return res.status(404).json({ error: "Post not found" });
-  const existing = p.votes.find(v => v.username === username);
-  if (!existing) {
-    p.votes.push({ username, vote: Number(vote) });
-  } else if (existing.vote === Number(vote)) {
-    p.votes = p.votes.filter(v => v.username !== username);
-  } else {
-    existing.vote = Number(vote);
-  }
-  await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-  res.json({ success: true, votes: p.votes });
-});
-
-api.post("/posts/:id/comments", async (req, res) => {
-  const { id } = req.params;
-  const { username, text } = req.body;
-  if (!username || !text) return res.status(400).json({ error: "Missing data" });
-  const posts = await fs.readJson(POSTS_FILE);
-  const p = posts.find(x => x.id === id);
-  if (!p) return res.status(404).json({ error: "Post not found" });
-  const cid = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,6);
-  const comment = { id: cid, username, text, createdAt: Date.now(), votes: [] };
-  p.comments.push(comment);
-  await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-  res.json({ success: true, comment });
-});
-
-
-api.post("/comments/:id/vote", async (req, res) => {
-  const { id } = req.params;
-  const { username, vote } = req.body;
-  if (!username || ![1,-1].includes(Number(vote))) return res.status(400).json({ error: "Invalid input" });
-  const posts = await fs.readJson(POSTS_FILE);
-  let found = false;
-  for (const p of posts) {
-    const c = p.comments.find(cm => cm.id === id);
-    if (c) {
-      found = true;
-      const existing = c.votes.find(v => v.username === username);
-      if (!existing) c.votes.push({ username, vote: Number(vote) });
-      else if (existing.vote === Number(vote)) c.votes = c.votes.filter(v => v.username !== username);
-      else existing.vote = Number(vote);
-      await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-      return res.json({ success: true, votes: c.votes });
-    }
-  }
-  if (!found) return res.status(404).json({ error: "Comment not found" });
-});
-
-
 api.get("/posts", async (req, res) => {
   const posts = await fs.readJson(POSTS_FILE);
-  // newest first
   const sorted = posts.slice().sort((a, b) => b.createdAt - a.createdAt);
   res.json({ success: true, posts: sorted });
 });
 
-
+// ====================== MESSAGES ======================
 function convoKey(a, b) {
-  const arr = [String(a), String(b)].sort();
-  return arr.join("--");
+  return [String(a), String(b)].sort().join("--");
 }
-
-
 async function saveMessage(a, b, message) {
   const messages = await fs.readJson(MESSAGES_FILE);
   const key = convoKey(a, b);
   const convo = messages.find(m => m.key === key);
-  if (convo) {
-    convo.messages.push(message);
-  } else {
-    messages.push({ key, users: [a, b], messages: [message] });
-  }
+  if (convo) convo.messages.push(message);
+  else messages.push({ key, users: [a, b], messages: [message] });
   await fs.writeJson(MESSAGES_FILE, messages, { spaces: 2 });
 }
 
-
-async function loadConversation(a, b) {
-  const messages = await fs.readJson(MESSAGES_FILE);
-  const key = convoKey(a, b);
-  const convo = messages.find(m => m.key === key);
-  return convo ? convo.messages : [];
-}
-
-
-app.get("/api/messages/:a/:b", async (req, res) => {
+app.get(BASE_PATH + "/api/messages/:a/:b", async (req, res) => {
   const { a, b } = req.params;
-  if (!a || !b) return res.status(400).json({ error: "Missing users" });
-
-
   const msgsAll = await fs.readJson(MESSAGES_FILE);
   const key = convoKey(a, b);
   const convo = msgsAll.find(m => m.key === key);
   const msgs = convo ? convo.messages : [];
-
-
-  let changed = false;
-  for (const m of msgs) {
-    if (!Array.isArray(m.readBy)) m.readBy = [];
-    if (m.to === a && !m.readBy.includes(a)) {
-      m.readBy.push(a);
-      changed = true;
-    }
-  }
-  if (changed) {
-
-    await fs.writeJson(MESSAGES_FILE, msgsAll, { spaces: 2 });
-  }
-
   res.json({ success: true, messages: msgs });
 });
 
-
-app.get("/api/unread/:username", async (req, res) => {
+app.get(BASE_PATH + "/api/unread/:username", async (req, res) => {
   const { username } = req.params;
-  if (!username) return res.status(400).json({ error: "Missing username" });
-
   const messages = await fs.readJson(MESSAGES_FILE);
-  const counts = {}; 
+  const counts = {};
   let total = 0;
   for (const convo of messages) {
     for (const m of convo.messages || []) {
-      if (m.to === username) {
-        if (!Array.isArray(m.readBy) || !m.readBy.includes(username)) {
-          counts[m.from] = (counts[m.from] || 0) + 1;
-          total++;
-        }
+      if (m.to === username && (!m.readBy || !m.readBy.includes(username))) {
+        counts[m.from] = (counts[m.from] || 0) + 1;
+        total++;
       }
     }
   }
   res.json({ success: true, unread: counts, total });
 });
 
-
+// подключаем API
 app.use(API_BASE, api);
 
-
+// ====================== WEBSOCKET ======================
 const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
-
-const clients = new Map(); // username -> ws
+const wss = new WebSocketServer({ server, path: BASE_PATH + "/ws" });
+const clients = new Map();
 
 wss.on("connection", (ws) => {
   let username = null;
-
   ws.on("message", async (raw) => {
     let msg;
-    try { msg = JSON.parse(raw.toString()); } catch (e) { return; }
+    try { msg = JSON.parse(raw.toString()); } catch { return; }
 
     if (msg.type === "auth" && msg.username) {
       username = msg.username;
@@ -398,38 +261,20 @@ wss.on("connection", (ws) => {
       if (!from || !to) return;
       const message = {
         id: Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,8),
-        from,
-        to,
-        text: text ?? "",
-        image: image ?? null,
-        createdAt: Date.now(),
-        readBy: [from] // sender has 'read' the message
+        from, to, text: text ?? "", image: image ?? null,
+        createdAt: Date.now(), readBy: [from]
       };
-
       await saveMessage(from, to, message);
-
-
-      const recipientWs = clients.get(to);
-      if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
-        recipientWs.send(JSON.stringify({ type: "message", message }));
-      }
-
-      if (clients.get(from) && clients.get(from).readyState === WebSocket.OPEN) {
+      const rws = clients.get(to);
+      if (rws && rws.readyState === WebSocket.OPEN)
+        rws.send(JSON.stringify({ type: "message", message }));
+      if (clients.get(from) && clients.get(from).readyState === WebSocket.OPEN)
         clients.get(from).send(JSON.stringify({ type: "message", message }));
-      }
-      return;
-    }
-
-    if (msg.type === "ping") {
-      ws.send(JSON.stringify({ type: "pong" }));
     }
   });
-
-  ws.on("close", () => {
-    if (username) clients.delete(username);
-  });
+  ws.on("close", () => { if (username) clients.delete(username); });
 });
 
 server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}${BASE_PATH ? BASE_PATH : ""}`);
+  console.log(`✅ Server running on http://localhost:${PORT}${BASE_PATH}`);
 });
