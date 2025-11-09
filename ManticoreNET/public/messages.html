@@ -32,11 +32,8 @@
         <div style="flex:1">
           <div class="card" id="chatCard" style="padding:12px">
             <div id="chatHeader" style="font-weight:700">Select a contact</div>
-            <!-- changed: fixed-height scrollable messages area -->
             <div id="messagesPane" style="margin-top:8px; height:56vh; overflow:auto; display:flex; flex-direction:column; gap:8px; padding-right:8px"></div>
 
-            <!-- changed: textarea now expands across most width (flex:1), starts as single-line and grows downwards;
-                 file input placed to the right and aligned to top so it's slightly above the textarea -->
             <div id="composer" style="margin-top:12px; display:flex; gap:12px; align-items:flex-start">
               <textarea id="msgInput" placeholder="Type a message (Enter — send, Shift+Enter — newline)"
                 rows="1"

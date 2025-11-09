@@ -7,7 +7,6 @@ function showStatus(msg, isError = true) {
   status.style.color = isError ? "#f66" : "#8f8";
 }
 
-// compute base (strip last path segment, e.g. "/ManticoreNET/profile.html" -> "/ManticoreNET")
 const BASE = location.pathname.replace(/\/[^/]*$/, '');
 
 async function postJson(url, body) {
@@ -31,7 +30,6 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   }
   const { ok, data } = await postJson("/api/login", { username: username.value, password: password.value });
   if (ok && data.success) {
-    // changed: save current user and go to profile
     localStorage.setItem("currentUser", username.value);
     window.location.href = (BASE || '/') + "/profile.html";
   } else {

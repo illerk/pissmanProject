@@ -1,6 +1,3 @@
-// compute base
-const BASE = location.pathname.replace(/\/[^/]*$/, '');
-
 const currentUser = localStorage.getItem('currentUser');
 if (!currentUser) {
   window.location.href = 'index.html';
@@ -16,8 +13,7 @@ const feedPosts = document.getElementById('feedPosts');
 
 async function fetchJson(url, opts) {
   try {
-    const full = url.startsWith('/') ? (BASE + url) : (BASE + '/' + url.replace(/^\//, ''));
-    const res = await fetch(full, opts);
+    const res = await fetch(url, opts);
     const data = await res.json();
     return { ok: res.ok, data };
   } catch (e) {
