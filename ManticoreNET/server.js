@@ -11,24 +11,30 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
+const BASE_PATH = process.env.BASE_PATH || "";
+
 const USERS_FILE = path.join(__dirname, "users.json");
 const POSTS_FILE = path.join(__dirname, "posts.json");
 const MESSAGES_FILE = path.join(__dirname, "messages.json");
-const BASE_PATH = process.env.BASE_PATH || ""; 
-const API_BASE = (BASE_PATH === "/") ? "/api" : (BASE_PATH + "/api");
-
 
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
-
-if (BASE_PATH && BASE_PATH !== "/") {
-  app.use(BASE_PATH, express.static(path.join(__dirname, "public")));
-} else {
-  app.use(express.static(path.join(__dirname, "public")));
+if (BASE_PATH) {
+  app.use((req, res, next) => {
+    if (req.url.startsWith(BASE_PATH + "/api")) {
+      req.url = req.url.slice(BASE_PATH.length);
+    }
+    next();
+  });
 }
 
+if (BASE_PATH) {
+  app.use(BASE_PATH, express.static(path.join(__dirname, "public")));
+}
+app.use(express.static(path.join(__dirname, "public")));
 
 const api = express.Router();
 
@@ -210,7 +216,7 @@ api.delete("/posts/:id", async (req, res) => {
   if (posts[idx].username !== username) return res.status(403).json({ error: "Not allowed" });
 
   if (posts[idx].image) {
-    const imgPath = path.join(__dirname, "public", posts[idx].image.replace(/^\//,""));
+    const imgPath = path.join(__dirname, "public", posts[idx].image.replace(/^\
     if (fs.existsSync(imgPath)) await fs.remove(imgPath);
   }
   posts.splice(idx,1);
@@ -251,7 +257,6 @@ api.post("/posts/:id/comments", async (req, res) => {
   res.json({ success: true, comment });
 });
 
-// голос по комменту (body: username, vote)
 api.post("/comments/:id/vote", async (req, res) => {
   const { id } = req.params;
   const { username, vote } = req.body;
@@ -273,21 +278,17 @@ api.post("/comments/:id/vote", async (req, res) => {
   if (!found) return res.status(404).json({ error: "Comment not found" });
 });
 
-// получить все посты (лента)
 api.get("/posts", async (req, res) => {
   const posts = await fs.readJson(POSTS_FILE);
-  // newest first
   const sorted = posts.slice().sort((a, b) => b.createdAt - a.createdAt);
   res.json({ success: true, posts: sorted });
 });
 
-// helper: conversation key
 function convoKey(a, b) {
   const arr = [String(a), String(b)].sort();
   return arr.join("--");
 }
 
-// helper: save message
 async function saveMessage(a, b, message) {
   const messages = await fs.readJson(MESSAGES_FILE);
   const key = convoKey(a, b);
@@ -300,7 +301,6 @@ async function saveMessage(a, b, message) {
   await fs.writeJson(MESSAGES_FILE, messages, { spaces: 2 });
 }
 
-// helper: load conversation
 async function loadConversation(a, b) {
   const messages = await fs.readJson(MESSAGES_FILE);
   const key = convoKey(a, b);
@@ -308,18 +308,15 @@ async function loadConversation(a, b) {
   return convo ? convo.messages : [];
 }
 
-// REST endpoint: get conversation between two users
 app.get("/api/messages/:a/:b", async (req, res) => {
   const { a, b } = req.params;
   if (!a || !b) return res.status(400).json({ error: "Missing users" });
 
-  // load messages, mark as read for requester 'a' messages that were sent to 'a'
   const msgsAll = await fs.readJson(MESSAGES_FILE);
   const key = convoKey(a, b);
   const convo = msgsAll.find(m => m.key === key);
   const msgs = convo ? convo.messages : [];
 
-  // ensure messages have readBy array; mark those addressed to 'a' as read by 'a'
   let changed = false;
   for (const m of msgs) {
     if (!Array.isArray(m.readBy)) m.readBy = [];
@@ -329,20 +326,18 @@ app.get("/api/messages/:a/:b", async (req, res) => {
     }
   }
   if (changed) {
-    // write back updated messages structure
     await fs.writeJson(MESSAGES_FILE, msgsAll, { spaces: 2 });
   }
 
   res.json({ success: true, messages: msgs });
 });
 
-// new: get unread counts for a user
 app.get("/api/unread/:username", async (req, res) => {
   const { username } = req.params;
   if (!username) return res.status(400).json({ error: "Missing username" });
 
   const messages = await fs.readJson(MESSAGES_FILE);
-  const counts = {}; // partner -> count
+  const counts = {};
   let total = 0;
   for (const convo of messages) {
     for (const m of convo.messages || []) {
@@ -357,14 +352,12 @@ app.get("/api/unread/:username", async (req, res) => {
   res.json({ success: true, unread: counts, total });
 });
 
-// after defining all api.* routes:
 app.use(API_BASE, api);
 
-// adjust WebSocket server to listen on path `${BASE_PATH}/ws`
 const server = http.createServer(app);
-const wss = new WebSocketServer({ server, path: (BASE_PATH || "") + "/ws" });
+const wss = new WebSocketServer({ server });
 
-const clients = new Map(); // username -> ws
+const clients = new Map();
 
 wss.on("connection", (ws) => {
   let username = null;
@@ -390,17 +383,14 @@ wss.on("connection", (ws) => {
         text: text ?? "",
         image: image ?? null,
         createdAt: Date.now(),
-        readBy: [from] // sender has 'read' the message
+        readBy: [from]
       };
-      // save
       await saveMessage(from, to, message);
 
-      // deliver to recipient if connected
       const recipientWs = clients.get(to);
       if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
         recipientWs.send(JSON.stringify({ type: "message", message }));
       }
-      // echo back to sender
       if (clients.get(from) && clients.get(from).readyState === WebSocket.OPEN) {
         clients.get(from).send(JSON.stringify({ type: "message", message }));
       }
@@ -418,5 +408,5 @@ wss.on("connection", (ws) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}${BASE_PATH}`);
+  console.log(`Server running on http://localhost:${PORT}${BASE_PATH ? BASE_PATH : ""}`);
 });
