@@ -63,10 +63,17 @@ async function fetchJson(url, opts) {
 function resolveAssetPath(p) {
   if (!p) return '';
   if (p.startsWith('http') || p.startsWith('data:')) return p;
-  // strip leading slash and resolve relative to current location
   const clean = String(p).replace(/^\/+/, '');
   return new URL(clean, location.href).href;
 }
+
+// inline default avatar (SVG) to avoid 404
+const DEFAULT_AVATAR = "data:image/svg+xml;utf8," +
+  encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>" +
+    "<rect width='64' height='64' fill='%23222'/>" +
+    "<circle cx='32' cy='22' r='12' fill='%23ffffff' opacity='0.9'/>" +
+    "<rect x='14' y='38' width='36' height='12' rx='6' fill='%23ffffff' opacity='0.95'/>" +
+  "</svg>");
 
 // add: cache for user profiles/avatars
 const userCache = {};
@@ -213,7 +220,7 @@ async function appendMessage(m, mine) {
 
   // get avatar for message sender
   const avatarSrc = await getUserAvatar(m.from);
-  img.src = resolveAssetPath(avatarSrc || 'default-avatar.png');
+  img.src = avatarSrc ? resolveAssetPath(avatarSrc) : DEFAULT_AVATAR;
 
   const img = document.createElement("img");
   img.src = avatarSrc;

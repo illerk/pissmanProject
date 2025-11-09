@@ -52,8 +52,16 @@ app.use((req, res, next) => {
 
 app.use(express.static(path.join(__dirname, "public")));
 
+// make static assets and api available when nginx proxies without rewriting the prefix
+// serve avatars/posts under any one-segment prefix (e.g. /ManticoreNET/avatars/...)
+app.use('/:prefix/avatars', express.static(path.join(__dirname, 'public', 'avatars')));
+app.use('/:prefix/posts', express.static(path.join(__dirname, 'public', 'posts')));
+app.use('/:prefix', express.static(path.join(__dirname, 'public')));
 
-const api = express.Router();
+// mount API router at multiple entry points to tolerate proxy rewrite or not
+app.use('/api', api);
+app.use('/:prefix/api', api);
+app.use(API_BASE, api); // keep existing mount (if BASE_PATH env used)
 
 
 if (!fs.existsSync(USERS_FILE)) {

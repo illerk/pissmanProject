@@ -89,7 +89,8 @@ async function renderPosts(posts) {
     left.style.gap = '8px';
 
     const authorImg = document.createElement('img');
-    authorImg.src = resolveAssetPath(author?.avatar || 'default-avatar.png');
+    // use resolveAssetPath if avatar exists, otherwise embedded default
+    authorImg.src = author && author.avatar ? resolveAssetPath(author.avatar) : DEFAULT_AVATAR;
     authorImg.style.width = '36px';
     authorImg.style.height = '36px';
     authorImg.style.objectFit = 'cover';
@@ -193,7 +194,7 @@ async function renderPosts(posts) {
       const cHeader = document.createElement('div'); cHeader.style.display='flex'; cHeader.style.alignItems='center'; cHeader.style.gap='8px';
       const cImg = document.createElement('img');
       const cAuthor = await getUserProfile(c.username);
-      cImg.src = resolveAssetPath((cAuthor && cAuthor.avatar) ? cAuthor.avatar : 'default-avatar.png');
+      cImg.src = (cAuthor && cAuthor.avatar) ? resolveAssetPath(cAuthor.avatar) : DEFAULT_AVATAR;
       cImg.style.width='28px'; cImg.style.height='28px'; cImg.style.objectFit='cover'; cImg.style.borderRadius='6px'; cImg.style.cursor='pointer';
       cImg.addEventListener('click', ()=> window.location.href = `profile.html?user=${encodeURIComponent(c.username)}`);
       const cMeta = document.createElement('div');
@@ -303,3 +304,11 @@ if (overlay) {
 if (overlayImg) {
   overlayImg.addEventListener('click', () => overlay.classList.remove('visible'));
 }
+
+// small inline default avatar (SVG) to avoid 404 when default file missing
+const DEFAULT_AVATAR = "data:image/svg+xml;utf8," +
+  encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>" +
+    "<rect width='64' height='64' fill='%23222'/>" +
+    "<circle cx='32' cy='22' r='12' fill='%23ffffff' opacity='0.9'/>" +
+    "<rect x='14' y='38' width='36' height='12' rx='6' fill='%23ffffff' opacity='0.95'/>" +
+  "</svg>");
