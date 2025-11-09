@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
+/* changed/added: full-screen layout, header, sidebar, content */
 html, body {
   height: 100%;
   margin: 0;
@@ -14,6 +15,7 @@ body {
   font-family: 'Share Tech Mono', monospace;
 }
 
+/* header */
 .app-header {
   display: flex;
   align-items: center;
@@ -46,15 +48,18 @@ body {
 }
 .header-actions button:hover { background: rgba(255,255,255,0.03); }
 
+/* main layout with sidebar + content */
+/* changed: sidebar hidden by default, layout adjusts when logged-in */
 .app-layout {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr; /* no sidebar by default */
   gap: 20px;
   height: 100%;
   padding: 24px;
   box-sizing: border-box;
 }
 
+/* sidebar hidden until logged-in */
 .sidebar {
   display: none;
   border-right: 1px solid rgba(255,255,255,0.06);
@@ -63,16 +68,19 @@ body {
   gap: 12px;
   align-items: flex-start;
 
+  /* added: sticky sidebar so it's always visible while scrolling */
   position: sticky;
-  top: 64px;
+  top: 64px; /* below header */
   height: calc(100vh - 64px);
 
+  /* changed: only vertical scroll, prevent horizontal scrollbar */
   overflow-y: auto;
   overflow-x: hidden;
   padding-bottom: 20px;
   box-sizing: border-box;
 }
 
+/* when logged in show sidebar and restore two-column layout */
 body.logged-in .app-layout {
   grid-template-columns: 240px 1fr;
 }
@@ -80,6 +88,7 @@ body.logged-in .sidebar {
   display: flex;
 }
 
+/* sidebar .nav-item styles */
 .sidebar .nav-item {
   width: 100%;
   padding: 10px 12px;
@@ -91,11 +100,13 @@ body.logged-in .sidebar {
 }
 .sidebar .nav-item:hover { background: rgba(255,255,255,0.03); color: #fff; }
 
+/* content area */
 .content {
   padding: 12px 24px;
   overflow: auto;
 }
 
+/* card (replaces old #window small box) */
 .card {
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
   border: 1px solid rgba(255,255,255,0.08);
@@ -105,6 +116,7 @@ body.logged-in .sidebar {
   box-shadow: 0 6px 18px rgba(0,0,0,0.6);
 }
 
+/* form controls inside card */
 .card input, .card select {
   width: 100%;
   background: transparent;
@@ -117,6 +129,7 @@ body.logged-in .sidebar {
   box-sizing: border-box;
 }
 
+/* disabled inputs slightly dim */
 .card input[disabled],
 .card select[disabled] {
   opacity: 0.85;
@@ -124,11 +137,13 @@ body.logged-in .sidebar {
   filter: grayscale(0.02);
 }
 
+/* smaller centered login area */
 .login-center {
   max-width: 420px;
   margin: 40px auto 0;
 }
 
+/* reuse avatar/style tweaks */
 #avatar {
   width: 140px;
   height: 140px;
@@ -138,6 +153,7 @@ body.logged-in .sidebar {
   border: 1px solid #fff;
 }
 
+/* overlay remains same */
 .overlay {
   position: fixed;
   inset: 0;
@@ -155,8 +171,10 @@ body.logged-in .sidebar {
 }
 .overlay.visible { display: flex; }
 
+/* contact list styles */
 .contact-item img { border: 1px solid rgba(255,255,255,0.06); }
 
+/* small button style */
 .card button {
   background: none;
   color: #fff;
@@ -167,10 +185,12 @@ body.logged-in .sidebar {
 }
 .card button:hover { background: rgba(255,255,255,0.03); color:#fff; }
 
+/* post styles */
 .post img { max-height: 420px; border-radius:6px; }
 .post button { background:none; border:1px solid rgba(255,255,255,0.06); padding:6px 8px; border-radius:6px; cursor:pointer; }
 .post input { background:transparent; border:1px solid rgba(255,255,255,0.06); color:#fff; padding:6px; border-radius:4px; }
 
+/* badge style for unread messages */
 .unread-badge {
   background: #e54;
   color: #fff;
@@ -185,6 +205,7 @@ body.logged-in .sidebar {
   box-sizing: border-box;
 }
 
+/* responsive: collapse sidebar on small screens */
 @media (max-width: 720px) {
   .app-layout {
     grid-template-columns: 1fr;
@@ -195,22 +216,26 @@ body.logged-in .sidebar {
   .login-center { margin-top: 10px; }
 }
 
+/* make small thumbnails render with better quality and keep square crop */
 .sidebar img,
 .contact-item img,
 .card img,
 .post img,
 #avatar {
-  object-fit: cover;
-  image-rendering: auto;
+  object-fit: cover;       /* keep aspect and crop centered */
+  image-rendering: auto;   /* let the browser choose best smoothing */
   -webkit-font-smoothing: antialiased;
   -webkit-optimize-contrast: true;
+  /* hint: avoid CSS transforms that may reduce quality */
   transform: none;
   backface-visibility: hidden;
 }
 
+/* Slightly larger contact images for better appearance (kept within previous sizes) */
 .contact-item img { width:44px; height:44px; border-radius:6px; }
 .sidebar img { max-width:100%; }
 
+/* dark theme for select controls (gender etc.) */
 .card select,
 .card select option,
 .card input[type="file"] {
@@ -223,11 +248,13 @@ body.logged-in .sidebar {
   -webkit-appearance: none;
 }
 
+/* when select is opened, options background in some browsers pick default — try to enforce */
 .card select option {
   background-color: #0b0b0b;
   color: #fff;
 }
 
+/* ensure the composer/file inputs keep layout without causing horizontal scroll in sidebar */
 #composer input[type="file"] {
   background: transparent;
   color: #fff;

@@ -15,39 +15,39 @@ const PORT = 3000;
 const USERS_FILE = path.join(__dirname, "users.json");
 const POSTS_FILE = path.join(__dirname, "posts.json");
 const MESSAGES_FILE = path.join(__dirname, "messages.json");
-const BASE_PATH = process.env.BASE_PATH || ""; 
+const BASE_PATH = process.env.BASE_PATH || ""; // e.g. "/ManticoreNET"
 const API_BASE = (BASE_PATH === "/") ? "/api" : (BASE_PATH + "/api");
 
-
+// changed: increase JSON and urlencoded body size limits to allow large base64 images
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
-
+// serve static files under BASE_PATH
 if (BASE_PATH && BASE_PATH !== "/") {
   app.use(BASE_PATH, express.static(path.join(__dirname, "public")));
 } else {
   app.use(express.static(path.join(__dirname, "public")));
 }
 
-
+// move API routes onto a router and mount under `${API_BASE}`
 const api = express.Router();
 
-
+// ensure users file exists
 if (!fs.existsSync(USERS_FILE)) {
   fs.writeJsonSync(USERS_FILE, []);
 }
 
-
+// ensure posts file exists
 if (!fs.existsSync(POSTS_FILE)) {
   fs.writeJsonSync(POSTS_FILE, []);
 }
 
-
+// ensure messages file exists
 if (!fs.existsSync(MESSAGES_FILE)) {
   fs.writeJsonSync(MESSAGES_FILE, []);
 }
 
-
+// helper to save base64 image to public/posts
 async function saveDataUrlImage(dataUrl, destNamePrefix) {
   const matches = String(dataUrl).match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/);
   if (!matches) throw new Error("Invalid image data");
@@ -62,7 +62,7 @@ async function saveDataUrlImage(dataUrl, destNamePrefix) {
   return `/posts/${filename}`;
 }
 
-
+// регистрация нового пользователя
 api.post("/register", async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -80,7 +80,7 @@ api.post("/register", async (req, res) => {
   res.json({ success: true });
 });
 
-
+// вход в систему
 api.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const users = await fs.readJson(USERS_FILE);
@@ -98,18 +98,19 @@ api.post("/login", async (req, res) => {
   res.json({ success: true });
 });
 
-
+// получить профиль пользователя
 api.get("/user/:username", async (req, res) => {
   const { username } = req.params;
   if (!username) return res.status(400).json({ error: "Missing username" });
   const users = await fs.readJson(USERS_FILE);
   const user = users.find(u => u.username === username);
   if (!user) return res.status(404).json({ error: "User not found" });
+  // возвращаем профиль без пароля
   const { password, ...profile } = user;
   res.json({ success: true, profile });
 });
 
-
+// обновить профиль (age, gender и т.д.)
 api.post("/profile", async (req, res) => {
   const { username, age, gender } = req.body;
   if (!username) return res.status(400).json({ error: "Missing username" });
@@ -122,7 +123,7 @@ api.post("/profile", async (req, res) => {
   res.json({ success: true, profile: { ...users[idx], password: undefined } });
 });
 
-
+// загрузка аватарки (ожидается dataURL в поле image)
 api.post("/avatar", async (req, res) => {
   const { username, image } = req.body;
   if (!username || !image) return res.status(400).json({ error: "Missing username or image" });
@@ -131,11 +132,11 @@ api.post("/avatar", async (req, res) => {
   const idx = users.findIndex(u => u.username === username);
   if (idx === -1) return res.status(404).json({ error: "User not found" });
 
-
+  // data:image/png;base64,AAA...
   const matches = image.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/);
   if (!matches) return res.status(400).json({ error: "Invalid image data" });
 
-  const mime = matches[1]; 
+  const mime = matches[1]; // e.g. image/png
   const base64 = matches[2];
   const ext = mime.split("/")[1] || "png";
 
@@ -154,7 +155,7 @@ api.post("/avatar", async (req, res) => {
   res.json({ success: true, url: publicPath });
 });
 
-
+// получить всех пользователей (для contacts) — без паролей
 api.get("/users", async (req, res) => {
   const users = await fs.readJson(USERS_FILE);
   const safe = users.map(u => {
@@ -164,7 +165,7 @@ api.get("/users", async (req, res) => {
   res.json({ success: true, users: safe });
 });
 
-
+// получить посты пользователя
 api.get("/posts/:username", async (req, res) => {
   const { username } = req.params;
   const posts = await fs.readJson(POSTS_FILE);
@@ -172,7 +173,7 @@ api.get("/posts/:username", async (req, res) => {
   res.json({ success: true, posts: userPosts });
 });
 
-
+// создать пост (username, text, optional image as dataURL)
 api.post("/posts", async (req, res) => {
   const { username, text, image } = req.body;
   if (!username) return res.status(400).json({ error: "Missing username" });
@@ -184,8 +185,8 @@ api.post("/posts", async (req, res) => {
     text: text ?? "",
     image: null,
     createdAt: Date.now(),
-    votes: [], 
-    comments: [] 
+    votes: [], // {username, vote}
+    comments: [] // {id, username, text, createdAt, votes:[]}
   };
   if (image) {
     try {
@@ -199,7 +200,7 @@ api.post("/posts", async (req, res) => {
   res.json({ success: true, post });
 });
 
-
+// удалить пост (только владелец)
 api.delete("/posts/:id", async (req, res) => {
   const { id } = req.params;
   const { username } = req.body;
@@ -208,7 +209,7 @@ api.delete("/posts/:id", async (req, res) => {
   const idx = posts.findIndex(p => p.id === id);
   if (idx === -1) return res.status(404).json({ error: "Post not found" });
   if (posts[idx].username !== username) return res.status(403).json({ error: "Not allowed" });
-
+  // optionally remove image file
   if (posts[idx].image) {
     const imgPath = path.join(__dirname, "public", posts[idx].image.replace(/^\//,""));
     if (fs.existsSync(imgPath)) await fs.remove(imgPath);
@@ -218,6 +219,7 @@ api.delete("/posts/:id", async (req, res) => {
   res.json({ success: true });
 });
 
+// голос по посту (body: username, vote = 1 or -1)
 api.post("/posts/:id/vote", async (req, res) => {
   const { id } = req.params;
   const { username, vote } = req.body;
@@ -229,14 +231,17 @@ api.post("/posts/:id/vote", async (req, res) => {
   if (!existing) {
     p.votes.push({ username, vote: Number(vote) });
   } else if (existing.vote === Number(vote)) {
+    // same vote => remove (toggle)
     p.votes = p.votes.filter(v => v.username !== username);
   } else {
+    // change vote
     existing.vote = Number(vote);
   }
   await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
   res.json({ success: true, votes: p.votes });
 });
 
+// добавить комментарий к посту
 api.post("/posts/:id/comments", async (req, res) => {
   const { id } = req.params;
   const { username, text } = req.body;

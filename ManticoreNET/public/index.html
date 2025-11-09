@@ -6,12 +6,14 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- changed: top header -->
   <div class="app-header">
     <div class="logo">ManticoreNET</div>
     <div class="search">Your network • Home</div>
   </div>
 
   <div class="app-layout">
+    <!-- sidebar -->
     <aside class="sidebar">
       <div class="nav-item" id="nav-profile">Profile</div>
       <div class="nav-item" id="nav-contacts">Contacts</div>
@@ -20,7 +22,9 @@
       <div class="nav-item">Settings</div>
     </aside>
 
+    <!-- main content -->
     <main class="content">
+      <!-- centered login card -->
       <div class="card login-center">
         <h2 style="margin:0 0 12px 0">Welcome back</h2>
         <p style="color:#aaa; margin:0 0 12px 0">Sign in to continue to your network</p>
@@ -39,18 +43,20 @@
   <script type="module" src="script.js"></script>
 
   <script>
+    // allow opening contacts from index (redirect to profile#contacts) when logged in
     const navContacts = document.getElementById('nav-contacts');
     if (navContacts) {
       navContacts.addEventListener('click', () => {
-        if (!localStorage.getItem('currentUser')) return;
+        if (!localStorage.getItem('currentUser')) return; // require login
         window.location.href = 'profile.html#contacts';
       });
     }
 
+    // profile nav: go to your own profile
     const navProfile = document.getElementById('nav-profile');
     if (navProfile) {
       navProfile.addEventListener('click', () => {
-        if (!localStorage.getItem('currentUser')) return;
+        if (!localStorage.getItem('currentUser')) return; // require login
         window.location.href = 'profile.html';
       });
     }
@@ -63,6 +69,7 @@
       });
     }
 
+    // nav: Messages -> go to messenger
     const navMessages = document.getElementById('nav-messages');
     if (navMessages) {
       navMessages.addEventListener('click', () => {
@@ -71,6 +78,7 @@
       });
     }
 
+    // NEW: show unread badge in menu on page load
     (async function showMenuUnread() {
       const user = localStorage.getItem('currentUser');
       if (!user) return;

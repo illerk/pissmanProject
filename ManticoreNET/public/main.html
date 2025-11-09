@@ -27,22 +27,27 @@
     </main>
   </div>
 
+  <!-- changed: require login to view main; enable sidebar when logged-in -->
   <script>
     const user = localStorage.getItem('currentUser');
     if (!user) {
+      // not logged in — go to login
       window.location.href = "index.html";
     } else {
       document.body.classList.add('logged-in');
     }
 
+    // when clicking Contacts in main -> go to profile and open contacts
     const navContacts = document.getElementById('nav-contacts');
     if (navContacts) {
       navContacts.addEventListener('click', () => {
         if (!localStorage.getItem('currentUser')) return window.location.href = 'index.html';
+        // navigate to profile page with hash — profile.js will detect and show contacts
         window.location.href = 'profile.html#contacts';
       });
     }
 
+    // nav: Profile -> go to your own profile
     const navProfile = document.getElementById('nav-profile');
     if (navProfile) {
       navProfile.addEventListener('click', () => {
@@ -59,6 +64,7 @@
       });
     }
 
+    // nav: Messages -> open messenger
     const navMessages = document.getElementById('nav-messages');
     if (navMessages) {
       navMessages.addEventListener('click', () => {
@@ -67,6 +73,7 @@
       });
     }
 
+    // NEW: show unread badge in menu on page load
     (async function showMenuUnread() {
       const user = localStorage.getItem('currentUser');
       if (!user) return;

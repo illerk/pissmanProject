@@ -24,6 +24,7 @@
 
     <main class="content">
       <div class="card" style="max-width:640px" id="profileCard">
+        <!-- headerLabel will be populated by JS with the profile owner's username -->
         <h2 id="headerLabel" style="margin:0 0 12px 0"></h2>
 
         <div style="display:flex; gap:18px; align-items:center; flex-wrap:wrap">
@@ -43,7 +44,7 @@
               <input id="ageInput" placeholder="Age" type="number" min="0">
               <label style="margin-top:8px;display:block">Gender</label>
               <select id="genderSelect">
-                <option value="">-</option>
+                <option value="">-- Gender --</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="other">Other</option>
@@ -61,20 +62,23 @@
         </div>
       </div>
 
+      <!-- new post creation (only for own profile) -->
       <div class="card" id="newPostCard" style="max-width:820px; display:none; margin-top:12px">
         <h3 style="margin:0 0 8px 0">Create post</h3>
-        <textarea id="postText" placeholder="What's happening at Manticore?" style="width:100%; min-height:80px; background:transparent; border:1px solid rgba(255,255,255,0.08); color:#fff; padding:8px"></textarea>
+        <textarea id="postText" placeholder="What's happening?" style="width:100%; min-height:80px; background:transparent; border:1px solid rgba(255,255,255,0.08); color:#fff; padding:8px"></textarea>
         <div style="margin-top:8px; display:flex; gap:8px; align-items:center">
           <input id="postImageInput" type="file" accept="image/*">
           <button id="createPostBtn">Post</button>
         </div>
       </div>
 
+      <!-- posts list -->
       <div class="card" id="postsListCard" style="max-width:820px; margin-top:12px">
         <h3 style="margin:0 0 8px 0">Posts</h3>
         <div id="postsList" style="display:flex; flex-direction:column; gap:12px"></div>
       </div>
 
+      <!-- contacts view (hidden by default) -->
       <div class="card" id="contactsView" style="max-width:820px; display:none; margin-top:12px">
         <h2 style="margin:0 0 12px 0">Contacts</h2>
         <div id="contactsList" style="display:flex; flex-direction:column; gap:10px"></div>
@@ -87,6 +91,7 @@
   <script type="module" src="profile.js"></script>
 
   <script>
+    // add feed nav handler
     const navFeed = document.getElementById('nav-feed');
     if (navFeed) {
       navFeed.addEventListener('click', () => {
@@ -95,6 +100,7 @@
       });
     }
 
+    // nav: Messages -> open messenger
     const navMessages = document.getElementById('nav-messages');
     if (navMessages) {
       navMessages.addEventListener('click', () => {
@@ -103,6 +109,7 @@
       });
     }
 
+    // NEW: show unread badge in menu on page load
     (async function showMenuUnread() {
       const user = localStorage.getItem('currentUser');
       if (!user) return;
