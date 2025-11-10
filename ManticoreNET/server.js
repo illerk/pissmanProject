@@ -71,12 +71,17 @@ if (!fs.existsSync(POSTS_FILE)) {
 try {
   const postsRaw = fs.readJsonSync(POSTS_FILE);
   const sanitized = (Array.isArray(postsRaw) ? postsRaw : []).map(p => {
-    const {...keep } = p;
+    const { ...keep } = p;
+    // ensure votesBy and score exist
+    keep.votesBy = keep.votesBy ?? {};
+    keep.score = (typeof keep.score === "number")
+      ? keep.score
+      : Object.values(keep.votesBy).reduce((s, x) => s + Number(x || 0), 0);
     return keep;
   });
   fs.writeJsonSync(POSTS_FILE, sanitized, { spaces: 2 });
 } catch (e) {
-  // ignore if file not readable yettty
+  // ignore if file not readable yet
 }
 
 
