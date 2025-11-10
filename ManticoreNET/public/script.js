@@ -2,7 +2,9 @@ const username = document.getElementById("username");
 const password = document.getElementById("password");
 const status = document.getElementById("status");
 
-const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+// compute base path and API root relative to current origin so requests hit correct endpoint
+const basePath = location.pathname.replace(/\/[^/]*$/, '');
+const API_ROOT = location.origin + basePath + "/api";
 
 let statusTimer = null;
 function showStatus(msg, isError = true, ttl = 4000) {

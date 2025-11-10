@@ -1,10 +1,9 @@
 // compute base
 const BASE = location.pathname.replace(/\/[^/]*$/, '');
 
-// add: explicit API root (always use this)
-const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
-// add: assets root for avatars/posts (serve from /ManticoreNET/public)
-const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
+// compute API and assets roots relative to current origin + BASE
+const API_ROOT = location.origin + BASE + "/api";
+const ASSET_ROOT = location.origin + BASE + "/public";
 
 function resolveAsset(url) {
   if (!url) return url;
