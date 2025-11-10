@@ -92,6 +92,9 @@ const unreadCounts = {}; // partner -> count
 const contactElements = new Map(); // username -> { itemEl, badgeEl }
 const navMessagesEl = document.getElementById('nav-messages');
 
+// add near top (keep previous total for notifications)
+let __prevUnreadTotal = 0;
+
 // create or update badge helper
 function ensureContactBadge(username, parentEl) {
   let entry = contactElements.get(username);
@@ -150,6 +153,25 @@ async function refreshUnread() {
     setContactBadge(username, unreadCounts[username] || 0);
   }
   updateMenuBadge();
+
+  // show desktop notification if total increased
+  try {
+    const total = Object.values(unreadCounts).reduce((s,n)=>s+(n||0),0);
+    if (total > __prevUnreadTotal) {
+      // request permission if needed
+      if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
+        try { await Notification.requestPermission(); } catch(e) {}
+      }
+      if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        const diff = total - __prevUnreadTotal;
+        const title = 'ManticoreNET — New messages';
+        const body = diff === 1 ? 'You have 1 new message' : `You have ${diff} new messages`;
+        const n = new Notification(title, { body, icon: '/default-avatar.png' });
+        setTimeout(()=>{ try { n.close(); } catch(e){} }, 8000);
+      }
+    }
+    __prevUnreadTotal = total;
+  } catch(e){}
 }
 
 // load contacts
