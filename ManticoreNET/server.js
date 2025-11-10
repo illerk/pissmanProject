@@ -67,11 +67,10 @@ if (!fs.existsSync(POSTS_FILE)) {
   fs.writeJsonSync(POSTS_FILE, []);
 }
 
-// --- ADDED: sanitize existing posts.json to remove votes/comments fields
 try {
   const postsRaw = fs.readJsonSync(POSTS_FILE);
   const sanitized = (Array.isArray(postsRaw) ? postsRaw : []).map(p => {
-    const { votes, comments, ...keep } = p;
+    const {comments, ...keep } = p;
     return keep;
   });
   fs.writeJsonSync(POSTS_FILE, sanitized, { spaces: 2 });
@@ -225,7 +224,6 @@ api.post("/posts", async (req, res) => {
     text: text ?? "",
     image: null,
     createdAt: Date.now()
-    // votes/comments removed
   };
   if (image) {
     try {
@@ -242,8 +240,6 @@ api.post("/posts", async (req, res) => {
 // --- REMOVED: DELETE /posts/:id endpoint (post deletion disabled) ---
 // original handler removed so server no longer accepts requests to delete posts
 
-// --- REMOVED: /posts/:id/vote, /posts/:id/comments and /comments/:id/vote endpoints ---
-/* these endpoints were intentionally removed — voting and commenting are disabled */
 
 api.get("/posts", async (req, res) => {
   const posts = await fs.readJson(POSTS_FILE);

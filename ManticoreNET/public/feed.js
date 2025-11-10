@@ -62,9 +62,6 @@ async function getUserProfile(username) {
   return null;
 }
 
-function voteCount(votes) { return (votes||[]).reduce((s,v)=>s + Number(v.vote), 0); }
-function userVote(votes, username) { const v=(votes||[]).find(x=>x.username===username); return v?v.vote:0; }
-
 async function loadFeed(options = { preserveScroll: true }) {
   const container = feedPosts;
   const prevScroll = options.preserveScroll ? container.scrollTop : 0;
