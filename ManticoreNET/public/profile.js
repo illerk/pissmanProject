@@ -273,54 +273,62 @@ async function renderPosts(posts) {
     const actions = document.createElement("div");
     actions.style.display = "flex"; actions.style.alignItems = "center"; actions.style.gap = "8px"; actions.style.marginTop = "10px";
 
-    // --- VOTE CONTROLS ---
-    const likesInfo = parseLikes(post.likes);
-    const voteControls = document.createElement("div");
-    voteControls.className = "vote-controls";
-
-    const upBtn = document.createElement("button");
-    upBtn.className = "vote-btn";
-    if (likesInfo.my === 1) upBtn.classList.add("active");
-    upBtn.textContent = `▲ ${likesInfo.up}`;
-    upBtn.addEventListener("click", async () => {
-      const target = (likesInfo.my === 1) ? 0 : 1;
-      const r = await postVote(post.id, target);
-      if (r.ok && r.data && r.data.success) {
-        post.likes = r.data.post.likes;
-        const info = parseLikes(post.likes);
-        upBtn.textContent = `▲ ${info.up}`; downBtn.textContent = `▼ ${info.down}`;
-        upBtn.classList.toggle("active", info.my === 1);
-        downBtn.classList.toggle("active", info.my === -1);
-        likesInfo.map = info.map; likesInfo.up = info.up; likesInfo.down = info.down; likesInfo.my = info.my;
-      } else {
-        showStatus(r.data?.error || "Vote failed");
-      }
-    });
-
-    const downBtn = document.createElement("button");
-    downBtn.className = "vote-btn";
-    if (likesInfo.my === -1) downBtn.classList.add("active");
-    downBtn.textContent = `▼ ${likesInfo.down}`;
-    downBtn.addEventListener("click", async () => {
-      const target = (likesInfo.my === -1) ? 0 : -1;
-      const r = await postVote(post.id, target);
-      if (r.ok && r.data && r.data.success) {
-        post.likes = r.data.post.likes;
-        const info = parseLikes(post.likes);
-        upBtn.textContent = `▲ ${info.up}`; downBtn.textContent = `▼ ${info.down}`;
-        upBtn.classList.toggle("active", info.my === 1);
-        downBtn.classList.toggle("active", info.my === -1);
-        likesInfo.map = info.map; likesInfo.up = info.up; likesInfo.down = info.down; likesInfo.my = info.my;
-      } else {
-        showStatus(r.data?.error || "Vote failed");
-      }
-    });
-
-    voteControls.appendChild(upBtn);
-    voteControls.appendChild(downBtn);
-    actions.appendChild(voteControls);
-
     el.appendChild(actions);
+
+    // NEW: vote controls (up/down, single vote per account) - parse CSV safely
+    function parseCsv(s) { return (typeof s === 'string' && s.length) ? s.split(',').filter(Boolean) : []; }
+    const upArr = parseCsv(post.upvotes);
+    const downArr = parseCsv(post.downvotes);
+    const hasUp = upArr.includes(currentUser);
+    const hasDown = downArr.includes(currentUser);
+
+    const voteWrap = document.createElement('div');
+    voteWrap.className = 'vote-controls';
+    voteWrap.style.alignItems = 'center';
+
+    const upBtn = document.createElement('button');
+    upBtn.className = 'vote-btn';
+    if (hasUp) upBtn.classList.add('active');
+    upBtn.textContent = '▲';
+
+    const countSpan = document.createElement('span');
+    countSpan.style.color = '#ddd';
+    countSpan.textContent = `${post.upvotesCount || 0} / ${post.downvotesCount || 0}`;
+
+    const downBtn = document.createElement('button');
+    downBtn.className = 'vote-btn';
+    if (hasDown) downBtn.classList.add('active');
+    downBtn.textContent = '▼';
+
+    async function sendVote(v) {
+      const { ok, data } = await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/vote`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUser, vote: v })
+      });
+      if (!ok || !data || !data.success) {
+        showStatus("Vote failed");
+        return;
+      }
+      const updated = data.post;
+      post.upvotes = updated.upvotes;
+      post.downvotes = updated.downvotes;
+      post.upvotesCount = updated.upvotesCount;
+      post.downvotesCount = updated.downvotesCount;
+      const newUpArr = parseCsv(post.upvotes);
+      const newDownArr = parseCsv(post.downvotes);
+      upBtn.classList.toggle('active', newUpArr.includes(currentUser));
+      downBtn.classList.toggle('active', newDownArr.includes(currentUser));
+      countSpan.textContent = `${post.upvotesCount || 0} / ${post.downvotesCount || 0}`;
+    }
+
+    upBtn.addEventListener('click', () => sendVote('up'));
+    downBtn.addEventListener('click', () => sendVote('down'));
+
+    voteWrap.appendChild(upBtn);
+    voteWrap.appendChild(countSpan);
+    voteWrap.appendChild(downBtn);
+
+    el.appendChild(voteWrap);
 
     // --- NEW: comments toggle (hidden by default) ---
     const commentsToggle = document.createElement("button");
@@ -622,30 +630,3 @@ avatarEl.addEventListener("click", () => {
   overlayImg.src = avatarEl.src;
   overlay.classList.add("visible");
 });
-
-// helper: parse likes string and compute counts and user's vote
-function parseLikes(likesStr) {
-  const map = {};
-  if (!likesStr) return { map, up:0, down:0, my:0 };
-  for (const part of String(likesStr).split(",")) {
-    if (!part) continue;
-    const i = part.indexOf(":");
-    if (i === -1) continue;
-    const u = part.slice(0,i);
-    const v = Number(part.slice(i+1)) || 0;
-    map[u] = v;
-  }
-  let up=0, down=0;
-  for (const v of Object.values(map)) { if (v === 1) up++; else if (v === -1) down++; }
-  const my = map[currentUser] || 0;
-  return { map, up, down, my };
-}
-
-async function postVote(postId, vote) {
-  const { ok, data } = await fetchJson(`/api/posts/${encodeURIComponent(postId)}/vote`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: currentUser, vote })
-  });
-  return { ok, data };
-}

@@ -68,6 +68,33 @@ if (!fs.existsSync(POSTS_FILE)) {
   fs.writeJsonSync(POSTS_FILE, []);
 }
 
+try {
+  const postsRaw = fs.readJsonSync(POSTS_FILE);
+  const sanitized = (Array.isArray(postsRaw) ? postsRaw : []).map(p => {
+    const { ...keep } = p;
+    // remove legacy voting fields if present
+    delete keep.votesBy;
+    delete keep.score;
+    // ensure likes array and count exist
+    keep.likes = Array.isArray(keep.likes) ? keep.likes : (keep.likes ? Object.values(keep.likes) : []);
+    keep.likesCount = (typeof keep.likesCount === "number") ? keep.likesCount : (Array.isArray(keep.likes) ? keep.likes.length : 0);
+
+    // NEW: ensure upvotes/downvotes stored as comma-separated strings (no [] arrays)
+    // if older data has arrays, convert them to CSV string; otherwise ensure empty string present
+    function arrToStr(a) { return Array.isArray(a) ? a.filter(Boolean).join(",") : (typeof a === "string" ? a : ""); }
+    function ensureCount(str) { if (!str) return 0; return str.split(",").filter(Boolean).length; }
+
+    keep.upvotes = arrToStr(keep.upvotes);
+    keep.downvotes = arrToStr(keep.downvotes);
+    keep.upvotesCount = (typeof keep.upvotesCount === "number") ? keep.upvotesCount : ensureCount(keep.upvotes);
+    keep.downvotesCount = (typeof keep.downvotesCount === "number") ? keep.downvotesCount : ensureCount(keep.downvotes);
+
+    return keep;
+  });
+  fs.writeJsonSync(POSTS_FILE, sanitized, { spaces: 2 });
+} catch (e) {
+  // ignore if file not readable yet
+}
 
 
 if (!fs.existsSync(MESSAGES_FILE)) {
@@ -220,7 +247,14 @@ api.post("/posts", async (req, res) => {
     text: text ?? "",
     image: null,
     createdAt: Date.now(),
-    likes: "" // store likes as string, not array
+    likes: [],       // <-- initialize likes
+    likesCount: 0,   // <-- initialize likesCount
+    // NEW: upvotes/downvotes stored as CSV strings (no arrays)
+    upvotes: "",
+    downvotes: "",
+    upvotesCount: 0,
+    downvotesCount: 0
+    // removed votesBy/score (voting disabled)
   };
   if (image) {
     try {
@@ -234,126 +268,55 @@ api.post("/posts", async (req, res) => {
   res.json({ success: true, post });
 });
 
-// --- helper: parse likes string "user1:1,user2:-1" -> map {user1:1,...}
-function parseLikesString(s) {
-  const map = {};
-  if (!s) return map;
-  const parts = String(s).split(",");
-  for (const p of parts) {
-    if (!p) continue;
-    const idx = p.indexOf(":");
-    if (idx === -1) continue;
-    const user = p.slice(0, idx);
-    const val = Number(p.slice(idx+1)) || 0;
-    map[user] = val;
-  }
-  return map;
-}
-function stringifyLikesMap(map) {
-  const parts = [];
-  for (const k of Object.keys(map)) {
-    const v = map[k];
-    if (v === 0 || v === null || typeof v === 'undefined') continue;
-    parts.push(`${k}:${v}`);
-  }
-  return parts.join(",");
-}
-
-// normalize likes when returning posts by user
-api.get("/posts/:username", async (req, res) => {
-  const { username } = req.params;
-  const posts = await fs.readJson(POSTS_FILE);
-  const normalized = (Array.isArray(posts) ? posts : []).map(p => ({ ...p, likes: p.likes ?? "" }));
-  const userPosts = normalized.filter(p => p.username === username).sort((a,b)=>b.createdAt-a.createdAt);
-  res.json({ success: true, posts: userPosts });
-});
-
-
-// normalize likes when returning all posts
-api.get("/posts", async (req, res) => {
-  const posts = await fs.readJson(POSTS_FILE);
-  const normalized = (Array.isArray(posts) ? posts : []).map(p => ({ ...p, likes: p.likes ?? "" }));
-  const sorted = normalized.slice().sort((a, b) => b.createdAt - a.createdAt);
-  res.json({ success: true, posts: sorted });
-});
-
-// NEW: vote endpoint for posts (body: { username, vote }) where vote = 1, -1, or 0 (remove)
+// --- NEW: up/down vote endpoint (persist as strings, one account one vote) ---
 api.post("/posts/:id/vote", async (req, res) => {
   const { id } = req.params;
-  let { username, vote } = req.body;
+  const { username, vote } = req.body; // vote: 'up' or 'down'
   if (!id) return res.status(400).json({ error: "Missing post id" });
   if (!username) return res.status(400).json({ error: "Missing username" });
-  vote = Number(vote) || 0;
-  if (![1, -1, 0].includes(vote)) return res.status(400).json({ error: "Invalid vote" });
+  if (!vote || (vote !== "up" && vote !== "down")) return res.status(400).json({ error: "Missing or invalid vote (use 'up' or 'down')" });
 
   const posts = await fs.readJson(POSTS_FILE);
   const idx = (Array.isArray(posts) ? posts : []).findIndex(p => p.id === id);
   if (idx === -1) return res.status(404).json({ error: "Post not found" });
 
-  const post = posts[idx];
-  const map = parseLikesString(post.likes ?? "");
-  if (vote === 0) {
-    delete map[username];
-  } else {
-    map[username] = vote;
-  }
-  post.likes = stringifyLikesMap(map);
-  posts[idx] = post;
-  await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
+  const strToArr = s => (typeof s === "string" && s.length > 0) ? s.split(",").filter(Boolean) : [];
+  const arrToStr = a => (Array.isArray(a) && a.length) ? a.filter(Boolean).join(",") : "";
 
-  res.json({ success: true, post });
-});
+  const upArr = strToArr(posts[idx].upvotes);
+  const downArr = strToArr(posts[idx].downvotes);
 
+  const inUp = upArr.includes(username);
+  const inDown = downArr.includes(username);
 
-// --- NEW: comments endpoints ---
-api.get("/comments/:postId", async (req, res) => {
-  const { postId } = req.params;
-  if (!postId) return res.status(400).json({ error: "Missing postId" });
-  const comments = await fs.readJson(COMMENTS_FILE);
-  const list = (Array.isArray(comments) ? comments : []).filter(c => c.postId === postId)
-               .sort((a,b) => a.createdAt - b.createdAt);
-  res.json({ success: true, comments: list });
-});
-
-api.post("/comments/:postId", async (req, res) => {
-  const { postId } = req.params;
-  const { username, text } = req.body;
-  if (!postId) return res.status(400).json({ error: "Missing postId" });
-  if (!username) return res.status(400).json({ error: "Missing username" });
-  const comments = await fs.readJson(COMMENTS_FILE);
-  const id = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,8);
-  const comment = {
-    id,
-    postId,
-    username,
-    text: String(text ?? ""),
-    createdAt: Date.now()
-  };
-  comments.push(comment);
-  await fs.writeJson(COMMENTS_FILE, comments, { spaces: 2 });
-
-  // attempt to find post owner and notify over websockets
-  try {
-    const posts = await fs.readJson(POSTS_FILE);
-    const post = (Array.isArray(posts) ? posts : []).find(p => p.id === postId);
-    if (post) {
-      const payload = JSON.stringify({ type: "comment", comment, post });
-      // notify post owner
-      const ownerWs = clients.get(post.username);
-      if (ownerWs && ownerWs.readyState === WebSocket.OPEN) ownerWs.send(payload);
-      // notify comment author (if connected)
-      const authorWs = clients.get(username);
-      if (authorWs && authorWs.readyState === WebSocket.OPEN) authorWs.send(payload);
+  if (vote === "up") {
+    if (inUp) {
+      // already upvoted -> remove (neutral)
+      posts[idx].upvotes = arrToStr(upArr.filter(u => u !== username));
+    } else {
+      // add to upvotes and remove from downvotes if present
+      const nUp = upArr.concat([username]).filter(Boolean);
+      posts[idx].upvotes = arrToStr(Array.from(new Set(nUp)));
+      if (inDown) posts[idx].downvotes = arrToStr(downArr.filter(u => u !== username));
     }
-  } catch (e) {
-    // ignore notification failures
+  } else { // down
+    if (inDown) {
+      // already downvoted -> remove (neutral)
+      posts[idx].downvotes = arrToStr(downArr.filter(u => u !== username));
+    } else {
+      const nDown = downArr.concat([username]).filter(Boolean);
+      posts[idx].downvotes = arrToStr(Array.from(new Set(nDown)));
+      if (inUp) posts[idx].upvotes = arrToStr(upArr.filter(u => u !== username));
+    }
   }
 
-  res.json({ success: true, comment });
-});
+  // update counts
+  posts[idx].upvotesCount = (posts[idx].upvotes && posts[idx].upvotes.length) ? posts[idx].upvotes.split(",").filter(Boolean).length : 0;
+  posts[idx].downvotesCount = (posts[idx].downvotes && posts[idx].downvotes.length) ? posts[idx].downvotes.split(",").filter(Boolean).length : 0;
 
-// --- REMOVED: DELETE /posts/:id endpoint (post deletion disabled) ---
-// original handler removed so server no longer accepts requests to delete posts
+  await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
+  res.json({ success: true, post: posts[idx] });
+});
 
 
 api.get("/posts", async (req, res) => {
