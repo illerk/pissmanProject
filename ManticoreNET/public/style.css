@@ -185,6 +185,41 @@ body.logged-in .sidebar {
   box-sizing: border-box;
 }
 
+.vote-area {
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.vote-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight:700;
+}
+.vote-btn:hover { background: rgba(255,255,255,0.02); }
+.vote-btn.active { background: rgba(0,128,0,0.15); border-color: rgba(0,128,0,0.25); }
+.vote-btn.down.active { background: rgba(255,60,60,0.12); border-color: rgba(255,60,60,0.25); }
+
+.vote-score {
+  min-width:36px;
+  text-align:center;
+  color:#fff;
+  font-weight:700;
+}
+
+.comments-toggle {
+  background:none;
+  border:1px solid rgba(255,255,255,0.06);
+  padding:6px 8px;
+  border-radius:6px;
+  color:#9cf;
+  cursor:pointer;
+}
+.comments-toggle:hover { background: rgba(255,255,255,0.02); }
+
 @media (max-width: 720px) {
   .app-layout {
     grid-template-columns: 1fr;

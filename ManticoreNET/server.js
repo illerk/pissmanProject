@@ -229,7 +229,9 @@ api.post("/posts", async (req, res) => {
     username,
     text: text ?? "",
     image: null,
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    votes: {},    // username -> 1|-1
+    score: 0
   };
   if (image) {
     try {
@@ -299,6 +301,32 @@ api.get("/posts", async (req, res) => {
   // newest first
   const sorted = posts.slice().sort((a, b) => b.createdAt - a.createdAt);
   res.json({ success: true, posts: sorted });
+});
+
+// NEW: vote on a post (1 = up, -1 = down, 0 = remove)
+api.post("/posts/:id/vote", async (req, res) => {
+  const { id } = req.params;
+  const { username, vote } = req.body;
+  if (!id) return res.status(400).json({ error: "Missing post id" });
+  if (!username) return res.status(400).json({ error: "Missing username" });
+  if (![1, -1, 0].includes(Number(vote))) return res.status(400).json({ error: "Invalid vote" });
+
+  const posts = await fs.readJson(POSTS_FILE);
+  const idx = posts.findIndex(p => p.id === id);
+  if (idx === -1) return res.status(404).json({ error: "Post not found" });
+
+  posts[idx].votes = posts[idx].votes || {};
+  const prev = posts[idx].votes[username] || 0;
+  if (Number(vote) === 0) {
+    delete posts[idx].votes[username];
+  } else {
+    posts[idx].votes[username] = Number(vote);
+  }
+  // recompute score
+  posts[idx].score = Object.values(posts[idx].votes || {}).reduce((s, v) => s + Number(v || 0), 0);
+
+  await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
+  res.json({ success: true, score: posts[idx].score, votes: posts[idx].votes });
 });
 
 // helper: conversation key

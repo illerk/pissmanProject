@@ -132,14 +132,29 @@ async function renderPosts(posts) {
     actions.style.gap = '8px';
     actions.style.marginTop = '10px';
 
+    // vote area
+    const voteArea = document.createElement('div');
+    voteArea.className = 'vote-area';
+    const upBtn = document.createElement('button'); upBtn.className = 'vote-btn up'; upBtn.textContent = '▲';
+    const scoreEl = document.createElement('div'); scoreEl.className = 'vote-score'; scoreEl.textContent = post.score || 0;
+    const downBtn = document.createElement('button'); downBtn.className = 'vote-btn down'; downBtn.textContent = '▼';
+    voteArea.appendChild(upBtn); voteArea.appendChild(scoreEl); voteArea.appendChild(downBtn);
+    actions.appendChild(voteArea);
+
+    // comments toggle
+    const commentsToggle = document.createElement('button');
+    commentsToggle.className = 'comments-toggle';
+    commentsToggle.textContent = 'Показать комментарии';
+    actions.appendChild(commentsToggle);
+
     el.appendChild(actions);
 
-    // --- NEW: comments section ---
+    // comments section (hidden)
     const commentsSection = document.createElement('div');
     commentsSection.style.marginTop = '10px';
     commentsSection.style.borderTop = '1px solid rgba(255,255,255,0.03)';
     commentsSection.style.paddingTop = '10px';
-
+    commentsSection.style.display = 'none';
     const commentsList = document.createElement('div');
     commentsList.style.display = 'flex';
     commentsList.style.flexDirection = 'column';
@@ -173,9 +188,8 @@ async function renderPosts(posts) {
         });
         if (ok) {
           input.value = '';
-          await loadCommentsForPost(post.id, commentsList);
+          if (commentsSection.style.display !== 'none') await loadCommentsForPost(post.id, commentsList);
         } else {
-          // unobtrusive failure handling
           console.warn('Failed to post comment');
         }
       });
@@ -187,7 +201,67 @@ async function renderPosts(posts) {
     el.appendChild(commentsSection);
     feedPosts.appendChild(el);
 
-    await loadCommentsForPost(post.id, commentsList);
+    // vote handlers
+    function setVoteButtonsState(v) {
+      upBtn.classList.toggle("active", v === 1);
+      downBtn.classList.toggle("active", v === -1);
+      scoreEl.textContent = post.score ?? 0;
+    }
+    const myVote = (post.votes && post.votes[currentUser]) ? Number(post.votes[currentUser]) : 0;
+    setVoteButtonsState(myVote);
+
+    async function sendVote(v) {
+      const body = { username: currentUser, vote: v };
+      const r = await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/vote`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+      });
+      if (r.ok && r.data && r.data.success) {
+        post.score = r.data.score;
+        post.votes = r.data.votes || post.votes;
+        setVoteButtonsState((post.votes && post.votes[currentUser]) ? Number(post.votes[currentUser]) : 0);
+      } else {
+        console.warn('Vote failed');
+      }
+    }
+    upBtn.addEventListener('click', () => {
+      const cur = (post.votes && post.votes[currentUser]) ? Number(post.votes[currentUser]) : 0;
+      sendVote(cur === 1 ? 0 : 1);
+    });
+    downBtn.addEventListener('click', () => {
+      const cur = (post.votes && post.votes[currentUser]) ? Number(post.votes[currentUser]) : 0;
+      sendVote(cur === -1 ? 0 : -1);
+    });
+
+    // comments toggle
+    let commentsLoaded = false;
+    commentsToggle.addEventListener('click', async () => {
+      if (commentsSection.style.display === 'none') {
+        commentsSection.style.display = '';
+        commentsToggle.textContent = 'Скрыть комментарии';
+        if (!commentsLoaded) {
+          await loadCommentsForPost(post.id, commentsList);
+          commentsLoaded = true;
+        }
+      } else {
+        commentsSection.style.display = 'none';
+        commentsToggle.textContent = 'Показать комментарии';
+      }
+    });
+
+    // update button text with count
+    (async () => {
+      try {
+        const r = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`);
+        if (r.ok && r.data && Array.isArray(r.data.comments)) {
+          const n = r.data.comments.length;
+          commentsToggle.textContent = n ? `Показать комментарии (${n})` : "Показать комментарии";
+        }
+      } catch(e) {}
+    })();
+
+    // ...existing code...
+    // await loadCommentsForPost(post.id, commentsList); // remove this line so comments are not auto-loaded
+    // but since we added comments hidden, ensure we do NOT auto-load here; remove or comment out line above in original file
   }
 }
 
