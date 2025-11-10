@@ -25,32 +25,101 @@ const basePath = location.pathname.replace(/\/[^/]*$/, ''); // e.g. "/ManticoreN
 const proto = location.protocol === "https:" ? "wss" : "ws";
 // build ws URL relative to current location so sub-paths are respected
 const wsUrl = `${proto}://${location.host}${basePath}/ws`;
-const ws = new WebSocket(wsUrl);
-ws.addEventListener("open", () => {
-  ws.send(JSON.stringify({ type: "auth", username: currentUser }));
-});
-ws.addEventListener("message", (ev) => {
-  let msg;
-  try { msg = JSON.parse(ev.data); } catch (e) { return; }
-  if (msg.type === "message") {
-    const m = msg.message;
-    // if conversation with m.from or m.to is currently open, append
-    const partner = (m.from === currentUser) ? m.to : m.from;
-    if (partner === selectedContact) {
-      // call async function to append
-      (async () => { await appendMessage(m, m.from === currentUser); })();
-      // server already marked as read for this user when opening conversation via GET.
-      // optionally ensure unread refreshed.
-      refreshUnread();
-    } else {
-      // increment local unread count (so it shows immediately)
-      unreadCounts[m.from] = (unreadCounts[m.from] || 0) + 1;
-      setContactBadge(m.from, unreadCounts[m.from]);
-    }
-    // update menu badge
-    updateMenuBadge();
-  }
-});
+
+// --- REPLACE plain one-off WebSocket with reconnect-safe wrapper ---
+// remove previous `const ws = new WebSocket(wsUrl);` + its listeners and use managed connection
+let ws = null;
+let wsOpenPromise = null;
+let reconnectDelay = 1000;
+let reconnectTimer = null;
+
+function attachWsHandlers(wsInstance) {
+	// auth on open
+	wsInstance.addEventListener("open", () => {
+		reconnectDelay = 1000;
+		try { wsInstance.send(JSON.stringify({ type: "auth", username: currentUser })); } catch (e) {}
+	});
+	// forward incoming messages to existing handler logic
+	wsInstance.addEventListener("message", (ev) => {
+		let msg;
+		try { msg = JSON.parse(ev.data); } catch (e) { return; }
+		if (msg.type === "message") {
+			const m = msg.message;
+			const partner = (m.from === currentUser) ? m.to : m.from;
+			if (partner === selectedContact) {
+				(async () => { await appendMessage(m, m.from === currentUser); })();
+				refreshUnread();
+			} else {
+				unreadCounts[m.from] = (unreadCounts[m.from] || 0) + 1;
+				setContactBadge(m.from, unreadCounts[m.from]);
+			}
+			updateMenuBadge();
+		}
+		// keep handling other message types if previously supported...
+	});
+	wsInstance.addEventListener("close", () => {
+		// schedule reconnect with backoff
+		if (!reconnectTimer) {
+			reconnectTimer = setTimeout(() => {
+				reconnectTimer = null;
+				connectWs().catch(()=>{}); // try reconnect
+			}, reconnectDelay);
+			reconnectDelay = Math.min(30000, reconnectDelay * 2);
+		}
+	});
+	wsInstance.addEventListener("error", () => {
+		// let 'close' handle reconnection; avoid noisy console errors
+	});
+}
+
+function connectWs() {
+	// return existing promise if connecting/open
+	if (ws && (ws.readyState === WebSocket.OPEN)) return Promise.resolve(ws);
+	if (ws && ws.readyState === WebSocket.CONNECTING && wsOpenPromise) return wsOpenPromise;
+
+	// create new socket
+	ws = new WebSocket(wsUrl);
+	wsOpenPromise = new Promise((resolve, reject) => {
+		const onOpen = () => {
+			cleanup();
+			resolve(ws);
+			wsOpenPromise = null;
+		};
+		const onError = (err) => {
+			cleanup();
+			reject(err);
+			wsOpenPromise = null;
+		};
+		function cleanup() {
+			ws.removeEventListener("open", onOpen);
+			ws.removeEventListener("error", onError);
+		}
+		ws.addEventListener("open", onOpen);
+		ws.addEventListener("error", onError);
+	});
+	attachWsHandlers(ws);
+	// fallback: if open event doesn't fire in a reasonable time, allow rejection
+	const timeout = setTimeout(() => {
+		if (wsOpenPromise) {
+			wsOpenPromise = wsOpenPromise.then(()=>{}, ()=>{}); // silence
+		}
+	}, 8000);
+	return wsOpenPromise;
+}
+
+// helper used by send to ensure connection
+async function ensureSend(jsonPayload) {
+	try {
+		const sock = await connectWs();
+		if (sock && sock.readyState === WebSocket.OPEN) {
+			sock.send(JSON.stringify(jsonPayload));
+			return true;
+		}
+	} catch (e) {
+		// ignore, will return false
+	}
+	return false;
+}
 
 // add: explicit API root
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
@@ -298,19 +367,21 @@ async function sendMessage() {
   const f = msgImage.files[0];
   if (f) {
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       const dataUrl = reader.result;
       const payload = { type: "message", from: currentUser, to: selectedContact, text, image: dataUrl };
-      ws.send(JSON.stringify(payload));
+      const ok = await ensureSend(payload);
+      if (!ok) alert("Unable to send message right now (disconnected).");
       msgInput.value = ""; msgImage.value = "";
-      adjustInputHeight(); // reset height
+      adjustInputHeight();
     };
     reader.readAsDataURL(f);
   } else {
     const payload = { type: "message", from: currentUser, to: selectedContact, text };
-    ws.send(JSON.stringify(payload));
+    const ok = await ensureSend(payload);
+    if (!ok) alert("Unable to send message right now (disconnected).");
     msgInput.value = "";
-    adjustInputHeight(); // reset height
+    adjustInputHeight();
   }
 }
 
