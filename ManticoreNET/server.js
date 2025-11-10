@@ -253,7 +253,7 @@ api.post("/posts", async (req, res) => {
 });
 
 // --- NEW: simple likes toggle endpoint ---
-api.post("/posts/:id/like", async (req, res) => {
+api.post("/posts/:id/likes", async (req, res) => {
   const { id } = req.params;
   const { username } = req.body;
   if (!id) return res.status(400).json({ error: "Missing post id" });
