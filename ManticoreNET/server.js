@@ -393,6 +393,19 @@ if (API_BASE !== "/api") {
   app.use("/api", api);
 }
 
+// --- ADDED: accept API mounted under a dynamic first segment like "/ManticoreNET/api"
+// This makes endpoints reachable when requests arrive as "/<someBase>/api/..." (e.g. "/ManticoreNET/api/posts/...")
+app.use("/:base/api", api);
+
+// --- ADDED: serve a tiny default-avatar fallback so clients won't 404 if default-avatar.png missing in /public
+// Responds both on "/default-avatar.png" and "/:base/default-avatar.png"
+const DEFAULT_AVATAR_BASE64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=";
+app.get(['/default-avatar.png', '/:base/default-avatar.png'], (req, res) => {
+  const buf = Buffer.from(DEFAULT_AVATAR_BASE64, 'base64');
+  res.setHeader('Content-Type', 'image/png');
+  res.send(buf);
+});
+
 // adjust WebSocket server to listen on path `${BASE_PATH}/ws`
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: (BASE_PATH || "") + "/ws" });
