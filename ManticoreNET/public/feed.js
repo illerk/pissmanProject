@@ -136,64 +136,6 @@ async function renderPosts(posts) {
 
     el.appendChild(actions);
 
-    // NEW: vote controls (up/down, one account one vote). parse CSV strings safely
-    function parseCsv(s) { return (typeof s === 'string' && s.length) ? s.split(',').filter(Boolean) : []; }
-    const upArr = parseCsv(post.upvotes);
-    const downArr = parseCsv(post.downvotes);
-    const hasUp = upArr.includes(currentUser);
-    const hasDown = downArr.includes(currentUser);
-
-    const voteWrap = document.createElement('div');
-    voteWrap.className = 'vote-controls';
-    voteWrap.style.alignItems = 'center';
-
-    const upBtn = document.createElement('button');
-    upBtn.className = 'vote-btn';
-    if (hasUp) upBtn.classList.add('active');
-    upBtn.textContent = '▲';
-
-    const countSpan = document.createElement('span');
-    countSpan.style.color = '#ddd';
-    countSpan.textContent = `${post.upvotesCount || 0} / ${post.downvotesCount || 0}`;
-
-    const downBtn = document.createElement('button');
-    downBtn.className = 'vote-btn';
-    if (hasDown) downBtn.classList.add('active');
-    downBtn.textContent = '▼';
-
-    async function sendVote(v) {
-      const { ok, data } = await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/vote`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: currentUser, vote: v })
-      });
-      if (!ok || !data || !data.success) {
-        console.warn('Vote failed', data && data.error);
-        return;
-      }
-      const updated = data.post;
-      // update local post and UI
-      post.upvotes = updated.upvotes;
-      post.downvotes = updated.downvotes;
-      post.upvotesCount = updated.upvotesCount;
-      post.downvotesCount = updated.downvotesCount;
-      // update active state
-      const newUpArr = parseCsv(post.upvotes);
-      const newDownArr = parseCsv(post.downvotes);
-      upBtn.classList.toggle('active', newUpArr.includes(currentUser));
-      downBtn.classList.toggle('active', newDownArr.includes(currentUser));
-      countSpan.textContent = `${post.upvotesCount || 0} / ${post.downvotesCount || 0}`;
-    }
-
-    upBtn.addEventListener('click', () => sendVote('up'));
-    downBtn.addEventListener('click', () => sendVote('down'));
-
-    voteWrap.appendChild(upBtn);
-    voteWrap.appendChild(countSpan);
-    voteWrap.appendChild(downBtn);
-
-    el.appendChild(voteWrap);
-
     // --- NEW: comments toggle (hidden by default) ---
     const commentsToggle = document.createElement('button');
     commentsToggle.className = 'comments-toggle';

@@ -78,17 +78,6 @@ try {
     // ensure likes array and count exist
     keep.likes = Array.isArray(keep.likes) ? keep.likes : (keep.likes ? Object.values(keep.likes) : []);
     keep.likesCount = (typeof keep.likesCount === "number") ? keep.likesCount : (Array.isArray(keep.likes) ? keep.likes.length : 0);
-
-    // NEW: ensure upvotes/downvotes stored as comma-separated strings (no [] arrays)
-    // if older data has arrays, convert them to CSV string; otherwise ensure empty string present
-    function arrToStr(a) { return Array.isArray(a) ? a.filter(Boolean).join(",") : (typeof a === "string" ? a : ""); }
-    function ensureCount(str) { if (!str) return 0; return str.split(",").filter(Boolean).length; }
-
-    keep.upvotes = arrToStr(keep.upvotes);
-    keep.downvotes = arrToStr(keep.downvotes);
-    keep.upvotesCount = (typeof keep.upvotesCount === "number") ? keep.upvotesCount : ensureCount(keep.upvotes);
-    keep.downvotesCount = (typeof keep.downvotesCount === "number") ? keep.downvotesCount : ensureCount(keep.downvotes);
-
     return keep;
   });
   fs.writeJsonSync(POSTS_FILE, sanitized, { spaces: 2 });
@@ -248,12 +237,7 @@ api.post("/posts", async (req, res) => {
     image: null,
     createdAt: Date.now(),
     likes: [],       // <-- initialize likes
-    likesCount: 0,   // <-- initialize likesCount
-    // NEW: upvotes/downvotes stored as CSV strings (no arrays)
-    upvotes: "",
-    downvotes: "",
-    upvotesCount: 0,
-    downvotesCount: 0
+    likesCount: 0    // <-- initialize likesCount
     // removed votesBy/score (voting disabled)
   };
   if (image) {
@@ -268,55 +252,79 @@ api.post("/posts", async (req, res) => {
   res.json({ success: true, post });
 });
 
-// --- NEW: up/down vote endpoint (persist as strings, one account one vote) ---
-api.post("/posts/:id/vote", async (req, res) => {
+// --- NEW: simple likes toggle endpoint ---
+api.post("/posts/:id/like", async (req, res) => {
   const { id } = req.params;
-  const { username, vote } = req.body; // vote: 'up' or 'down'
+  const { username } = req.body;
   if (!id) return res.status(400).json({ error: "Missing post id" });
   if (!username) return res.status(400).json({ error: "Missing username" });
-  if (!vote || (vote !== "up" && vote !== "down")) return res.status(400).json({ error: "Missing or invalid vote (use 'up' or 'down')" });
 
   const posts = await fs.readJson(POSTS_FILE);
   const idx = (Array.isArray(posts) ? posts : []).findIndex(p => p.id === id);
   if (idx === -1) return res.status(404).json({ error: "Post not found" });
 
-  const strToArr = s => (typeof s === "string" && s.length > 0) ? s.split(",").filter(Boolean) : [];
-  const arrToStr = a => (Array.isArray(a) && a.length) ? a.filter(Boolean).join(",") : "";
-
-  const upArr = strToArr(posts[idx].upvotes);
-  const downArr = strToArr(posts[idx].downvotes);
-
-  const inUp = upArr.includes(username);
-  const inDown = downArr.includes(username);
-
-  if (vote === "up") {
-    if (inUp) {
-      // already upvoted -> remove (neutral)
-      posts[idx].upvotes = arrToStr(upArr.filter(u => u !== username));
-    } else {
-      // add to upvotes and remove from downvotes if present
-      const nUp = upArr.concat([username]).filter(Boolean);
-      posts[idx].upvotes = arrToStr(Array.from(new Set(nUp)));
-      if (inDown) posts[idx].downvotes = arrToStr(downArr.filter(u => u !== username));
-    }
-  } else { // down
-    if (inDown) {
-      // already downvoted -> remove (neutral)
-      posts[idx].downvotes = arrToStr(downArr.filter(u => u !== username));
-    } else {
-      const nDown = downArr.concat([username]).filter(Boolean);
-      posts[idx].downvotes = arrToStr(Array.from(new Set(nDown)));
-      if (inUp) posts[idx].upvotes = arrToStr(upArr.filter(u => u !== username));
-    }
+  posts[idx].likes = Array.isArray(posts[idx].likes) ? posts[idx].likes : (posts[idx].likes ? Object.values(posts[idx].likes) : []);
+  const has = posts[idx].likes.includes(username);
+  if (has) {
+    posts[idx].likes = posts[idx].likes.filter(u => u !== username);
+  } else {
+    posts[idx].likes.push(username);
   }
-
-  // update counts
-  posts[idx].upvotesCount = (posts[idx].upvotes && posts[idx].upvotes.length) ? posts[idx].upvotes.split(",").filter(Boolean).length : 0;
-  posts[idx].downvotesCount = (posts[idx].downvotes && posts[idx].downvotes.length) ? posts[idx].downvotes.split(",").filter(Boolean).length : 0;
+  posts[idx].likesCount = posts[idx].likes.length;
 
   await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
   res.json({ success: true, post: posts[idx] });
 });
+
+// --- NEW: comments endpoints ---
+api.get("/comments/:postId", async (req, res) => {
+  const { postId } = req.params;
+  if (!postId) return res.status(400).json({ error: "Missing postId" });
+  const comments = await fs.readJson(COMMENTS_FILE);
+  const list = (Array.isArray(comments) ? comments : []).filter(c => c.postId === postId)
+               .sort((a,b) => a.createdAt - b.createdAt);
+  res.json({ success: true, comments: list });
+});
+
+api.post("/comments/:postId", async (req, res) => {
+  const { postId } = req.params;
+  const { username, text } = req.body;
+  if (!postId) return res.status(400).json({ error: "Missing postId" });
+  if (!username) return res.status(400).json({ error: "Missing username" });
+  const comments = await fs.readJson(COMMENTS_FILE);
+  const id = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,8);
+  const comment = {
+    id,
+    postId,
+    username,
+    text: String(text ?? ""),
+    createdAt: Date.now()
+  };
+  comments.push(comment);
+  await fs.writeJson(COMMENTS_FILE, comments, { spaces: 2 });
+
+  // attempt to find post owner and notify over websockets
+  try {
+    const posts = await fs.readJson(POSTS_FILE);
+    const post = (Array.isArray(posts) ? posts : []).find(p => p.id === postId);
+    if (post) {
+      const payload = JSON.stringify({ type: "comment", comment, post });
+      // notify post owner
+      const ownerWs = clients.get(post.username);
+      if (ownerWs && ownerWs.readyState === WebSocket.OPEN) ownerWs.send(payload);
+      // notify comment author (if connected)
+      const authorWs = clients.get(username);
+      if (authorWs && authorWs.readyState === WebSocket.OPEN) authorWs.send(payload);
+    }
+  } catch (e) {
+    // ignore notification failures
+  }
+
+  res.json({ success: true, comment });
+});
+
+// --- REMOVED: DELETE /posts/:id endpoint (post deletion disabled) ---
+// original handler removed so server no longer accepts requests to delete posts
 
 
 api.get("/posts", async (req, res) => {
