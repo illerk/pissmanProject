@@ -146,7 +146,7 @@ async function renderPosts(posts) {
     up.addEventListener('click', async () => {
       const container = feedPosts;
       const prev = container.scrollTop;
-      const { ok, data } = await fetchJson(`/api/posts/${post.id}/votes`, {
+      const { ok, data } = await fetchJson(`/api/posts/${post.id}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: currentUser, vote: 1 })
@@ -160,7 +160,7 @@ async function renderPosts(posts) {
     down.addEventListener('click', async () => {
       const container = feedPosts;
       const prev = container.scrollTop;
-      const { ok, data } = await fetchJson(`/api/posts/${post.id}/votes`, {
+      const { ok, data } = await fetchJson(`/api/posts/${post.id}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: currentUser, vote: -1 })
@@ -219,7 +219,7 @@ async function renderPosts(posts) {
       const cdown = document.createElement('button'); cdown.textContent='▼';
       const ccount = document.createElement('span'); ccount.textContent = voteCount(c.votes);
       cup.addEventListener('click', async ()=> {
-        const { ok } = await fetchJson(`/api/comments/${c.id}/votes`, {
+        const { ok } = await fetchJson(`/api/comments/${c.id}/vote`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: currentUser, vote: 1 })
@@ -227,7 +227,7 @@ async function renderPosts(posts) {
         if (ok) loadFeed();
       });
       cdown.addEventListener('click', async ()=> {
-        const { ok } = await fetchJson(`/api/comments/${c.id}/votes`, {
+        const { ok } = await fetchJson(`/api/comments/${c.id}/vote`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: currentUser, vote: -1 })
