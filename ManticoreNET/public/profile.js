@@ -273,19 +273,6 @@ async function renderPosts(posts) {
     const actions = document.createElement("div");
     actions.style.display = "flex"; actions.style.alignItems = "center"; actions.style.gap = "8px"; actions.style.marginTop = "10px";
 
-    if (post.username === currentUser) {
-      const delBtn = document.createElement("button"); delBtn.textContent = "Delete";
-      delBtn.addEventListener("click", async () => {
-        if (!confirm("Delete this post?")) return;
-        await fetch(`${API_ROOT}/posts/${post.id}`, {
-          method: "DELETE", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: currentUser })
-        });
-        await loadPosts(viewingUser);
-      });
-      actions.appendChild(delBtn);
-    }
-
     el.appendChild(actions);
 
     postsList.appendChild(el);

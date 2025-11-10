@@ -239,24 +239,8 @@ api.post("/posts", async (req, res) => {
   res.json({ success: true, post });
 });
 
-
-api.delete("/posts/:id", async (req, res) => {
-  const { id } = req.params;
-  const { username } = req.body;
-  if (!username) return res.status(400).json({ error: "Missing username" });
-  const posts = await fs.readJson(POSTS_FILE);
-  const idx = posts.findIndex(p => p.id === id);
-  if (idx === -1) return res.status(404).json({ error: "Post not found" });
-  if (posts[idx].username !== username) return res.status(403).json({ error: "Not allowed" });
-
-  if (posts[idx].image) {
-    const imgPath = path.join(__dirname, "public", posts[idx].image.replace(/^\//,""));
-    if (fs.existsSync(imgPath)) await fs.remove(imgPath);
-  }
-  posts.splice(idx,1);
-  await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-  res.json({ success: true });
-});
+// --- REMOVED: DELETE /posts/:id endpoint (post deletion disabled) ---
+// original handler removed so server no longer accepts requests to delete posts
 
 // --- REMOVED: /posts/:id/vote, /posts/:id/comments and /comments/:id/vote endpoints ---
 /* these endpoints were intentionally removed — voting and commenting are disabled */
