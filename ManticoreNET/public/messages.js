@@ -1,13 +1,8 @@
+// force API root to the hosted path
+const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+
 // compute base
 const BASE = location.pathname.replace(/\/[^/]*$/, '');
-
-// add fixed API base and helper
-const API_BASE = "https://immersivethingsforsierra.ru/ManticoreNET/api";
-function apiUrl(path) {
-  if (!path) return API_BASE;
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  return API_BASE + (path.startsWith("/") ? path : "/" + path);
-}
 
 // top code
 const currentUser = localStorage.getItem("currentUser");
@@ -25,11 +20,10 @@ const overlayImg = document.getElementById("overlayImg");
 const logoutTopBtn = document.getElementById("logoutTopBtn");
 if (logoutTopBtn) logoutTopBtn.addEventListener("click", () => { localStorage.removeItem("currentUser"); location.href = "index.html"; });
 
-// compute ws base (path part of current URL)
-const basePath = location.pathname.replace(/\/[^/]*$/, ''); // e.g. "/ManticoreNET"
+// compute ws base (use explicit app sub-path)
 const proto = location.protocol === "https:" ? "wss" : "ws";
-// build ws URL relative to current location so sub-paths are respected
-const wsUrl = `${proto}://${location.host}${basePath}/ws`;
+// ensure websocket connects to the app sub-path
+const wsUrl = `${proto}://${location.host}/ManticoreNET/ws`;
 const ws = new WebSocket(wsUrl);
 ws.addEventListener("open", () => {
   ws.send(JSON.stringify({ type: "auth", username: currentUser }));
@@ -57,10 +51,10 @@ ws.addEventListener("message", (ev) => {
   }
 });
 
-// unified fetch that resolves relative to API_BASE (preserves sub-path)
+// unified fetch that resolves relative to API_ROOT (preserves correct server path)
 async function fetchJson(url, opts) {
   try {
-    const full = apiUrl(url);
+    const full = new URL(url, API_ROOT).href; // e.g. "/users" -> "https://.../ManticoreNET/api/users"
     const r = await fetch(full, opts);
     return { ok: r.ok, data: await r.json() };
   } catch (e) { return { ok: false, data: null }; }
@@ -71,7 +65,7 @@ const userCache = {};
 async function getUserAvatar(username) {
   if (!username) return "default-avatar.png";
   if (userCache[username]) return userCache[username].avatar || "default-avatar.png";
-  const { ok, data } = await fetchJson(`/api/user/${encodeURIComponent(username)}`);
+  const { ok, data } = await fetchJson(`/user/${encodeURIComponent(username)}`);
   if (ok && data && data.success) {
     userCache[username] = data.profile;
     return data.profile.avatar || "default-avatar.png";
@@ -132,7 +126,7 @@ function updateMenuBadge() {
 
 // fetch unread from server and update badges
 async function refreshUnread() {
-  const { ok, data } = await fetchJson(`/api/unread/${encodeURIComponent(currentUser)}`);
+  const { ok, data } = await fetchJson(`/unread/${encodeURIComponent(currentUser)}`);
   if (!ok || !data || !data.success) return;
   // replace unreadCounts
   Object.keys(unreadCounts).forEach(k=>delete unreadCounts[k]);
@@ -149,7 +143,7 @@ let contacts = [];
 let selectedContact = null;
 async function loadContacts() {
   contactsPane.innerHTML = "Loading...";
-  const { ok, data } = await fetchJson("api/users");
+  const { ok, data } = await fetchJson("users");
   if (!ok || !data.users) { contactsPane.innerHTML = "<div style='color:#f66'>Failed</div>"; return; }
   contacts = data.users.filter(u => u.username !== currentUser);
   contactsPane.innerHTML = "";
@@ -186,7 +180,7 @@ async function loadContacts() {
 // load conversation history via REST — use async loop and await appendMessage
 async function loadHistory(withUser) {
   messagesPane.innerHTML = "Loading history...";
-  const { ok, data } = await fetchJson(`/api/messages/${encodeURIComponent(currentUser)}/${encodeURIComponent(withUser)}`);
+  const { ok, data } = await fetchJson(`/messages/${encodeURIComponent(currentUser)}/${encodeURIComponent(withUser)}`);
   if (!ok || !data.messages) { messagesPane.innerHTML = "<div style='color:#f66'>Failed to load history</div>"; return; }
   messagesPane.innerHTML = "";
   for (const m of data.messages) {

@@ -2,24 +2,18 @@ const username = document.getElementById("username");
 const password = document.getElementById("password");
 const status = document.getElementById("status");
 
+// add API root so client always targets the hosted API path
+const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+
 function showStatus(msg, isError = true) {
   status.textContent = msg;
   status.style.color = isError ? "#f66" : "#8f8";
 }
 
-// add absolute API base and helper
-const API_BASE = "https://immersivethingsforsierra.ru/ManticoreNET/api";
-function apiUrl(path) {
-  if (!path) return API_BASE;
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  // avoid leading-slash resetting host when using URL(), just join
-  return API_BASE + (path.startsWith("/") ? path : "/" + path);
-}
-
 async function postJson(url, body) {
   try {
-    // build URL using fixed API base so sub-paths are always correct
-    const full = apiUrl(url);
+    // build URL relative to API_ROOT so requests always go to the correct sub-path
+    const full = new URL(url, API_ROOT).href;
     const res = await fetch(full, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
