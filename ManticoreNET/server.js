@@ -75,6 +75,9 @@ try {
     // remove legacy voting fields if present
     delete keep.votesBy;
     delete keep.score;
+    // ensure likes array and count exist
+    keep.likes = Array.isArray(keep.likes) ? keep.likes : (keep.likes ? Object.values(keep.likes) : []);
+    keep.likesCount = (typeof keep.likesCount === "number") ? keep.likesCount : (Array.isArray(keep.likes) ? keep.likes.length : 0);
     return keep;
   });
   fs.writeJsonSync(POSTS_FILE, sanitized, { spaces: 2 });
@@ -232,7 +235,9 @@ api.post("/posts", async (req, res) => {
     username,
     text: text ?? "",
     image: null,
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    likes: [],       // <-- initialize likes
+    likesCount: 0    // <-- initialize likesCount
     // removed votesBy/score (voting disabled)
   };
   if (image) {
@@ -245,6 +250,30 @@ api.post("/posts", async (req, res) => {
   posts.push(post);
   await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
   res.json({ success: true, post });
+});
+
+// --- NEW: simple likes toggle endpoint ---
+api.post("/posts/:id/like", async (req, res) => {
+  const { id } = req.params;
+  const { username } = req.body;
+  if (!id) return res.status(400).json({ error: "Missing post id" });
+  if (!username) return res.status(400).json({ error: "Missing username" });
+
+  const posts = await fs.readJson(POSTS_FILE);
+  const idx = (Array.isArray(posts) ? posts : []).findIndex(p => p.id === id);
+  if (idx === -1) return res.status(404).json({ error: "Post not found" });
+
+  posts[idx].likes = Array.isArray(posts[idx].likes) ? posts[idx].likes : (posts[idx].likes ? Object.values(posts[idx].likes) : []);
+  const has = posts[idx].likes.includes(username);
+  if (has) {
+    posts[idx].likes = posts[idx].likes.filter(u => u !== username);
+  } else {
+    posts[idx].likes.push(username);
+  }
+  posts[idx].likesCount = posts[idx].likes.length;
+
+  await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
+  res.json({ success: true, post: posts[idx] });
 });
 
 // --- NEW: comments endpoints ---
