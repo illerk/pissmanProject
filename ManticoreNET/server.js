@@ -247,7 +247,7 @@ api.delete("/posts/:id", async (req, res) => {
   res.json({ success: true });
 });
 
-api.post("/posts/:id/vote", async (req, res) => {
+api.post("/posts/:id/votes", async (req, res) => {
   const { id } = req.params;
   const { username, vote } = req.body;
   if (!username || ![1,-1].includes(Number(vote))) return res.status(400).json({ error: "Invalid input" });
@@ -281,7 +281,7 @@ api.post("/posts/:id/comments", async (req, res) => {
 });
 
 // голос по комменту (body: username, vote)
-api.post("/comments/:id/vote", async (req, res) => {
+api.post("/comments/:id/votes", async (req, res) => {
   const { id } = req.params;
   const { username, vote } = req.body;
   if (!username || ![1,-1].includes(Number(vote))) return res.status(400).json({ error: "Invalid input" });

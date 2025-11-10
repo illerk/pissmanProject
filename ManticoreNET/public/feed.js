@@ -15,13 +15,10 @@ const basePath = location.pathname.replace(/\/[^/]*$/, '');
 const proto = location.protocol === "https:" ? "wss" : "ws";
 const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
-// compute API and asset roots based on current location and optional app base (e.g. /ManticoreNET)
-const _origin = location.origin;
-const _parts = location.pathname.split('/').filter(Boolean);
-const _appBase = (_parts.length && !_parts[0].includes('.')) ? '/' + _parts[0] : '';
-const API_ROOT = _origin + _appBase + '/api';
-const ASSET_ROOT = _origin + _appBase + '/public';
-
+// add: explicit API root
+const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+// add: assets root for avatars/posts (serve from /ManticoreNET/public)
+const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
 function resolveAsset(url) {
   if (!url) return url;
   if (/^(https?:|data:)/.test(url)) return url;
@@ -149,7 +146,7 @@ async function renderPosts(posts) {
     up.addEventListener('click', async () => {
       const container = feedPosts;
       const prev = container.scrollTop;
-      const { ok, data } = await fetchJson(`${API_ROOT}/posts/${post.id}/vote`, {
+      const { ok, data } = await fetchJson(`/api/posts/${post.id}/votes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: currentUser, vote: 1 })
@@ -163,7 +160,7 @@ async function renderPosts(posts) {
     down.addEventListener('click', async () => {
       const container = feedPosts;
       const prev = container.scrollTop;
-      const { ok, data } = await fetchJson(`${API_ROOT}/posts/${post.id}/vote`, {
+      const { ok, data } = await fetchJson(`/api/posts/${post.id}/votes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: currentUser, vote: -1 })
@@ -222,7 +219,7 @@ async function renderPosts(posts) {
       const cdown = document.createElement('button'); cdown.textContent='▼';
       const ccount = document.createElement('span'); ccount.textContent = voteCount(c.votes);
       cup.addEventListener('click', async ()=> {
-        const { ok } = await fetchJson(`${API_ROOT}/comments/${c.id}/vote`, {
+        const { ok } = await fetchJson(`/api/comments/${c.id}/votes`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: currentUser, vote: 1 })
@@ -230,7 +227,7 @@ async function renderPosts(posts) {
         if (ok) loadFeed();
       });
       cdown.addEventListener('click', async ()=> {
-        const { ok } = await fetchJson(`${API_ROOT}/comments/${c.id}/vote`, {
+        const { ok } = await fetchJson(`/api/comments/${c.id}/votes`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: currentUser, vote: -1 })
@@ -250,7 +247,7 @@ async function renderPosts(posts) {
     commentBtn.addEventListener('click', async ()=> {
       const txt = commentInput.value.trim();
       if (!txt) return;
-      const { ok } = await fetchJson(`${API_ROOT}/posts/${post.id}/comments`, {
+      const { ok } = await fetchJson(`/api/posts/${post.id}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: currentUser, text: txt })

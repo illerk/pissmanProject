@@ -2,11 +2,7 @@ const username = document.getElementById("username");
 const password = document.getElementById("password");
 const status = document.getElementById("status");
 
-// compute API root based on current location and optional app base (e.g. /ManticoreNET)
-const _origin = location.origin;
-const _parts = location.pathname.split('/').filter(Boolean);
-const _appBase = (_parts.length && !_parts[0].includes('.')) ? '/' + _parts[0] : '';
-const API_ROOT = _origin + _appBase + '/api';
+const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
 
 let statusTimer = null;
 function showStatus(msg, isError = true, ttl = 4000) {

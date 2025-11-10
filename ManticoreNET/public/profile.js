@@ -1,12 +1,10 @@
 // compute base
 const BASE = location.pathname.replace(/\/[^/]*$/, '');
 
-// compute API and asset roots based on current location and optional app base (e.g. /ManticoreNET)
-const _origin = location.origin;
-const _parts = location.pathname.split('/').filter(Boolean);
-const _appBase = (_parts.length && !_parts[0].includes('.')) ? '/' + _parts[0] : '';
-const API_ROOT = _origin + _appBase + '/api';
-const ASSET_ROOT = _origin + _appBase + '/public';
+// add: explicit API root (always use this)
+const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+// add: assets root for avatars/posts (serve from /ManticoreNET/public)
+const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
 
 function resolveAsset(url) {
   if (!url) return url;
@@ -286,8 +284,7 @@ async function renderPosts(posts) {
     up.addEventListener("click", async () => {
       const container = postsList;
       const prev = container.scrollTop;
-      // use absolute API_ROOT URL to avoid prefix/path mismatches
-      const { ok, data } = await fetchJson(`${API_ROOT}/posts/${post.id}/vote`, {
+      const { ok, data } = await fetchJson(`/api/posts/${post.id}/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: currentUser, vote: 1 })
@@ -302,16 +299,11 @@ async function renderPosts(posts) {
     down.addEventListener("click", async () => {
       const container = postsList;
       const prev = container.scrollTop;
-      const { ok, data } = await fetchJson(`${API_ROOT}/posts/${post.id}/vote`, {
+      const { ok, data } = await fetchJson(`/api/posts/${post.id}/vote`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: currentUser, vote: -1 })
       });
-      if (ok && data.success) {
-        post.votes = data.votes;
-        count.textContent = (post.votes||[]).reduce((s,v)=>s+Number(v.vote),0);
-        await loadPosts(viewingUser, { preserveScroll:true });
-        container.scrollTop = prev;
-      }
+      if (ok && data.success) { post.votes = data.votes; count.textContent = (post.votes||[]).reduce((s,v)=>s+Number(v.vote),0); await loadPosts(viewingUser, { preserveScroll:true }); container.scrollTop = prev; }
     });
 
     actions.appendChild(up); actions.appendChild(count); actions.appendChild(down);
@@ -362,14 +354,14 @@ async function renderPosts(posts) {
       const ccount = document.createElement("span"); ccount.textContent = (c.votes||[]).reduce((s,v)=>s+Number(v.vote),0);
 
       cup.addEventListener("click", async () => {
-        const { ok } = await fetchJson(`${API_ROOT}/comments/${c.id}/vote`, {
+        const { ok } = await fetchJson(`/api/comments/${c.id}/vote`, {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username: currentUser, vote: 1 })
         });
         if (ok) await loadPosts(viewingUser);
       });
       cdown.addEventListener("click", async () => {
-        const { ok } = await fetchJson(`${API_ROOT}/comments/${c.id}/vote`, {
+        const { ok } = await fetchJson(`/api/comments/${c.id}/vote`, {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username: currentUser, vote: -1 })
         });
@@ -390,7 +382,7 @@ async function renderPosts(posts) {
     commentBtn.addEventListener("click", async () => {
       const txt = commentInput.value.trim();
       if (!txt) return;
-      const { ok } = await fetchJson(`${API_ROOT}/posts/${post.id}/comments`, {
+      const { ok } = await fetchJson(`/api/posts/${post.id}/comments`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: currentUser, text: txt })
       });
