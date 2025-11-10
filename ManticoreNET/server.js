@@ -220,7 +220,7 @@ api.post("/posts", async (req, res) => {
     text: text ?? "",
     image: null,
     createdAt: Date.now(),
-
+    likes: "" // store likes as string, not array
   };
   if (image) {
     try {
@@ -231,6 +231,76 @@ api.post("/posts", async (req, res) => {
   }
   posts.push(post);
   await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
+  res.json({ success: true, post });
+});
+
+// --- helper: parse likes string "user1:1,user2:-1" -> map {user1:1,...}
+function parseLikesString(s) {
+  const map = {};
+  if (!s) return map;
+  const parts = String(s).split(",");
+  for (const p of parts) {
+    if (!p) continue;
+    const idx = p.indexOf(":");
+    if (idx === -1) continue;
+    const user = p.slice(0, idx);
+    const val = Number(p.slice(idx+1)) || 0;
+    map[user] = val;
+  }
+  return map;
+}
+function stringifyLikesMap(map) {
+  const parts = [];
+  for (const k of Object.keys(map)) {
+    const v = map[k];
+    if (v === 0 || v === null || typeof v === 'undefined') continue;
+    parts.push(`${k}:${v}`);
+  }
+  return parts.join(",");
+}
+
+// normalize likes when returning posts by user
+api.get("/posts/:username", async (req, res) => {
+  const { username } = req.params;
+  const posts = await fs.readJson(POSTS_FILE);
+  const normalized = (Array.isArray(posts) ? posts : []).map(p => ({ ...p, likes: p.likes ?? "" }));
+  const userPosts = normalized.filter(p => p.username === username).sort((a,b)=>b.createdAt-a.createdAt);
+  res.json({ success: true, posts: userPosts });
+});
+
+
+// normalize likes when returning all posts
+api.get("/posts", async (req, res) => {
+  const posts = await fs.readJson(POSTS_FILE);
+  const normalized = (Array.isArray(posts) ? posts : []).map(p => ({ ...p, likes: p.likes ?? "" }));
+  const sorted = normalized.slice().sort((a, b) => b.createdAt - a.createdAt);
+  res.json({ success: true, posts: sorted });
+});
+
+// NEW: vote endpoint for posts (body: { username, vote }) where vote = 1, -1, or 0 (remove)
+api.post("/posts/:id/vote", async (req, res) => {
+  const { id } = req.params;
+  let { username, vote } = req.body;
+  if (!id) return res.status(400).json({ error: "Missing post id" });
+  if (!username) return res.status(400).json({ error: "Missing username" });
+  vote = Number(vote) || 0;
+  if (![1, -1, 0].includes(vote)) return res.status(400).json({ error: "Invalid vote" });
+
+  const posts = await fs.readJson(POSTS_FILE);
+  const idx = (Array.isArray(posts) ? posts : []).findIndex(p => p.id === id);
+  if (idx === -1) return res.status(404).json({ error: "Post not found" });
+
+  const post = posts[idx];
+  const map = parseLikesString(post.likes ?? "");
+  if (vote === 0) {
+    delete map[username];
+  } else {
+    map[username] = vote;
+  }
+  post.likes = stringifyLikesMap(map);
+  posts[idx] = post;
+  await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
+
   res.json({ success: true, post });
 });
 
