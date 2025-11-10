@@ -158,7 +158,7 @@ async function showContacts() {
     item.style.borderRadius = "6px";
 
     const img = document.createElement("img");
-    img.src = resolveAsset(u.avatar) || "default-avatar.png";
+    img.src = resolveAsset(u.avatar) || "default-avatar.jpg";
     img.style.width = "56px";
     img.style.height = "56px";
     img.style.objectFit = "cover";
@@ -451,6 +451,16 @@ async function loadProfile(username = currentUser) {
   if (typeof currentProfile.bio === "undefined") currentProfile.bio = "";
   renderBio(currentProfile.bio);
   setEditMode(false);
+
+  // hide edit UI for non-owners
+  if (!isOwn) {
+    editBtn.style.display = "none";
+    uploadBtn.style.display = "none";
+    saveBtn.style.display = "none";
+  } else {
+    // ensure edit button visible for owner (setEditMode already set upload/save)
+    editBtn.style.display = "";
+  }
 
   // load posts for this user
   await loadPosts(viewingUser);
