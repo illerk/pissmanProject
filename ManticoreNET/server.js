@@ -26,8 +26,6 @@ app.use((req, res, next) => {
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
-// NEW: normalize proxied requests that may include a prefix or '/public' segment.
-// This handles requests coming from nginx proxy (e.g. /ManticoreNET/api/... or /ManticoreNET/public/...)
 app.use((req, res, next) => {
 	// If URL contains /api/ somewhere later, strip everything before it so routes mounted at /api/... match.
 	const apiIndex = req.url.indexOf("/api/");
@@ -194,10 +192,13 @@ api.get("/users", async (req, res) => {
 });
 
 
-api.get("/posts/:username", async (req, res) => {
+
+
+api.get("/posts/user/:username", async (req, res) => {
   const { username } = req.params;
   const posts = await fs.readJson(POSTS_FILE);
-  const userPosts = posts.filter(p => p.username === username).sort((a,b)=>b.createdAt-a.createdAt);
+  const userPosts = posts.filter(p => p.username === username)
+                        .sort((a, b) => b.createdAt - a.createdAt);
   res.json({ success: true, posts: userPosts });
 });
 
@@ -247,7 +248,7 @@ api.delete("/posts/:id", async (req, res) => {
   res.json({ success: true });
 });
 
-api.post("/posts/:id/votes", async (req, res) => {
+api.post("/posts/:id/vote", async (req, res) => {
   const { id } = req.params;
   const { username, vote } = req.body;
   if (!username || ![1,-1].includes(Number(vote))) return res.status(400).json({ error: "Invalid input" });
@@ -280,8 +281,7 @@ api.post("/posts/:id/comments", async (req, res) => {
   res.json({ success: true, comment });
 });
 
-// голос по комменту (body: username, vote)
-api.post("/comments/:id/votes", async (req, res) => {
+api.post("/comments/:id/vote", async (req, res) => {
   const { id } = req.params;
   const { username, vote } = req.body;
   if (!username || ![1,-1].includes(Number(vote))) return res.status(400).json({ error: "Invalid input" });
@@ -302,7 +302,6 @@ api.post("/comments/:id/votes", async (req, res) => {
   if (!found) return res.status(404).json({ error: "Comment not found" });
 });
 
-// получить все посты (лента)
 api.get("/posts", async (req, res) => {
   const posts = await fs.readJson(POSTS_FILE);
   // newest first

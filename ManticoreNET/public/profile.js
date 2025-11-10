@@ -184,30 +184,25 @@ async function showContacts() {
 
 // load posts for a user
 async function loadPosts(username, options = { preserveScroll: true }) {
-  // preserve scroll position if requested
   const container = postsList;
   const prevScroll = options.preserveScroll ? container.scrollTop : 0;
   postsList.innerHTML = "Loading posts...";
 
   try {
-    // load all posts (feed) then filter to this user's posts
-    const { ok, data } = await fetchJson(`${API_ROOT}/posts`);
+    // Используем новый endpoint для получения постов пользователя
+    const { ok, data } = await fetchJson(`/api/posts/user/${encodeURIComponent(username)}`);
     if (!ok || !data || !Array.isArray(data.posts)) {
       postsList.innerHTML = `<div style="color:#f66">Failed to load posts</div>`;
       return;
     }
-    // filter posts that belong to the requested username
-    const userPosts = data.posts.filter(p => String(p.username) === String(username))
-                               .sort((a,b) => b.createdAt - a.createdAt);
-    await renderPosts(userPosts);
+    
+    await renderPosts(data.posts);
   } catch (e) {
     postsList.innerHTML = `<div style="color:#f66">Failed to load posts</div>`;
     return;
   }
 
-  // restore scroll
   if (options.preserveScroll) {
-    // small timeout to ensure DOM layout applied
     setTimeout(() => { container.scrollTop = prevScroll; }, 0);
   }
 }
