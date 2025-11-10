@@ -235,7 +235,8 @@ api.post("/posts", async (req, res) => {
     text: text ?? "",
     image: null,
     createdAt: Date.now(),
-    votesBy: {} // <--- initialize votes mapping username -> 1|-1
+    votesBy: {}, // <--- initialize votes mapping username -> 1|-1
+    score: 0     // <--- initialize score
   };
   if (image) {
     try {
@@ -305,6 +306,35 @@ api.get("/posts", async (req, res) => {
   // newest first
   const sorted = posts.slice().sort((a, b) => b.createdAt - a.createdAt);
   res.json({ success: true, posts: sorted });
+});
+
+// --- NEW: vote endpoint ---
+api.post("/posts/:id/vote", async (req, res) => {
+  const { id } = req.params;
+  const { username, vote } = req.body;
+  if (!id) return res.status(400).json({ error: "Missing post id" });
+  if (!username) return res.status(400).json({ error: "Missing username" });
+  const v = Number(vote);
+  if (![ -1, 0, 1 ].includes(v)) return res.status(400).json({ error: "Invalid vote value" });
+
+  const posts = await fs.readJson(POSTS_FILE);
+  const idx = (Array.isArray(posts) ? posts : []).findIndex(p => p.id === id);
+  if (idx === -1) return res.status(404).json({ error: "Post not found" });
+
+  posts[idx].votesBy = posts[idx].votesBy ?? {};
+  if (v === 0) {
+    if (Object.prototype.hasOwnProperty.call(posts[idx].votesBy, username)) {
+      delete posts[idx].votesBy[username];
+    }
+  } else {
+    posts[idx].votesBy[username] = v;
+  }
+
+  posts[idx].score = Object.values(posts[idx].votesBy || {}).reduce((s, x) => s + Number(x || 0), 0);
+
+  await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
+
+  res.json({ success: true, post: posts[idx] });
 });
 
 // helper: conversation key
