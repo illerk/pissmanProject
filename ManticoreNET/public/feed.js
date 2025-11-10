@@ -15,9 +15,7 @@ const basePath = location.pathname.replace(/\/[^/]*$/, '');
 const proto = location.protocol === "https:" ? "wss" : "ws";
 const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
-// add: explicit API root
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
-// add: assets root for avatars/posts (serve from /ManticoreNET/public)
 const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
 function resolveAsset(url) {
   if (!url) return url;
@@ -26,7 +24,6 @@ function resolveAsset(url) {
   return url;
 }
 
-// unified fetch
 async function fetchJson(url, opts) {
   try {
     let full;
@@ -297,7 +294,6 @@ if (navProfile) navProfile.addEventListener('click', ()=> window.location.href='
 const navContacts = document.getElementById('nav-contacts');
 if (navContacts) navContacts.addEventListener('click', ()=> window.location.href='profile.html#contacts');
 
-// ensure nav->messages works from feed page
 const navMessages = document.getElementById('nav-messages');
 if (navMessages) navMessages.addEventListener('click', () => {
   if (!localStorage.getItem('currentUser')) return window.location.href = 'index.html';
@@ -306,7 +302,6 @@ if (navMessages) navMessages.addEventListener('click', () => {
 
 loadFeed();
 
-// ensure overlay references and allow closing full-screen preview
 const overlay = document.getElementById('overlay');
 const overlayImg = document.getElementById('overlayImg');
 if (overlay) {

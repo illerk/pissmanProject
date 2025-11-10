@@ -228,6 +228,11 @@ body.logged-in .sidebar {
   color: #fff;
 }
 
+textarea {
+  resize: none !important;
+  overflow: auto;
+}
+
 #composer input[type="file"] {
   background: transparent;
   color: #fff;
