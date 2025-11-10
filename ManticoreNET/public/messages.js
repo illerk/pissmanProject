@@ -49,22 +49,24 @@ ws.addEventListener("message", (ev) => {
   }
 });
 
-// add: explicit API root
-const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
-// add: assets root for avatars/posts (serve from /ManticoreNET/public)
-const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
+// add: compute app base & dynamic roots
+const APP_BASE = (location.pathname.match(/^\/[^/]+/) || [""])[0];
+const API_ROOT = location.origin + APP_BASE + "/api";
+const ASSET_ROOT = location.origin + APP_BASE + "/public";
+
 function resolveAsset(url) {
-  if (!url) return url;
+  if (!url) return null;
   if (/^(https?:|data:)/.test(url)) return url;
   if (url.startsWith("/")) return ASSET_ROOT + url;
-  return url;
+  return ASSET_ROOT + "/" + url;
 }
 
 // unified fetch that resolves relative to current page (preserves sub-path)
 async function fetchJson(url, opts) {
   try {
     let full;
-    if (/^https?:\/\//.test(url)) full = url;
+    if (typeof url === "string" && url.startsWith(API_ROOT)) full = url;
+    else if (/^https?:\/\//.test(url)) full = url;
     else if (url.startsWith("/api/")) full = API_ROOT + url.slice(4);
     else if (url.startsWith("api/")) full = API_ROOT + url.slice(3);
     else full = new URL(url, location.href).href;
@@ -73,18 +75,17 @@ async function fetchJson(url, opts) {
   } catch (e) { return { ok: false, data: null }; }
 }
 
-// add: cache for user profiles/avatars
-const userCache = {};
+// getUserAvatar: return resolved default-avatar when no avatar available
 async function getUserAvatar(username) {
-  if (!username) return "default-avatar.png";
-  if (userCache[username]) return userCache[username].avatar || "default-avatar.png";
+  if (!username) return resolveAsset('/default-avatar.png');
+  if (userCache[username]) return userCache[username].avatar || resolveAsset('/default-avatar.png');
   const { ok, data } = await fetchJson(`/api/user/${encodeURIComponent(username)}`);
   if (ok && data && data.success) {
     userCache[username] = data.profile;
     if (userCache[username].avatar) userCache[username].avatar = resolveAsset(userCache[username].avatar);
-    return userCache[username].avatar || "default-avatar.png";
+    return userCache[username].avatar || resolveAsset('/default-avatar.png');
   }
-  return "default-avatar.png";
+  return resolveAsset('/default-avatar.png');
 }
 
 // add: client-side unread map and DOM references

@@ -15,22 +15,24 @@ const basePath = location.pathname.replace(/\/[^/]*$/, '');
 const proto = location.protocol === "https:" ? "wss" : "ws";
 const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
-// add: explicit API root
-const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
-// add: assets root for avatars/posts (serve from /ManticoreNET/public)
-const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
+// compute app base & dynamic roots
+const APP_BASE = (location.pathname.match(/^\/[^/]+/) || [""])[0];
+const API_ROOT = location.origin + APP_BASE + "/api";
+const ASSET_ROOT = location.origin + APP_BASE + "/public";
+
 function resolveAsset(url) {
-  if (!url) return url;
+  if (!url) return null;
   if (/^(https?:|data:)/.test(url)) return url;
   if (url.startsWith("/")) return ASSET_ROOT + url;
-  return url;
+  return ASSET_ROOT + "/" + url;
 }
 
 // unified fetch
 async function fetchJson(url, opts) {
   try {
     let full;
-    if (/^https?:\/\//.test(url)) full = url;
+    if (typeof url === "string" && url.startsWith(API_ROOT)) full = url;
+    else if (/^https?:\/\//.test(url)) full = url;
     else if (url.startsWith("/api/")) full = API_ROOT + url.slice(4);
     else if (url.startsWith("api/")) full = API_ROOT + url.slice(3);
     else full = new URL(url, location.href).href;
@@ -97,7 +99,7 @@ async function renderPosts(posts) {
     left.style.gap = '8px';
 
     const authorImg = document.createElement('img');
-    authorImg.src = resolveAsset(author?.avatar) || 'default-avatar.png';
+    authorImg.src = resolveAsset(author?.avatar) || resolveAsset('/default-avatar.png');
     authorImg.style.width = '36px';
     authorImg.style.height = '36px';
     authorImg.style.objectFit = 'cover';

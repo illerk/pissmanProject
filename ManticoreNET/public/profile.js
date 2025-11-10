@@ -1,16 +1,14 @@
-// compute base
-const BASE = location.pathname.replace(/\/[^/]*$/, '');
-
-// add: explicit API root (always use this)
-const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
-// add: assets root for avatars/posts (serve from /ManticoreNET/public)
-const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
+// compute app base from current path (e.g. "/ManticoreNET" or "" -> "")
+const APP_BASE = (location.pathname.match(/^\/[^/]+/) || [""])[0]; // "/ManticoreNET" or ""
+const API_ROOT = location.origin + APP_BASE + "/api";
+const ASSET_ROOT = location.origin + APP_BASE + "/public";
 
 function resolveAsset(url) {
-  if (!url) return url;
+  if (!url) return null;
   if (/^(https?:|data:)/.test(url)) return url;
+  // url may be "/path/..." or "path/file"
   if (url.startsWith("/")) return ASSET_ROOT + url;
-  return url;
+  return ASSET_ROOT + "/" + url;
 }
 
 const currentUser = localStorage.getItem("currentUser");
@@ -79,12 +77,19 @@ function showStatus(msg, isError = true, ttl = 4000) {
 // unified fetch that resolves relative to current page (preserves sub-path)
 async function fetchJson(url, opts) {
   try {
-    // resolve to API_ROOT when requesting API paths
+    // prefer already-absolute URLs
     let full;
-    if (/^https?:\/\//.test(url)) full = url;
-    else if (url.startsWith("/api/")) full = API_ROOT + url.slice(4);
-    else if (url.startsWith("api/")) full = API_ROOT + url.slice(3);
-    else full = new URL(url, location.href).href;
+    if (typeof url === "string" && url.startsWith(API_ROOT)) {
+      full = url;
+    } else if (/^https?:\/\//.test(url)) {
+      full = url;
+    } else if (url.startsWith("/api/")) {
+      full = API_ROOT + url.slice(4);
+    } else if (url.startsWith("api/")) {
+      full = API_ROOT + url.slice(3);
+    } else {
+      full = new URL(url, location.href).href;
+    }
     const res = await fetch(full, opts);
     const data = await res.json();
     return { ok: res.ok, data };
@@ -157,7 +162,7 @@ async function showContacts() {
     item.style.borderRadius = "6px";
 
     const img = document.createElement("img");
-    img.src = resolveAsset(u.avatar) || "default-avatar.png";
+    img.src = resolveAsset(u.avatar) || resolveAsset('/default-avatar.png');
     img.style.width = "56px";
     img.style.height = "56px";
     img.style.objectFit = "cover";
@@ -238,7 +243,7 @@ async function renderPosts(posts) {
     left.style.gap = "8px";
 
     const authorImg = document.createElement("img");
-    authorImg.src = (author && author.avatar) ? author.avatar : "default-avatar.png";
+    authorImg.src = (author && author.avatar) ? author.avatar : resolveAsset('/default-avatar.png');
     authorImg.style.width = "36px";
     authorImg.style.height = "36px";
     authorImg.style.objectFit = "cover";
@@ -431,7 +436,7 @@ async function loadCommentsForPost(postId, container) {
     row.style.gap = "8px";
     row.style.alignItems = "flex-start";
     const avatar = document.createElement("img");
-    avatar.src = resolveAsset((userCache[c.username] && userCache[c.username].avatar) ? userCache[c.username].avatar : `/default-avatar.png`);
+    avatar.src = resolveAsset((userCache[c.username] && userCache[c.username].avatar) ? userCache[c.username].avatar : '/default-avatar.png');
     avatar.style.width = "28px";
     avatar.style.height = "28px";
     avatar.style.borderRadius = "6px";
@@ -469,7 +474,7 @@ async function loadProfile(username = currentUser) {
     return;
   }
   currentProfile = data.profile;
-  avatarEl.src = resolveAsset(currentProfile.avatar) || "default-avatar.png";
+  avatarEl.src = resolveAsset(currentProfile.avatar) || resolveAsset('/default-avatar.png');
   ageText.textContent = currentProfile.age ?? "—";
   genderText.textContent = currentProfile.gender ?? "—";
   // ensure bio exists

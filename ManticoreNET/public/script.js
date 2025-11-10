@@ -2,7 +2,9 @@ const username = document.getElementById("username");
 const password = document.getElementById("password");
 const status = document.getElementById("status");
 
-const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+// derive API_ROOT dynamically from current location (supports subpath like /ManticoreNET)
+const APP_BASE = (location.pathname.match(/^\/[^/]+/) || [""])[0];
+const API_ROOT = location.origin + APP_BASE + "/api";
 
 let statusTimer = null;
 function showStatus(msg, isError = true, ttl = 4000) {
@@ -24,6 +26,7 @@ function showStatus(msg, isError = true, ttl = 4000) {
 function buildApiUrl(url) {
   if (!url) return url;
   if (/^https?:\/\//.test(url)) return url;
+  if (typeof url === "string" && url.startsWith(API_ROOT)) return url;
   if (url.startsWith("/api/")) return API_ROOT + url.slice(4); // "/api/foo" -> API_ROOT + "/foo"
   if (url.startsWith("api/")) return API_ROOT + url.slice(3);  // "api/foo" -> API_ROOT + "/foo"
   return url;
