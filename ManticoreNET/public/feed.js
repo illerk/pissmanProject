@@ -15,10 +15,13 @@ const basePath = location.pathname.replace(/\/[^/]*$/, '');
 const proto = location.protocol === "https:" ? "wss" : "ws";
 const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
-// add: explicit API root
-const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
-// add: assets root for avatars/posts (serve from /ManticoreNET/public)
-const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
+// compute API and asset roots based on current location and optional app base (e.g. /ManticoreNET)
+const _origin = location.origin;
+const _parts = location.pathname.split('/').filter(Boolean);
+const _appBase = (_parts.length && !_parts[0].includes('.')) ? '/' + _parts[0] : '';
+const API_ROOT = _origin + _appBase + '/api';
+const ASSET_ROOT = _origin + _appBase + '/public';
+
 function resolveAsset(url) {
   if (!url) return url;
   if (/^(https?:|data:)/.test(url)) return url;
