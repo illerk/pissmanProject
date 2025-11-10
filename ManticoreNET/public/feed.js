@@ -17,8 +17,8 @@ const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
 // add: explicit API root
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
-// add: assets root for avatars/posts
-const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET";
+// add: assets root for avatars/posts (serve from /ManticoreNET/public)
+const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
 function resolveAsset(url) {
   if (!url) return url;
   if (/^(https?:|data:)/.test(url)) return url;
@@ -53,7 +53,12 @@ async function getUserProfile(username) {
   if (!username) return null;
   if (userCache[username]) return userCache[username];
   const r = await fetchJson(`/api/user/${encodeURIComponent(username)}`);
-  if (r.ok && r.data.success) { userCache[username] = r.data.profile; return r.data.profile; }
+  if (r.ok && r.data.success) {
+    const prof = r.data.profile;
+    if (prof && prof.avatar) prof.avatar = resolveAsset(prof.avatar);
+    userCache[username] = prof;
+    return prof;
+  }
   return null;
 }
 

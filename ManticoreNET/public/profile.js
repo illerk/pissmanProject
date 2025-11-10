@@ -3,8 +3,8 @@ const BASE = location.pathname.replace(/\/[^/]*$/, '');
 
 // add: explicit API root (always use this)
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
-// add: assets root for avatars/posts
-const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET";
+// add: assets root for avatars/posts (serve from /ManticoreNET/public)
+const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
 
 function resolveAsset(url) {
   if (!url) return url;
