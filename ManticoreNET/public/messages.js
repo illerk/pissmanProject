@@ -55,7 +55,7 @@ ws.addEventListener("message", (ev) => {
 // add: explicit API root
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
 // add: assets root for avatars/posts (serve from /ManticoreNET/public)
-const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
+const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET";
 function resolveAsset(url) {
   if (!url) return url;
   if (/^(https?:|data:)/.test(url)) return url;
