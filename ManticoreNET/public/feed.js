@@ -174,24 +174,32 @@ async function renderPosts(posts) {
         } catch (e) {
           commentsToggle.textContent = 'Hide comments';
         }
-        if (currentUser) {
-          if (!commentsSection.querySelector('.comment-composer')) {
-            const composer = document.createElement('div');
-            composer.className = 'comment-composer';
-            composer.style.display = 'flex';
-            composer.style.gap = '8px';
-            composer.style.marginTop = '8px';
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = 'Write a comment...';
-            input.style.flex = '1';
-            input.style.background = 'transparent';
-            input.style.border = '1px solid rgba(255,255,255,0.06)';
-            input.style.color = '#fff';
-            input.style.padding = '6px';
-            input.style.borderRadius = '6px';
-            const btn = document.createElement('button');
-            btn.textContent = 'Comment';
+        // ensure composer exists; disable for guests
+        if (!commentsSection.querySelector('.comment-composer')) {
+          const composer = document.createElement('div');
+          composer.className = 'comment-composer';
+          composer.style.display = 'flex';
+          composer.style.gap = '8px';
+          composer.style.marginTop = '8px';
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.placeholder = 'Write a comment...';
+          input.style.flex = '1';
+          input.style.background = 'transparent';
+          input.style.border = '1px solid rgba(255,255,255,0.06)';
+          input.style.color = '#fff';
+          input.style.padding = '6px';
+          input.style.borderRadius = '6px';
+          const btn = document.createElement('button');
+          btn.textContent = 'Comment';
+
+          const isGuest = (currentUser === GUEST_ID);
+          if (isGuest) {
+            input.disabled = true;
+            input.placeholder = "Guests cannot comment";
+            btn.disabled = true;
+            btn.title = "Log in to comment";
+          } else {
             btn.addEventListener('click', async () => {
               const txt = input.value.trim();
               if (!txt) return;
@@ -203,7 +211,6 @@ async function renderPosts(posts) {
               if (ok) {
                 input.value = '';
                 await loadCommentsForPost(post.id, commentsList);
-                // refresh count and update toggle text
                 try {
                   const cc3 = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`);
                   const newCount = (cc3.ok && cc3.data && Array.isArray(cc3.data.comments)) ? cc3.data.comments.length : 0;
@@ -215,10 +222,11 @@ async function renderPosts(posts) {
                 console.warn('Failed to post comment');
               }
             });
-            composer.appendChild(input);
-            composer.appendChild(btn);
-            commentsSection.appendChild(composer);
           }
+
+          composer.appendChild(input);
+          composer.appendChild(btn);
+          commentsSection.appendChild(composer);
         }
         commentsToggle.textContent = commentsToggle.textContent || 'Hide comments';
         commentsSection.style.display = '';
