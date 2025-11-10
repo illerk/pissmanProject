@@ -262,8 +262,12 @@ async function loadCommentsForPost(postId, container) {
     row.style.display = 'flex';
     row.style.gap = '8px';
     row.style.alignItems = 'flex-start';
+
+    // load author's profile (getUserProfile resolves avatar via resolveAsset)
+    const prof = await getUserProfile(c.username);
     const avatar = document.createElement('img');
-    avatar.src = resolveAsset('/default-avatar.png');
+    avatar.src = (prof && prof.avatar) ? prof.avatar : resolveAsset('/default-avatar.png');
+
     avatar.style.width = '28px';
     avatar.style.height = '28px';
     avatar.style.borderRadius = '6px';

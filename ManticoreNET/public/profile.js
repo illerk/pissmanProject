@@ -3,8 +3,8 @@ const BASE = location.pathname.replace(/\/[^/]*$/, '');
 
 // add: explicit API root (always use this)
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
-// add: assets root for avatars/posts (serve from /ManticoreNET/public)
-const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
+// add: assets root for avatars/posts (serve from app base)
+const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET";
 const GUEST_ID = "__guest__";
 
 function resolveAsset(url) {
@@ -407,8 +407,12 @@ async function loadCommentsForPost(postId, container) {
     row.style.display = "flex";
     row.style.gap = "8px";
     row.style.alignItems = "flex-start";
+
+    // try to load the author's profile (getUserProfile resolves avatar via resolveAsset)
+    const prof = await getUserProfile(c.username);
     const avatar = document.createElement("img");
-    avatar.src = resolveAsset((userCache[c.username] && userCache[c.username].avatar) ? userCache[c.username].avatar : `/default-avatar.png`);
+    avatar.src = (prof && prof.avatar) ? prof.avatar : resolveAsset('/default-avatar.png');
+
     avatar.style.width = "28px";
     avatar.style.height = "28px";
     avatar.style.borderRadius = "6px";
