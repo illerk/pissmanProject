@@ -16,7 +16,7 @@ const USERS_FILE = path.join(__dirname, "users.json");
 const POSTS_FILE = path.join(__dirname, "posts.json");
 const MESSAGES_FILE = path.join(__dirname, "messages.json");
 const BASE_PATH = process.env.BASE_PATH || ""; 
-const API_BASE = (BASE_PATH === "/") ? "/api" : (BASE_PATH + "/api");
+const API_BASE = (BASE_PATH === "/") ? "/api" : (BASE_PATH + "ManticoreNET/api");
 
 
 app.use(bodyParser.json({ limit: "50mb" }));
@@ -26,7 +26,7 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 // This handles requests coming from nginx proxy (e.g. /ManticoreNET/api/... or /ManticoreNET/public/...)
 app.use((req, res, next) => {
 	// If URL contains /api/ somewhere later, strip everything before it so routes mounted at /api/... match.
-	const apiIndex = req.url.indexOf("/api/");
+	const apiIndex = req.url.indexOf("ManticoreNET/api/");
 	if (apiIndex > 0) {
 		req.url = req.url.slice(apiIndex);
 		return next();
@@ -42,7 +42,7 @@ app.use((req, res, next) => {
 	if (m) {
 		// only strip when the remaining path looks like an app path (e.g. starts with /api/ or /avatars/ or /index.html or /profile.html)
 		const rest = m[1] || "/";
-		if (rest.startsWith("/api/") || rest.startsWith("/avatars/") || rest.startsWith("/posts/") ||
+		if (rest.startsWith("ManticoreNET/api/") || rest.startsWith("/avatars/") || rest.startsWith("/posts/") ||
 			rest === "/" || rest.endsWith(".html") || rest.endsWith(".css") || rest.endsWith(".js")) {
 			req.url = rest;
 		}
