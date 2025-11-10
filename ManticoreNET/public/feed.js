@@ -132,136 +132,120 @@ async function renderPosts(posts) {
     actions.style.gap = '8px';
     actions.style.marginTop = '10px';
 
-    // vote area
-    const voteArea = document.createElement('div');
-    voteArea.className = 'vote-area';
-    const upBtn = document.createElement('button'); upBtn.className = 'vote-btn up'; upBtn.textContent = '▲';
-    const scoreEl = document.createElement('div'); scoreEl.className = 'vote-score'; scoreEl.textContent = post.score || 0;
-    const downBtn = document.createElement('button'); downBtn.className = 'vote-btn down'; downBtn.textContent = '▼';
-    voteArea.appendChild(upBtn); voteArea.appendChild(scoreEl); voteArea.appendChild(downBtn);
-    actions.appendChild(voteArea);
+    // --- NEW: vote controls ---
+    const voteWrap = document.createElement('div');
+    voteWrap.style.display = 'flex';
+    voteWrap.style.alignItems = 'center';
+    voteWrap.style.gap = '6px';
 
-    // comments toggle
-    const commentsToggle = document.createElement('button');
-    commentsToggle.className = 'comments-toggle';
-    commentsToggle.textContent = 'Показать комментарии';
-    actions.appendChild(commentsToggle);
+    const upBtn = document.createElement('button');
+    upBtn.textContent = '↑';
+    upBtn.className = 'vote-btn';
+    const scoreEl = document.createElement('div');
+    scoreEl.textContent = (post.score ?? Object.values(post.votesBy || {}).reduce((s,x)=>s+Number(x||0),0)) || '0';
+    scoreEl.style.minWidth = '28px';
+    scoreEl.style.textAlign = 'center';
+    const downBtn = document.createElement('button');
+    downBtn.textContent = '↓';
+    downBtn.className = 'vote-btn';
+
+    const myVote = (post.votesBy && post.votesBy[currentUser]) ? Number(post.votesBy[currentUser]) : 0;
+    if (myVote === 1) upBtn.classList.add('active');
+    if (myVote === -1) downBtn.classList.add('active');
+
+    async function votePost(v) {
+      const wanted = (myVote === v) ? 0 : v;
+      const { ok, data } = await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUser, vote: wanted })
+      });
+      if (!ok || !data.post) { console.warn('Vote failed'); return; }
+      post.votesBy = data.post.votesBy || {};
+      post.score = data.post.score ?? Object.values(post.votesBy).reduce((s,x)=>s+Number(x||0),0);
+      scoreEl.textContent = post.score;
+      upBtn.classList.toggle('active', (post.votesBy[currentUser] === 1));
+      downBtn.classList.toggle('active', (post.votesBy[currentUser] === -1));
+    }
+
+    upBtn.addEventListener('click', ()=> votePost(1));
+    downBtn.addEventListener('click', ()=> votePost(-1));
+
+    voteWrap.appendChild(upBtn);
+    voteWrap.appendChild(scoreEl);
+    voteWrap.appendChild(downBtn);
+    actions.appendChild(voteWrap);
 
     el.appendChild(actions);
 
-    // comments section (hidden)
+    // --- NEW: comments toggle (hidden by default) ---
+    const commentsToggle = document.createElement('button');
+    commentsToggle.className = 'comments-toggle';
+    commentsToggle.style.marginTop = '8px';
+    commentsToggle.textContent = 'Show comments';
     const commentsSection = document.createElement('div');
+    commentsSection.style.display = 'none';
     commentsSection.style.marginTop = '10px';
     commentsSection.style.borderTop = '1px solid rgba(255,255,255,0.03)';
     commentsSection.style.paddingTop = '10px';
-    commentsSection.style.display = 'none';
     const commentsList = document.createElement('div');
     commentsList.style.display = 'flex';
     commentsList.style.flexDirection = 'column';
     commentsList.style.gap = '6px';
-    commentsList.innerHTML = 'Loading comments...';
     commentsSection.appendChild(commentsList);
 
-    if (currentUser) {
-      const composer = document.createElement('div');
-      composer.style.display = 'flex';
-      composer.style.gap = '8px';
-      composer.style.marginTop = '8px';
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = 'Write a comment...';
-      input.style.flex = '1';
-      input.style.background = 'transparent';
-      input.style.border = '1px solid rgba(255,255,255,0.06)';
-      input.style.color = '#fff';
-      input.style.padding = '6px';
-      input.style.borderRadius = '6px';
-      const btn = document.createElement('button');
-      btn.textContent = 'Comment';
-      btn.addEventListener('click', async () => {
-        const txt = input.value.trim();
-        if (!txt) return;
-        const { ok } = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: currentUser, text: txt })
-        });
-        if (ok) {
-          input.value = '';
-          if (commentsSection.style.display !== 'none') await loadCommentsForPost(post.id, commentsList);
-        } else {
-          console.warn('Failed to post comment');
+    commentsToggle.addEventListener('click', async () => {
+      const opening = commentsSection.style.display === 'none';
+      if (opening) {
+        await loadCommentsForPost(post.id, commentsList);
+        if (currentUser) {
+          const composer = document.createElement('div');
+          composer.style.display = 'flex';
+          composer.style.gap = '8px';
+          composer.style.marginTop = '8px';
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.placeholder = 'Write a comment...';
+          input.style.flex = '1';
+          input.style.background = 'transparent';
+          input.style.border = '1px solid rgba(255,255,255,0.06)';
+          input.style.color = '#fff';
+          input.style.padding = '6px';
+          input.style.borderRadius = '6px';
+          const btn = document.createElement('button');
+          btn.textContent = 'Comment';
+          btn.addEventListener('click', async () => {
+            const txt = input.value.trim();
+            if (!txt) return;
+            const { ok } = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username: currentUser, text: txt })
+            });
+            if (ok) {
+              input.value = '';
+              await loadCommentsForPost(post.id, commentsList);
+            } else {
+              console.warn('Failed to post comment');
+            }
+          });
+          composer.appendChild(input);
+          composer.appendChild(btn);
+          commentsSection.appendChild(composer);
         }
-      });
-      composer.appendChild(input);
-      composer.appendChild(btn);
-      commentsSection.appendChild(composer);
-    }
+        commentsToggle.textContent = 'Hide comments';
+        commentsSection.style.display = '';
+      } else {
+        commentsSection.style.display = 'none';
+        commentsToggle.textContent = 'Show comments';
+      }
+    });
 
+    el.appendChild(commentsToggle);
     el.appendChild(commentsSection);
     feedPosts.appendChild(el);
 
-    // vote handlers
-    function setVoteButtonsState(v) {
-      upBtn.classList.toggle("active", v === 1);
-      downBtn.classList.toggle("active", v === -1);
-      scoreEl.textContent = post.score ?? 0;
-    }
-    const myVote = (post.votes && post.votes[currentUser]) ? Number(post.votes[currentUser]) : 0;
-    setVoteButtonsState(myVote);
-
-    async function sendVote(v) {
-      const body = { username: currentUser, vote: v };
-      const r = await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/vote`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
-      });
-      if (r.ok && r.data && r.data.success) {
-        post.score = r.data.score;
-        post.votes = r.data.votes || post.votes;
-        setVoteButtonsState((post.votes && post.votes[currentUser]) ? Number(post.votes[currentUser]) : 0);
-      } else {
-        console.warn('Vote failed');
-      }
-    }
-    upBtn.addEventListener('click', () => {
-      const cur = (post.votes && post.votes[currentUser]) ? Number(post.votes[currentUser]) : 0;
-      sendVote(cur === 1 ? 0 : 1);
-    });
-    downBtn.addEventListener('click', () => {
-      const cur = (post.votes && post.votes[currentUser]) ? Number(post.votes[currentUser]) : 0;
-      sendVote(cur === -1 ? 0 : -1);
-    });
-
-    // comments toggle
-    let commentsLoaded = false;
-    commentsToggle.addEventListener('click', async () => {
-      if (commentsSection.style.display === 'none') {
-        commentsSection.style.display = '';
-        commentsToggle.textContent = 'Скрыть комментарии';
-        if (!commentsLoaded) {
-          await loadCommentsForPost(post.id, commentsList);
-          commentsLoaded = true;
-        }
-      } else {
-        commentsSection.style.display = 'none';
-        commentsToggle.textContent = 'Показать комментарии';
-      }
-    });
-
-    // update button text with count
-    (async () => {
-      try {
-        const r = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`);
-        if (r.ok && r.data && Array.isArray(r.data.comments)) {
-          const n = r.data.comments.length;
-          commentsToggle.textContent = n ? `Показать комментарии (${n})` : "Показать комментарии";
-        }
-      } catch(e) {}
-    })();
-
-    // ...existing code...
-    // await loadCommentsForPost(post.id, commentsList); // remove this line so comments are not auto-loaded
-    // but since we added comments hidden, ensure we do NOT auto-load here; remove or comment out line above in original file
+    // do not auto-load comments
   }
 }
 
