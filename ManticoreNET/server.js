@@ -383,6 +383,12 @@ app.get("/api/unread/:username", async (req, res) => {
 // after defining all api.* routes:
 app.use(API_BASE, api);
 
+// Ensure API also responds on plain "/api" so clients hitting "/api/..." (root) work
+// This makes the server tolerant to requests that don't include the app base path.
+if (API_BASE !== "/api") {
+  app.use("/api", api);
+}
+
 // adjust WebSocket server to listen on path `${BASE_PATH}/ws`
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: (BASE_PATH || "") + "/ws" });
