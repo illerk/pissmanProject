@@ -247,100 +247,23 @@ api.delete("/posts/:id", async (req, res) => {
   res.json({ success: true });
 });
 
-// Helper: normalize votes storage for an entity (post or comment).
-// Supports old format "votes" array [{username, vote}] and new in-memory map "votesMap".
-// After calling, entity.votesMap will be present. When persisting, we convert back to array.
-function ensureVotesMap(entity) {
-  if (!entity) return;
-  if (!entity.votesMap) {
-    entity.votesMap = {};
-    if (Array.isArray(entity.votes)) {
-      for (const v of entity.votes) {
-        try { entity.votesMap[String(v.username)] = Number(v.vote) || 0; } catch(e) {}
-      }
-    }
-  }
-}
-function votesMapToArray(map) {
-  const arr = [];
-  for (const [username, vote] of Object.entries(map || {})) {
-    arr.push({ username, vote: Number(vote) });
-  }
-  return arr;
-}
-
-// Replace the posts/:id/vote handler with a robust implementation that supports both formats
-// and returns aggregate score and the current user's vote.
 api.post("/posts/:id/vote", async (req, res) => {
   const { id } = req.params;
   const { username, vote } = req.body;
-  if (!username || ![1, -1].includes(Number(vote))) return res.status(400).json({ error: "Invalid input" });
-
+  if (!username || ![1,-1].includes(Number(vote))) return res.status(400).json({ error: "Invalid input" });
   const posts = await fs.readJson(POSTS_FILE);
   const p = posts.find(x => x.id === id);
   if (!p) return res.status(404).json({ error: "Post not found" });
-
-  // ensure votesMap exists and is initialized from old array if necessary
-  ensureVotesMap(p);
-
-  const vnum = Number(vote);
-  const prev = p.votesMap[String(username)] || 0;
-  if (prev === vnum) {
-    // toggle off
-    delete p.votesMap[String(username)];
+  const existing = p.votes.find(v => v.username === username);
+  if (!existing) {
+    p.votes.push({ username, vote: Number(vote) });
+  } else if (existing.vote === Number(vote)) {
+    p.votes = p.votes.filter(v => v.username !== username);
   } else {
-    p.votesMap[String(username)] = vnum;
+    existing.vote = Number(vote);
   }
-
-  // persist back to array form for compatibility
-  p.votes = votesMapToArray(p.votesMap);
-
   await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-
-  // compute response values
-  const score = Object.values(p.votesMap || {}).reduce((s, it) => s + Number(it || 0), 0);
-  const userVote = Number(p.votesMap[String(username)] || 0);
-
-  console.log(`[vote] post=${id} by=${username} vote=${vnum} -> score=${score} userVote=${userVote}`);
-
-  res.json({ success: true, votes: p.votes, score, userVote });
-});
-
-// Replace the comments/:id/vote handler similarly
-api.post("/comments/:id/vote", async (req, res) => {
-  const { id } = req.params;
-  const { username, vote } = req.body;
-  if (!username || ![1, -1].includes(Number(vote))) return res.status(400).json({ error: "Invalid input" });
-
-  const posts = await fs.readJson(POSTS_FILE);
-  for (const p of posts) {
-    const c = p.comments.find(cm => cm.id === id);
-    if (c) {
-      // ensure votesMap on comment
-      ensureVotesMap(c);
-
-      const vnum = Number(vote);
-      const prev = c.votesMap[String(username)] || 0;
-      if (prev === vnum) {
-        delete c.votesMap[String(username)];
-      } else {
-        c.votesMap[String(username)] = vnum;
-      }
-
-      // persist back to array
-      c.votes = votesMapToArray(c.votesMap);
-
-      await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-
-      const score = Object.values(c.votesMap || {}).reduce((s, it) => s + Number(it || 0), 0);
-      const userVote = Number(c.votesMap[String(username)] || 0);
-
-      console.log(`[vote] comment=${id} post=${p.id} by=${username} vote=${vnum} -> score=${score} userVote=${userVote}`);
-
-      return res.json({ success: true, votes: c.votes, score, userVote });
-    }
-  }
-  return res.status(404).json({ error: "Comment not found" });
+  res.json({ success: true, votes: p.votes });
 });
 
 api.post("/posts/:id/comments", async (req, res) => {
@@ -356,6 +279,61 @@ api.post("/posts/:id/comments", async (req, res) => {
   await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
   res.json({ success: true, comment });
 });
+
+api.post("/comments/:id/vote", async (req, res) => {
+  const { id } = req.params;
+  const { username, vote } = req.body;
+  if (!username || ![1,-1].includes(Number(vote))) return res.status(400).json({ error: "Invalid input" });
+  const posts = await fs.readJson(POSTS_FILE);
+  let found = false;
+  for (const p of posts) {
+    const c = p.comments.find(cm => cm.id === id);
+    if (c) {
+      found = true;
+      const existing = c.votes.find(v => v.username === username);
+      if (!existing) c.votes.push({ username, vote: Number(vote) });
+      else if (existing.vote === Number(vote)) c.votes = c.votes.filter(v => v.username !== username);
+      else existing.vote = Number(vote);
+      await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
+      return res.json({ success: true, votes: c.votes });
+    }
+  }
+  if (!found) return res.status(404).json({ error: "Comment not found" });
+});
+
+api.get("/posts", async (req, res) => {
+  const posts = await fs.readJson(POSTS_FILE);
+  // newest first
+  const sorted = posts.slice().sort((a, b) => b.createdAt - a.createdAt);
+  res.json({ success: true, posts: sorted });
+});
+
+// helper: conversation key
+function convoKey(a, b) {
+  const arr = [String(a), String(b)].sort();
+  return arr.join("--");
+}
+
+// helper: save message
+async function saveMessage(a, b, message) {
+  const messages = await fs.readJson(MESSAGES_FILE);
+  const key = convoKey(a, b);
+  const convo = messages.find(m => m.key === key);
+  if (convo) {
+    convo.messages.push(message);
+  } else {
+    messages.push({ key, users: [a, b], messages: [message] });
+  }
+  await fs.writeJson(MESSAGES_FILE, messages, { spaces: 2 });
+}
+
+// helper: load conversation
+async function loadConversation(a, b) {
+  const messages = await fs.readJson(MESSAGES_FILE);
+  const key = convoKey(a, b);
+  const convo = messages.find(m => m.key === key);
+  return convo ? convo.messages : [];
+}
 
 // REST endpoint: get conversation between two users
 app.get("/api/messages/:a/:b", async (req, res) => {
@@ -414,8 +392,6 @@ app.use(API_BASE, api);
 if (API_BASE !== "/api") {
   app.use("/api", api);
 }
-// allow requests to /ManticoreNET/api to reach the same router (clients use that URL).
-app.use("/ManticoreNET/api", api);
 
 // adjust WebSocket server to listen on path `${BASE_PATH}/ws`
 const server = http.createServer(app);
