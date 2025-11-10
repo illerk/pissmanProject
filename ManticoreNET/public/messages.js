@@ -49,42 +49,14 @@ ws.addEventListener("message", (ev) => {
   }
 });
 
-// add helper to compute base path
-function getBasePath() {
-  let p = location.pathname || "/";
-  if (p === "/") return "/";
-  if (!p.endsWith("/")) {
-    if (p.includes(".")) p = p.replace(/\/[^\/]*$/, "/");
-    else p = p + "/";
-  }
-  return p;
-}
-
-// helper fetch — strip leading slashes and build absolute URL using origin + basePath
+// unified fetch that resolves relative to current page (preserves sub-path)
 async function fetchJson(url, opts) {
   try {
-    const cleaned = String(url).replace(/^\/+/, "");
-    const full = location.origin + getBasePath() + cleaned;
+    const full = new URL(url, location.href).href; // e.g. "api/users" -> "/ManticoreNET/api/users"
     const r = await fetch(full, opts);
     return { ok: r.ok, data: await r.json() };
   } catch (e) { return { ok: false, data: null }; }
 }
-
-// resolve asset path (avatars, posts) to respect subpath hosting
-function resolveAssetPath(p) {
-  if (!p) return '';
-  if (p.startsWith('http') || p.startsWith('data:')) return p;
-  const clean = String(p).replace(/^\/+/, '');
-  return location.origin + getBasePath() + clean;
-}
-
-// inline default avatar (SVG) to avoid 404
-const DEFAULT_AVATAR = "data:image/svg+xml;utf8," +
-  encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>" +
-    "<rect width='64' height='64' fill='%23222'/>" +
-    "<circle cx='32' cy='22' r='12' fill='%23ffffff' opacity='0.9'/>" +
-    "<rect x='14' y='38' width='36' height='12' rx='6' fill='%23ffffff' opacity='0.95'/>" +
-  "</svg>");
 
 // add: cache for user profiles/avatars
 const userCache = {};
@@ -98,11 +70,6 @@ async function getUserAvatar(username) {
   }
   return "default-avatar.png";
 }
-
-// deployment base prefix (always use /ManticoreNET)
-const BASE_PREFIX = "/ManticoreNET";
-
-function getBasePath() { return BASE_PREFIX.endsWith("/") ? BASE_PREFIX : BASE_PREFIX + "/"; }
 
 // add: client-side unread map and DOM references
 const unreadCounts = {}; // partner -> count
@@ -157,7 +124,7 @@ function updateMenuBadge() {
 
 // fetch unread from server and update badges
 async function refreshUnread() {
-  const { ok, data } = await fetchJson(`api/unread/${encodeURIComponent(currentUser)}`);
+  const { ok, data } = await fetchJson(`/api/unread/${encodeURIComponent(currentUser)}`);
   if (!ok || !data || !data.success) return;
   // replace unreadCounts
   Object.keys(unreadCounts).forEach(k=>delete unreadCounts[k]);
@@ -211,7 +178,7 @@ async function loadContacts() {
 // load conversation history via REST — use async loop and await appendMessage
 async function loadHistory(withUser) {
   messagesPane.innerHTML = "Loading history...";
-  const { ok, data } = await fetchJson(`api/messages/${encodeURIComponent(currentUser)}/${encodeURIComponent(withUser)}`);
+  const { ok, data } = await fetchJson(`/api/messages/${encodeURIComponent(currentUser)}/${encodeURIComponent(withUser)}`);
   if (!ok || !data.messages) { messagesPane.innerHTML = "<div style='color:#f66'>Failed to load history</div>"; return; }
   messagesPane.innerHTML = "";
   for (const m of data.messages) {
@@ -236,7 +203,6 @@ async function appendMessage(m, mine) {
 
   // get avatar for message sender
   const avatarSrc = await getUserAvatar(m.from);
-  img.src = avatarSrc ? resolveAssetPath(avatarSrc) : DEFAULT_AVATAR;
 
   const img = document.createElement("img");
   img.src = avatarSrc;
@@ -255,9 +221,7 @@ async function appendMessage(m, mine) {
     content.appendChild(txt);
   }
   if (m.image) {
-    const im = document.createElement("img");
-    im.src = resolveAssetPath(m.image);
-    im.style.maxWidth = "240px"; im.style.marginTop="6px"; im.style.borderRadius="6px"; im.style.cursor="pointer";
+    const im = document.createElement("img"); im.src = m.image; im.style.maxWidth = "240px"; im.style.marginTop="6px"; im.style.borderRadius="6px"; im.style.cursor="pointer";
     im.addEventListener("click", ()=> { overlayImg.src = im.src; overlay.classList.add("visible"); });
     content.appendChild(im);
   }

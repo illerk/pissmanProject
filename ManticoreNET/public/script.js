@@ -7,13 +7,10 @@ function showStatus(msg, isError = true) {
   status.style.color = isError ? "#f66" : "#8f8";
 }
 
-const BASE_PREFIX = "/ManticoreNET";
-function getBasePath() { return BASE_PREFIX.endsWith("/") ? BASE_PREFIX : BASE_PREFIX + "/"; }
-
 async function postJson(url, body) {
   try {
-    const cleaned = String(url).replace(/^\/+/, "");
-    const full = location.origin + getBasePath() + cleaned;
+    // build URL relative to current document location so sub-paths are preserved
+    const full = new URL(url, location.href).href;
     const res = await fetch(full, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

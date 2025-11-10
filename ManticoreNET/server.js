@@ -52,11 +52,6 @@ app.use((req, res, next) => {
 
 app.use(express.static(path.join(__dirname, "public")));
 
-// make static assets and api available when nginx proxies without rewriting the prefix
-// serve avatars/posts under any one-segment prefix (e.g. /ManticoreNET/avatars/...)
-app.use('/:prefix/avatars', express.static(path.join(__dirname, 'public', 'avatars')));
-app.use('/:prefix/posts', express.static(path.join(__dirname, 'public', 'posts')));
-app.use('/:prefix', express.static(path.join(__dirname, 'public')));
 
 const api = express.Router();
 
@@ -386,27 +381,9 @@ app.get("/api/unread/:username", async (req, res) => {
 });
 
 // after defining all api.* routes:
-// register API mounts (do this AFTER api is defined)
-app.use('/api', api);
-app.use('/:prefix/api', api);
 app.use(API_BASE, api);
 
-// added: tolerant delegator — if req.path begins with /api/ but wasn't handled by above mounts,
-// forward request to api router. This helps when proxy rewrites/paths are inconsistent.
-app.use((req, res, next) => {
-  try {
-    if (req.path && req.path.startsWith('/api/')) {
-      // useful debug line — remove or comment out in production if noisy
-      console.log('[api-delegator] forwarding', req.originalUrl);
-      return api(req, res, next);
-    }
-  } catch (e) {
-    // ignore and continue
-  }
-  next();
-});
-
-
+// adjust WebSocket server to listen on path `${BASE_PATH}/ws`
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: (BASE_PATH || "") + "/ws" });
 

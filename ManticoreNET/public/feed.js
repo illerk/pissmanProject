@@ -15,29 +15,16 @@ const basePath = location.pathname.replace(/\/[^/]*$/, '');
 const proto = location.protocol === "https:" ? "wss" : "ws";
 const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
-// use fixed base prefix for deployment under /ManticoreNET
-const BASE_PREFIX = "/ManticoreNET";
-function getBasePath() { return BASE_PREFIX.endsWith("/") ? BASE_PREFIX : BASE_PREFIX + "/"; }
-
-// unified fetch — build absolute URL using origin + BASE_PREFIX
+// unified fetch
 async function fetchJson(url, opts) {
   try {
-    const cleaned = String(url).replace(/^\/+/, "");
-    const full = location.origin + getBasePath() + cleaned;
-    const r = await fetch(full, opts);
-    const data = await r.json();
-    return { ok: r.ok, data };
+    const full = new URL(url, location.href).href;
+    const res = await fetch(full, opts);
+    const data = await res.json();
+    return { ok: res.ok, data };
   } catch (e) {
-    return { ok: false, data: { error: "Network error" } };
+    return { ok: false, data: { error: 'Network error' } };
   }
-}
-
-// resolve asset path to respect fixed deployment prefix
-function resolveAssetPath(p) {
-  if (!p) return '';
-  if (p.startsWith('http') || p.startsWith('data:')) return p;
-  const clean = String(p).replace(/^\/+/, '');
-  return location.origin + getBasePath() + clean;
 }
 
 function formatFutureDate(ts) {
@@ -93,8 +80,7 @@ async function renderPosts(posts) {
     left.style.gap = '8px';
 
     const authorImg = document.createElement('img');
-    // use resolveAssetPath if avatar exists, otherwise embedded default
-    authorImg.src = author && author.avatar ? resolveAssetPath(author.avatar) : DEFAULT_AVATAR;
+    authorImg.src = author?.avatar || 'default-avatar.png';
     authorImg.style.width = '36px';
     authorImg.style.height = '36px';
     authorImg.style.objectFit = 'cover';
@@ -114,13 +100,7 @@ async function renderPosts(posts) {
     el.appendChild(header);
 
     if (post.text) { const txt = document.createElement('div'); txt.style.marginTop='8px'; txt.textContent = post.text; el.appendChild(txt); }
-    if (post.image) {
-      const img = document.createElement('img');
-      img.src = resolveAssetPath(post.image);
-      img.style.maxWidth='100%'; img.style.marginTop='8px'; img.style.borderRadius='6px'; img.style.cursor='pointer';
-      img.addEventListener('click', ()=>{ document.getElementById('overlayImg').src = img.src; document.getElementById('overlay').classList.add('visible'); });
-      el.appendChild(img);
-    }
+    if (post.image) { const img = document.createElement('img'); img.src = post.image ? new URL(post.image, location.href).href : ''; img.style.maxWidth='100%'; img.style.marginTop='8px'; img.style.borderRadius='6px'; img.style.cursor='pointer'; img.addEventListener('click', ()=>{ document.getElementById('overlayImg').src = img.src; document.getElementById('overlay').classList.add('visible'); }); el.appendChild(img); }
 
     const actions = document.createElement('div');
     actions.style.display = 'flex';
@@ -173,12 +153,12 @@ async function renderPosts(posts) {
       const delBtn = document.createElement('button'); delBtn.textContent = 'Delete';
       delBtn.addEventListener('click', async () => {
         if (!confirm('Delete this post?')) return;
-        const { ok } = await fetchJson(`api/posts/${post.id}`, {
+        const res = await fetch(`/api/posts/${post.id}`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: currentUser })
         });
-        if (ok) await loadFeed();
+        if (res.ok) loadFeed();
       });
       actions.appendChild(delBtn);
     }
@@ -198,7 +178,7 @@ async function renderPosts(posts) {
       const cHeader = document.createElement('div'); cHeader.style.display='flex'; cHeader.style.alignItems='center'; cHeader.style.gap='8px';
       const cImg = document.createElement('img');
       const cAuthor = await getUserProfile(c.username);
-      cImg.src = (cAuthor && cAuthor.avatar) ? resolveAssetPath(cAuthor.avatar) : DEFAULT_AVATAR;
+      cImg.src = (cAuthor && cAuthor.avatar) ? cAuthor.avatar : 'default-avatar.png';
       cImg.style.width='28px'; cImg.style.height='28px'; cImg.style.objectFit='cover'; cImg.style.borderRadius='6px'; cImg.style.cursor='pointer';
       cImg.addEventListener('click', ()=> window.location.href = `profile.html?user=${encodeURIComponent(c.username)}`);
       const cMeta = document.createElement('div');
@@ -308,11 +288,3 @@ if (overlay) {
 if (overlayImg) {
   overlayImg.addEventListener('click', () => overlay.classList.remove('visible'));
 }
-
-// small inline default avatar (SVG) to avoid 404 when default file missing
-const DEFAULT_AVATAR = "data:image/svg+xml;utf8," +
-  encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>" +
-    "<rect width='64' height='64' fill='%23222'/>" +
-    "<circle cx='32' cy='22' r='12' fill='%23ffffff' opacity='0.9'/>" +
-    "<rect x='14' y='38' width='36' height='12' rx='6' fill='%23ffffff' opacity='0.95'/>" +
-  "</svg>");
