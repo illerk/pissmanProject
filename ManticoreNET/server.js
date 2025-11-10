@@ -308,9 +308,9 @@ api.get("/posts", async (req, res) => {
   res.json({ success: true, posts: sorted });
 });
 
-// --- NEW: vote endpoint ---
-api.post("/posts/:id/vote", async (req, res) => {
-  const { id } = req.params;
+// --- NEW: unified vote handler (works when mounted under /api, /:base/api and when routed via api router) ---
+async function handleVote(req, res) {
+  const id = req.params.id;
   const { username, vote } = req.body;
   if (!id) return res.status(400).json({ error: "Missing post id" });
   if (!username) return res.status(400).json({ error: "Missing username" });
@@ -335,7 +335,13 @@ api.post("/posts/:id/vote", async (req, res) => {
   await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
 
   res.json({ success: true, post: posts[idx] });
-});
+}
+
+// register on the api router (existing clients that hit API_BASE + /posts/:id/vote)
+api.post("/posts/:id/vote", handleVote);
+// also register on top-level app for common variants so requests don't 404 when a base path is present/stripped
+app.post("/api/posts/:id/vote", handleVote);
+app.post("/:base/api/posts/:id/vote", handleVote);
 
 // helper: conversation key
 function convoKey(a, b) {
