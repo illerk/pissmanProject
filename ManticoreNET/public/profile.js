@@ -14,6 +14,9 @@ const currentUser = localStorage.getItem("currentUser");
 if (!currentUser) {
   window.location.href = "index.html";
 }
+if (currentUser === "GUEST") {
+  window.location.href = "feed.html";
+}
 document.body.classList.add("logged-in");
 
 const headerLabel = document.getElementById("headerLabel");

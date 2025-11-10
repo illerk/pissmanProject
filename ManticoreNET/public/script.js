@@ -3,6 +3,7 @@ const password = document.getElementById("password");
 const status = document.getElementById("status");
 
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+const GUEST_USER = "GUEST";
 
 let statusTimer = null;
 function showStatus(msg, isError = true, ttl = 4000) {
@@ -69,4 +70,9 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   } else {
     showStatus(data.error || "Registration failed.");
   }
+});
+
+document.getElementById("guestBtn").addEventListener("click", () => {
+  localStorage.setItem("currentUser", GUEST_USER);
+  window.location.href = new URL("feed.html", location.href).href;
 });

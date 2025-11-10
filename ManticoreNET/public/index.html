@@ -30,6 +30,7 @@
         <div style="display:flex; gap:8px; margin-top:12px; justify-content:flex-start">
           <button id="loginBtn">Login</button>
           <button id="registerBtn">Register</button>
+          <button id="guestBtn">Guest</button>
         </div>
         <p id="status" style="margin-top:12px;color:#aaa"></p>
       </div>
@@ -94,6 +95,14 @@
         }
       } catch(e){}
     })();
+
+    const guestBtn = document.getElementById('guestBtn');
+    if (guestBtn) {
+      guestBtn.addEventListener('click', () => {
+        localStorage.setItem('currentUser', 'GUEST');
+        window.location.href = 'feed.html';
+      });
+    }
   </script>
 </body>
 </html>

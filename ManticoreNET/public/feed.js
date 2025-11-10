@@ -74,6 +74,14 @@ async function loadFeed(options = { preserveScroll: true }) {
   }
 }
 
+const GUEST_USER = "GUEST";
+const isGuest = currentUser === GUEST_USER;
+
+// hide composer for guests
+if (isGuest && document.getElementById('newPostCardFeed')) {
+  document.getElementById('newPostCardFeed').style.display = 'none';
+}
+
 async function renderPosts(posts) {
   feedPosts.innerHTML = '';
   if (!posts.length) { feedPosts.innerHTML = "<div style='color:#aaa'>No posts yet.</div>"; return; }
@@ -135,12 +143,18 @@ async function renderPosts(posts) {
     const up = document.createElement('button'); up.textContent = '▲';
     const down = document.createElement('button'); down.textContent = '▼';
     const count = document.createElement('span'); count.textContent = voteCount(post.votes);
-    count.style.minWidth = '28px'; count.style.textAlign = 'center';
-    const myV = userVote(post.votes, currentUser);
-    if (myV === 1) up.style.opacity = '0.9';
-    if (myV === -1) down.style.opacity = '0.9';
+    // disable voting for guests
+    if (isGuest) {
+      up.disabled = true;
+      down.disabled = true;
+      up.title = "Guests cannot vote";
+      down.title = "Guests cannot vote";
+      up.style.opacity = "0.5";
+      down.style.opacity = "0.5";
+    }
 
     up.addEventListener('click', async () => {
+      if (isGuest) { alert("Guests cannot vote"); return; }
       const container = feedPosts;
       const prev = container.scrollTop;
       const { ok, data } = await fetchJson(`/api/posts/${post.id}/vote`, {
@@ -155,6 +169,7 @@ async function renderPosts(posts) {
       }
     });
     down.addEventListener('click', async () => {
+      if (isGuest) { alert("Guests cannot vote"); return; }
       const container = feedPosts;
       const prev = container.scrollTop;
       const { ok, data } = await fetchJson(`/api/posts/${post.id}/vote`, {
@@ -238,10 +253,21 @@ async function renderPosts(posts) {
 
     commentsArea.appendChild(cl);
 
+    // add comment form
     const commentForm = document.createElement('div'); commentForm.style.marginTop='8px';
     const commentInput = document.createElement('input'); commentInput.placeholder='Write a comment...'; commentInput.style.width='70%';
     const commentBtn = document.createElement('button'); commentBtn.textContent='Comment';
+
+    if (isGuest) {
+      commentInput.disabled = true;
+      commentBtn.disabled = true;
+      commentBtn.title = "Guests cannot comment";
+      commentInput.title = "Guests cannot comment";
+      commentBtn.style.opacity = "0.5";
+    }
+
     commentBtn.addEventListener('click', async ()=> {
+      if (isGuest) { alert("Guests cannot comment"); return; }
       const txt = commentInput.value.trim();
       if (!txt) return;
       const { ok } = await fetchJson(`/api/posts/${post.id}/comments`, {
@@ -261,7 +287,9 @@ async function renderPosts(posts) {
   }
 }
 
+// ensure create post handler blocks guests
 createPostBtnFeed.addEventListener('click', async () => {
+  if (currentUser === GUEST_USER) { alert("Guests cannot create posts"); return; }
   const text = postTextFeed.value.trim();
   const f = postImageInputFeed.files[0];
   if (f) {
