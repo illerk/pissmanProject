@@ -305,12 +305,6 @@ api.get("/posts", async (req, res) => {
   res.json({ success: true, posts: sorted });
 });
 
-// register on the api router (existing clients that hit API_BASE + /posts/:id/vote)
-api.post("/posts/:id/vote", handleVote);
-// also register on top-level app for common variants so requests don't 404 when a base path is present/stripped
-app.post("/api/posts/:id/vote", handleVote);
-app.post("/:base/api/posts/:id/vote", handleVote);
-
 // helper: conversation key
 function convoKey(a, b) {
   const arr = [String(a), String(b)].sort();
