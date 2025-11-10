@@ -161,7 +161,10 @@ async function loadContacts() {
   if (!ok || !data.users) { contactsPane.innerHTML = "<div style='color:#f66'>Failed</div>"; return; }
   contacts = data.users.filter(u => u.username !== currentUser);
   contactsPane.innerHTML = "";
-  contacts.forEach(u => { userCache[u.username] = u; });
+  // store contacts in cache with resolved avatar URLs so later lookups use full /ManticoreNET/public path
+  contacts.forEach(u => {
+    userCache[u.username] = { ...u, avatar: resolveAsset(u.avatar) || u.avatar };
+  });
 
   for (const u of contacts) {
     const item = document.createElement("div");
