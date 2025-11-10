@@ -149,17 +149,17 @@ async function renderPosts(posts) {
     downBtn.textContent = '↓';
     downBtn.className = 'vote-btn';
 
-    // --- DYNAMIC: don't capture myVote once, compute it dynamically ---
-    function updateVoteButtons() {
-      const cur = (post.votesBy && post.votesBy[currentUser]) ? Number(post.votesBy[currentUser]) : 0;
-      upBtn.classList.toggle('active', cur === 1);
-      downBtn.classList.toggle('active', cur === -1);
-    }
-    updateVoteButtons();
+    const myVote = (post.votesBy && post.votesBy[currentUser]) ? Number(post.votesBy[currentUser]) : 0;
+    if (myVote === 1) upBtn.classList.add('active');
+    if (myVote === -1) downBtn.classList.add('active');
+
+    // replace with mutable currentVote and update after server response
+    let currentVote = (post.votesBy && post.votesBy[currentUser]) ? Number(post.votesBy[currentUser]) : 0;
+    if (currentVote === 1) upBtn.classList.add('active');
+    if (currentVote === -1) downBtn.classList.add('active');
 
     async function votePost(v) {
-      const cur = (post.votesBy && post.votesBy[currentUser]) ? Number(post.votesBy[currentUser]) : 0;
-      const wanted = (cur === v) ? 0 : v;
+      const wanted = (currentVote === v) ? 0 : v;
       const { ok, data } = await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -168,8 +168,11 @@ async function renderPosts(posts) {
       if (!ok || !data.post) { console.warn('Vote failed'); return; }
       post.votesBy = data.post.votesBy || {};
       post.score = data.post.score ?? Object.values(post.votesBy).reduce((s,x)=>s+Number(x||0),0);
+      // update currentVote from server state and refresh UI
+      currentVote = (post.votesBy && post.votesBy[currentUser]) ? Number(post.votesBy[currentUser]) : 0;
       scoreEl.textContent = post.score;
-      updateVoteButtons();
+      upBtn.classList.toggle('active', (currentVote === 1));
+      downBtn.classList.toggle('active', (currentVote === -1));
     }
 
     upBtn.addEventListener('click', ()=> votePost(1));
