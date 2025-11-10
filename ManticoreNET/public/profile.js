@@ -269,11 +269,112 @@ async function renderPosts(posts) {
       el.appendChild(img);
     }
 
-    // actions: only keep delete (for owner)
+    // compute vote info
+    const votesArr = post.votes || [];
+    const voteSum = votesArr.reduce((s, v) => s + Number(v.vote || 0), 0);
+    const myVote = (votesArr.find(v => v.username === currentUser) || {}).vote || 0;
+
     const actions = document.createElement("div");
     actions.style.display = "flex"; actions.style.alignItems = "center"; actions.style.gap = "8px"; actions.style.marginTop = "10px";
 
+    const up = document.createElement("button"); up.textContent = "▲";
+    const cnt = document.createElement("div"); cnt.textContent = voteSum; cnt.style.minWidth = "36px"; cnt.style.textAlign = "center";
+    const down = document.createElement("button"); down.textContent = "▼";
+
+    if (myVote === 1) up.style.background = 'rgba(0,200,0,0.12)';
+    if (myVote === -1) down.style.background = 'rgba(200,0,0,0.12)';
+
+    up.addEventListener('click', async () => {
+      const { ok, data } = await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/vote`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser, vote: 1 })
+      });
+      if (ok && data && data.votes) {
+        post.votes = data.votes;
+        cnt.textContent = post.votes.reduce((s,v)=>s+Number(v.vote||0),0);
+        up.style.background = (post.votes.find(v=>v.username===currentUser)?.vote === 1) ? 'rgba(0,200,0,0.12)' : '';
+        down.style.background = (post.votes.find(v=>v.username===currentUser)?.vote === -1) ? 'rgba(200,0,0,0.12)' : '';
+      }
+    });
+    down.addEventListener('click', async () => {
+      const { ok, data } = await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/vote`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser, vote: -1 })
+      });
+      if (ok && data && data.votes) {
+        post.votes = data.votes;
+        cnt.textContent = post.votes.reduce((s,v)=>s+Number(v.vote||0),0);
+        up.style.background = (post.votes.find(v=>v.username===currentUser)?.vote === 1) ? 'rgba(0,200,0,0.12)' : '';
+        down.style.background = (post.votes.find(v=>v.username===currentUser)?.vote === -1) ? 'rgba(200,0,0,0.12)' : '';
+      }
+    });
+
+    actions.appendChild(up); actions.appendChild(cnt); actions.appendChild(down);
+
+    // comments UI (toggle)
+    const commentsBtn = document.createElement('button'); commentsBtn.textContent = 'Comments';
+    const commentsContainer = document.createElement('div');
+    commentsContainer.style.marginTop = '8px'; commentsContainer.style.display='none'; commentsContainer.style.flexDirection='column'; commentsContainer.style.gap='8px';
+
+    commentsBtn.addEventListener('click', async () => {
+      if (commentsContainer.style.display === 'none') {
+        const { ok, data } = await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/comments`);
+        commentsContainer.innerHTML = '';
+        if (!ok || !data.comments) {
+          commentsContainer.innerHTML = '<div style="color:#f66">Failed to load comments</div>';
+        } else {
+          for (const c of data.comments) {
+            const ce = document.createElement('div');
+            ce.style.border = '1px solid rgba(255,255,255,0.04)';
+            ce.style.padding = '8px';
+            ce.style.borderRadius = '6px';
+            const meta = document.createElement('div'); meta.style.fontSize='0.85rem'; meta.style.color='#999';
+            meta.textContent = `${c.username} · ${formatFutureDate(c.createdAt)}`;
+            const txt = document.createElement('div'); txt.style.marginTop='6px'; txt.innerHTML = c.text;
+            const cVotes = c.votes || []; const cSum = cVotes.reduce((s,v)=>s+Number(v.vote||0),0);
+            const cActions = document.createElement('div'); cActions.style.display='flex'; cActions.style.gap='6px'; cActions.style.marginTop='6px';
+            const cup = document.createElement('button'); cup.textContent='▲'; const ccnt = document.createElement('div'); ccnt.textContent = cSum; ccnt.style.minWidth='28px'; ccnt.style.textAlign='center';
+            const cdown = document.createElement('button'); cdown.textContent='▼';
+            if ((c.votes || []).find(v=>v.username===currentUser)?.vote === 1) cup.style.background='rgba(0,200,0,0.12)';
+            if ((c.votes || []).find(v=>v.username===currentUser)?.vote === -1) cdown.style.background='rgba(200,0,0,0.12)';
+            cup.addEventListener('click', async () => {
+              const { ok } = await fetchJson(`/api/comments/${encodeURIComponent(c.id)}/vote`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser, vote: 1 })
+              });
+              if (ok) { commentsBtn.click(); commentsBtn.click(); }
+            });
+            cdown.addEventListener('click', async () => {
+              const { ok } = await fetchJson(`/api/comments/${encodeURIComponent(c.id)}/vote`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser, vote: -1 })
+              });
+              if (ok) { commentsBtn.click(); commentsBtn.click(); }
+            });
+            cActions.appendChild(cup); cActions.appendChild(ccnt); cActions.appendChild(cdown);
+            ce.appendChild(meta); ce.appendChild(txt); ce.appendChild(cActions);
+            commentsContainer.appendChild(ce);
+          }
+          // add comment form
+          const form = document.createElement('div'); form.style.display='flex'; form.style.flexDirection='column'; form.style.gap='8px'; form.style.marginTop='8px';
+          const ta = document.createElement('textarea'); ta.placeholder='Write a comment...'; ta.style.minHeight='60px';
+          const send = document.createElement('button'); send.textContent='Comment';
+          send.addEventListener('click', async () => {
+            const text = ta.value.trim();
+            if (!text) return;
+            const { ok } = await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/comments`, {
+              method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser, text })
+            });
+            if (ok) { commentsBtn.click(); commentsBtn.click(); }
+          });
+          form.appendChild(ta); form.appendChild(send);
+          commentsContainer.appendChild(form);
+        }
+        commentsContainer.style.display = '';
+      } else {
+        commentsContainer.style.display = 'none';
+      }
+    });
+
+    actions.appendChild(commentsBtn);
     el.appendChild(actions);
+    el.appendChild(commentsContainer);
 
     postsList.appendChild(el);
   }
