@@ -26,6 +26,8 @@ app.use((req, res, next) => {
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
+// NEW: normalize proxied requests that may include a prefix or '/public' segment.
+// This handles requests coming from nginx proxy (e.g. /ManticoreNET/api/... or /ManticoreNET/public/...)
 app.use((req, res, next) => {
 	// If URL contains /api/ somewhere later, strip everything before it so routes mounted at /api/... match.
 	const apiIndex = req.url.indexOf("/api/");
@@ -278,6 +280,7 @@ api.post("/posts/:id/comments", async (req, res) => {
   res.json({ success: true, comment });
 });
 
+// голос по комменту (body: username, vote)
 api.post("/comments/:id/vote", async (req, res) => {
   const { id } = req.params;
   const { username, vote } = req.body;
@@ -299,6 +302,7 @@ api.post("/comments/:id/vote", async (req, res) => {
   if (!found) return res.status(404).json({ error: "Comment not found" });
 });
 
+// получить все посты (лента)
 api.get("/posts", async (req, res) => {
   const posts = await fs.readJson(POSTS_FILE);
   // newest first

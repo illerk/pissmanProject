@@ -1,6 +1,9 @@
+// compute base
 const BASE = location.pathname.replace(/\/[^/]*$/, '');
 
+// add: explicit API root (always use this)
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+// add: assets root for avatars/posts (serve from /ManticoreNET/public)
 const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
 
 function resolveAsset(url) {
@@ -55,6 +58,7 @@ let viewingUser = currentUser;
 let currentProfile = {};
 const userCache = {};
 
+// small helpers
 let statusTimer = null;
 function showStatus(msg, isError = true, ttl = 4000) {
   status.textContent = msg;
@@ -72,31 +76,20 @@ function showStatus(msg, isError = true, ttl = 4000) {
   }
 }
 
-async function fetchJson(url, opts = {}) {
+// unified fetch that resolves relative to current page (preserves sub-path)
+async function fetchJson(url, opts) {
   try {
+    // resolve to API_ROOT when requesting API paths
     let full;
     if (/^https?:\/\//.test(url)) full = url;
     else if (url.startsWith("/api/")) full = API_ROOT + url.slice(4);
     else if (url.startsWith("api/")) full = API_ROOT + url.slice(3);
     else full = new URL(url, location.href).href;
-
-    opts = { ...opts };
-    opts.headers = { ...(opts.headers || {}) };
-
-    if (opts.body && !opts.headers['Content-Type'] && !opts.headers['content-type']) {
-      opts.headers['Content-Type'] = 'application/json';
-    }
-
     const res = await fetch(full, opts);
-    let data = null;
-    try { data = await res.json(); } catch (e) { /* non-json response */ }
-    if (!res.ok) {
-      console.error('fetchJson error', full, res.status, data);
-    }
+    const data = await res.json();
     return { ok: res.ok, data };
   } catch (e) {
-    console.error('fetchJson network error', url, e);
-    return { ok: false, data: { error: 'Network error' } };
+    return { ok: false, data: { error: "Network error" } };
   }
 }
 function formatFutureDate(ts) {
@@ -109,6 +102,7 @@ async function getUserProfile(username) {
   if (userCache[username]) return userCache[username];
   const r = await fetchJson(`/api/user/${encodeURIComponent(username)}`);
   if (r.ok && r.data.success) {
+    // resolve avatar to full asset URL
     const prof = r.data.profile;
     if (prof && prof.avatar) prof.avatar = resolveAsset(prof.avatar);
     userCache[username] = prof;
@@ -136,8 +130,10 @@ function setEditMode(on) {
   }
 }
 
+// show contacts view — hide posts list and profile card
 async function showContacts() {
   headerSearch.textContent = "Contacts";
+  // keep headerLabel (profile name) unchanged
   profileCard.style.display = "none";
   contactsView.style.display = "";
   newPostCard.style.display = "none";
@@ -186,17 +182,21 @@ async function showContacts() {
   });
 }
 
+// load posts for a user
 async function loadPosts(username, options = { preserveScroll: true }) {
+  // preserve scroll position if requested
   const container = postsList;
   const prevScroll = options.preserveScroll ? container.scrollTop : 0;
   postsList.innerHTML = "Loading posts...";
 
   try {
+    // load all posts (feed) then filter to this user's posts
     const { ok, data } = await fetchJson(`${API_ROOT}/posts`);
     if (!ok || !data || !Array.isArray(data.posts)) {
       postsList.innerHTML = `<div style="color:#f66">Failed to load posts</div>`;
       return;
     }
+    // filter posts that belong to the requested username
     const userPosts = data.posts.filter(p => String(p.username) === String(username))
                                .sort((a,b) => b.createdAt - a.createdAt);
     await renderPosts(userPosts);
@@ -205,11 +205,14 @@ async function loadPosts(username, options = { preserveScroll: true }) {
     return;
   }
 
+  // restore scroll
   if (options.preserveScroll) {
+    // small timeout to ensure DOM layout applied
     setTimeout(() => { container.scrollTop = prevScroll; }, 0);
   }
 }
 
+// render posts sequentially to avoid race/double-appends
 async function renderPosts(posts) {
   postsList.innerHTML = "";
   if (!posts.length) { postsList.innerHTML = "<div style='color:#aaa'>No posts yet.</div>"; return; }
@@ -266,6 +269,7 @@ async function renderPosts(posts) {
       el.appendChild(img);
     }
 
+    // actions
     const actions = document.createElement("div");
     actions.style.display = "flex"; actions.style.alignItems = "center"; actions.style.gap = "8px"; actions.style.marginTop = "10px";
 
@@ -287,6 +291,7 @@ async function renderPosts(posts) {
       });
       if (ok && data.success) {
         post.votes = data.votes;
+        // reload posts preserving scroll
         await loadPosts(viewingUser, { preserveScroll: true });
         container.scrollTop = prev;
       }
@@ -307,15 +312,11 @@ async function renderPosts(posts) {
       const delBtn = document.createElement("button"); delBtn.textContent = "Delete";
       delBtn.addEventListener("click", async () => {
         if (!confirm("Delete this post?")) return;
-        const { ok } = await fetchJson(`/api/posts/${post.id}`, {
-          method: "DELETE",
+        await fetch(`${API_ROOT}/posts/${post.id}`, {
+          method: "DELETE", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username: currentUser })
         });
-        if (ok) {
-          await loadPosts(viewingUser);
-        } else {
-          showStatus("Failed to delete post");
-        }
+        await loadPosts(viewingUser);
       });
       actions.appendChild(delBtn);
     }
@@ -324,6 +325,7 @@ async function renderPosts(posts) {
     actions.appendChild(commentsToggle);
     el.appendChild(actions);
 
+    // comments area
     const commentsArea = document.createElement("div"); commentsArea.style.display = "none"; commentsArea.style.marginTop = "10px";
     const cl = document.createElement("div");
 
@@ -373,6 +375,7 @@ async function renderPosts(posts) {
 
     commentsArea.appendChild(cl);
 
+    // add comment form
     const commentForm = document.createElement("div"); commentForm.style.marginTop = "8px";
     const commentInput = document.createElement("input"); commentInput.placeholder = "Write a comment..."; commentInput.style.width = "70%";
     const commentBtn = document.createElement("button"); commentBtn.textContent = "Comment";
@@ -398,6 +401,7 @@ async function renderPosts(posts) {
   }
 }
 
+// load profile (single entry point)
 async function loadProfile(username = currentUser) {
   viewingUser = username;
   const isOwn = viewingUser === currentUser;
@@ -405,11 +409,13 @@ async function loadProfile(username = currentUser) {
   headerLabel.textContent = viewingUser;
   headerSearch.textContent = isOwn ? "Profile" : `${viewingUser}'s Profile`;
 
+  // show profile card and posts list
   contactsView.style.display = "none";
   profileCard.style.display = "";
   postsListCard.style.display = "";
   newPostCard.style.display = isOwn ? "" : "none";
 
+  // load profile data
   const { ok, data } = await fetchJson(`/api/user/${encodeURIComponent(viewingUser)}`);
   if (!ok || !data.success) {
     showStatus(data.error || "Failed to load profile");
@@ -419,16 +425,20 @@ async function loadProfile(username = currentUser) {
   avatarEl.src = resolveAsset(currentProfile.avatar) || "default-avatar.png";
   ageText.textContent = currentProfile.age ?? "—";
   genderText.textContent = currentProfile.gender ?? "—";
+  // ensure bio exists
   if (typeof currentProfile.bio === "undefined") currentProfile.bio = "";
   renderBio(currentProfile.bio);
   setEditMode(false);
 
+  // load posts for this user
   await loadPosts(viewingUser);
 }
 
+// nav bindings
 if (navContacts) navContacts.addEventListener("click", () => { showContacts(); });
 if (navProfile) navProfile.addEventListener("click", () => { loadProfile(currentUser); });
 
+// file upload for avatar (only active in edit mode)
 fileInput.addEventListener("change", async () => {
   if (!editMode) return;
   const f = fileInput.files[0];
@@ -442,8 +452,9 @@ fileInput.addEventListener("change", async () => {
       body: JSON.stringify({ username: currentUser, image: dataUrl })
     });
     if (ok) {
+      // refresh profile avatar
       const p = await getUserProfile(currentUser);
-      userCache[currentUser] = null;
+      userCache[currentUser] = null; // clear cache so next getUserProfile fetches updated avatar
       await loadProfile(viewingUser);
     } else {
       showStatus("Upload failed");
@@ -452,10 +463,11 @@ fileInput.addEventListener("change", async () => {
   reader.readAsDataURL(f);
 });
 
+// edit/save handlers (only for own profile)
 editBtn.addEventListener("click", async () => {
   if (viewingUser !== currentUser) return;
   if (!editMode) setEditMode(true);
-  else await loadProfile(viewingUser);
+  else await loadProfile(viewingUser); // cancel -> reload profile
 });
 saveBtn.addEventListener("click", async () => {
   if (viewingUser !== currentUser) return;
@@ -469,6 +481,7 @@ saveBtn.addEventListener("click", async () => {
   if (ok) await loadProfile(viewingUser);
 });
 
+// create post (only for own profile)
 createPostBtn.addEventListener("click", async () => {
   if (viewingUser !== currentUser) return;
   const text = postText.value.trim();
@@ -493,12 +506,14 @@ createPostBtn.addEventListener("click", async () => {
   }
 });
 
+// logout top
 if (logoutTopBtn) logoutTopBtn.addEventListener("click", () => {
   localStorage.removeItem("currentUser");
   document.body.classList.remove("logged-in");
   window.location.href = "index.html";
 });
 
+// init: respect ?user= and #contacts, run only once
 (async function init() {
   const params = new URLSearchParams(location.search);
   const userParam = params.get('user');
@@ -513,10 +528,12 @@ if (logoutTopBtn) logoutTopBtn.addEventListener("click", () => {
   await loadProfile();
 })();
 
+// added: make Upload avatar button open file picker
 uploadBtn.addEventListener("click", () => {
   fileInput.click();
 });
 
+// added: close overlay when clicking background or the image
 overlay.addEventListener("click", () => {
   overlay.classList.remove("visible");
 });
@@ -560,6 +577,7 @@ function renderBio(bio) {
   }
 }
 
+// open avatar in full-screen overlay when clicked
 avatarEl.addEventListener("click", () => {
   if (!avatarEl.src) return;
   overlayImg.src = avatarEl.src;

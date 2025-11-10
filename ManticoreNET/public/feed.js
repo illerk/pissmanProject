@@ -15,7 +15,9 @@ const basePath = location.pathname.replace(/\/[^/]*$/, '');
 const proto = location.protocol === "https:" ? "wss" : "ws";
 const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
+// add: explicit API root
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+// add: assets root for avatars/posts (serve from /ManticoreNET/public)
 const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
 function resolveAsset(url) {
   if (!url) return url;
@@ -24,29 +26,18 @@ function resolveAsset(url) {
   return url;
 }
 
-// improved fetchJson: builds full URL, sets Content-Type for JSON bodies, logs errors
-async function fetchJson(url, opts = {}) {
+// unified fetch
+async function fetchJson(url, opts) {
   try {
     let full;
     if (/^https?:\/\//.test(url)) full = url;
     else if (url.startsWith("/api/")) full = API_ROOT + url.slice(4);
     else if (url.startsWith("api/")) full = API_ROOT + url.slice(3);
     else full = new URL(url, location.href).href;
-
-    opts = { ...opts };
-    opts.headers = { ...(opts.headers || {}) };
-
-    if (opts.body && !opts.headers['Content-Type'] && !opts.headers['content-type']) {
-      opts.headers['Content-Type'] = 'application/json';
-    }
-
     const res = await fetch(full, opts);
-    let data = null;
-    try { data = await res.json(); } catch (e) {}
-    if (!res.ok) console.error('fetchJson error', full, res.status, data);
+    const data = await res.json();
     return { ok: res.ok, data };
   } catch (e) {
-    console.error('fetchJson network error', url, e);
     return { ok: false, data: { error: 'Network error' } };
   }
 }
@@ -189,15 +180,12 @@ async function renderPosts(posts) {
       const delBtn = document.createElement('button'); delBtn.textContent = 'Delete';
       delBtn.addEventListener('click', async () => {
         if (!confirm('Delete this post?')) return;
-        const { ok } = await fetchJson(`/api/posts/${post.id}`, {
+        const res = await fetch(`${API_ROOT}/posts/${post.id}`, {
           method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: currentUser })
         });
-        if (ok) loadFeed();
-        else {
-          console.error('Delete failed', post.id);
-          alert('Failed to delete post');
-        }
+        if (res.ok) loadFeed();
       });
       actions.appendChild(delBtn);
     }
@@ -309,6 +297,7 @@ if (navProfile) navProfile.addEventListener('click', ()=> window.location.href='
 const navContacts = document.getElementById('nav-contacts');
 if (navContacts) navContacts.addEventListener('click', ()=> window.location.href='profile.html#contacts');
 
+// ensure nav->messages works from feed page
 const navMessages = document.getElementById('nav-messages');
 if (navMessages) navMessages.addEventListener('click', () => {
   if (!localStorage.getItem('currentUser')) return window.location.href = 'index.html';
@@ -317,6 +306,7 @@ if (navMessages) navMessages.addEventListener('click', () => {
 
 loadFeed();
 
+// ensure overlay references and allow closing full-screen preview
 const overlay = document.getElementById('overlay');
 const overlayImg = document.getElementById('overlayImg');
 if (overlay) {

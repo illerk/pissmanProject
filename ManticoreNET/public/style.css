@@ -228,6 +228,7 @@ body.logged-in .sidebar {
   color: #fff;
 }
 
+/* prevent manual resizing of textareas across the app */
 textarea {
   resize: none !important;
   overflow: auto;

@@ -1,5 +1,7 @@
+// compute base
 const BASE = location.pathname.replace(/\/[^/]*$/, '');
 
+// top code
 const currentUser = localStorage.getItem("currentUser");
 if (!currentUser) location.href = "index.html";
 document.body.classList.add("logged-in");
@@ -15,8 +17,10 @@ const overlayImg = document.getElementById("overlayImg");
 const logoutTopBtn = document.getElementById("logoutTopBtn");
 if (logoutTopBtn) logoutTopBtn.addEventListener("click", () => { localStorage.removeItem("currentUser"); location.href = "index.html"; });
 
-const basePath = location.pathname.replace(/\/[^/]*$/, '');
+// compute ws base (path part of current URL)
+const basePath = location.pathname.replace(/\/[^/]*$/, ''); // e.g. "/ManticoreNET"
 const proto = location.protocol === "https:" ? "wss" : "ws";
+// build ws URL relative to current location so sub-paths are respected
 const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 const ws = new WebSocket(wsUrl);
 ws.addEventListener("open", () => {
@@ -27,19 +31,27 @@ ws.addEventListener("message", (ev) => {
   try { msg = JSON.parse(ev.data); } catch (e) { return; }
   if (msg.type === "message") {
     const m = msg.message;
+    // if conversation with m.from or m.to is currently open, append
     const partner = (m.from === currentUser) ? m.to : m.from;
     if (partner === selectedContact) {
+      // call async function to append
       (async () => { await appendMessage(m, m.from === currentUser); })();
+      // server already marked as read for this user when opening conversation via GET.
+      // optionally ensure unread refreshed.
       refreshUnread();
     } else {
+      // increment local unread count (so it shows immediately)
       unreadCounts[m.from] = (unreadCounts[m.from] || 0) + 1;
       setContactBadge(m.from, unreadCounts[m.from]);
     }
+    // update menu badge
     updateMenuBadge();
   }
 });
 
+// add: explicit API root
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+// add: assets root for avatars/posts (serve from /ManticoreNET/public)
 const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
 function resolveAsset(url) {
   if (!url) return url;
@@ -48,32 +60,20 @@ function resolveAsset(url) {
   return url;
 }
 
-async function fetchJson(url, opts = {}) {
+// unified fetch that resolves relative to current page (preserves sub-path)
+async function fetchJson(url, opts) {
   try {
     let full;
     if (/^https?:\/\//.test(url)) full = url;
     else if (url.startsWith("/api/")) full = API_ROOT + url.slice(4);
     else if (url.startsWith("api/")) full = API_ROOT + url.slice(3);
     else full = new URL(url, location.href).href;
-
-    opts = { ...opts };
-    opts.headers = { ...(opts.headers || {}) };
-
-    if (opts.body && !opts.headers['Content-Type'] && !opts.headers['content-type']) {
-      opts.headers['Content-Type'] = 'application/json';
-    }
-
     const r = await fetch(full, opts);
-    let data = null;
-    try { data = await r.json(); } catch (e) {}
-    if (!r.ok) console.error('fetchJson error', full, r.status, data);
-    return { ok: r.ok, data };
-  } catch (e) {
-    console.error('fetchJson network error', url, e);
-    return { ok: false, data: null };
-  }
+    return { ok: r.ok, data: await r.json() };
+  } catch (e) { return { ok: false, data: null }; }
 }
 
+// add: cache for user profiles/avatars
 const userCache = {};
 async function getUserAvatar(username) {
   if (!username) return "default-avatar.png";
@@ -87,10 +87,12 @@ async function getUserAvatar(username) {
   return "default-avatar.png";
 }
 
-const unreadCounts = {};
-const contactElements = new Map();
+// add: client-side unread map and DOM references
+const unreadCounts = {}; // partner -> count
+const contactElements = new Map(); // username -> { itemEl, badgeEl }
 const navMessagesEl = document.getElementById('nav-messages');
 
+// create or update badge helper
 function ensureContactBadge(username, parentEl) {
   let entry = contactElements.get(username);
   if (!entry) {
@@ -98,6 +100,7 @@ function ensureContactBadge(username, parentEl) {
     badge.className = 'unread-badge';
     badge.style.display = 'none';
     badge.style.marginLeft = '6px';
+    // attach later beside name; return entry
     entry = { badgeEl: badge, itemEl: parentEl };
     contactElements.set(username, entry);
   }
@@ -113,6 +116,7 @@ function setContactBadge(username, count) {
   } else {
     entry.badgeEl.style.display = 'none';
   }
+  // update global menu badge
   updateMenuBadge();
 }
 
@@ -134,17 +138,21 @@ function updateMenuBadge() {
   }
 }
 
+// fetch unread from server and update badges
 async function refreshUnread() {
   const { ok, data } = await fetchJson(`/api/unread/${encodeURIComponent(currentUser)}`);
   if (!ok || !data || !data.success) return;
+  // replace unreadCounts
   Object.keys(unreadCounts).forEach(k=>delete unreadCounts[k]);
   Object.assign(unreadCounts, data.unread || {});
+  // apply to contact elements
   for (const [username, entry] of contactElements.entries()) {
     setContactBadge(username, unreadCounts[username] || 0);
   }
   updateMenuBadge();
 }
 
+// load contacts
 let contacts = [];
 let selectedContact = null;
 async function loadContacts() {
@@ -153,6 +161,7 @@ async function loadContacts() {
   if (!ok || !data.users) { contactsPane.innerHTML = "<div style='color:#f66'>Failed</div>"; return; }
   contacts = data.users.filter(u => u.username !== currentUser);
   contactsPane.innerHTML = "";
+  // store contacts in cache with resolved avatar URLs so later lookups use full /ManticoreNET/public path
   contacts.forEach(u => {
     userCache[u.username] = { ...u, avatar: resolveAsset(u.avatar) || u.avatar };
   });
@@ -169,19 +178,23 @@ async function loadContacts() {
     const name = document.createElement("div"); name.textContent = u.username; name.style.fontWeight="600";
     item.appendChild(img); item.appendChild(name);
 
+    // badge
     const entry = ensureContactBadge(u.username, item);
     item.appendChild(entry.badgeEl);
 
     item.addEventListener("click", async () => {
       await selectContact(u.username);
+      // after opening conversation, refresh unread (server marks read on GET)
       await refreshUnread();
     });
     contactsPane.appendChild(item);
   }
 
+  // initial unread refresh after contacts are in DOM
   await refreshUnread();
 }
 
+// load conversation history via REST — use async loop and await appendMessage
 async function loadHistory(withUser) {
   messagesPane.innerHTML = "Loading history...";
   const { ok, data } = await fetchJson(`/api/messages/${encodeURIComponent(currentUser)}/${encodeURIComponent(withUser)}`);
@@ -193,23 +206,27 @@ async function loadHistory(withUser) {
   messagesPane.scrollTop = messagesPane.scrollHeight;
 }
 
+// add: format date shifted by 313 years
 function formatFutureDate(ts) {
   const d = new Date(Number(ts));
   d.setFullYear(d.getFullYear() + 313);
   return d.toLocaleString();
 }
 
+// ensure avatars are displayed as squares (object-fit: cover) where created
+// update appendMessage to set objectFit and to be async (uses getUserAvatar)
 async function appendMessage(m, mine) {
   const b = document.createElement("div");
   b.style.display = "flex"; b.style.gap="8px"; b.style.alignItems="flex-start";
   if (mine) b.style.justifyContent = "flex-end";
 
+  // get avatar for message sender (already resolved by getUserAvatar)
   const avatarSrc = await getUserAvatar(m.from);
 
   const img = document.createElement("img");
   img.src = avatarSrc;
   img.style.width = "32px"; img.style.height = "32px"; img.style.borderRadius = "6px";
-  img.style.objectFit = "cover";
+  img.style.objectFit = "cover"; // ensure square crop
   img.style.cursor = "pointer";
   img.addEventListener("click", ()=> location.href = `profile.html?user=${encodeURIComponent(m.from)}`);
 
@@ -234,16 +251,20 @@ async function appendMessage(m, mine) {
   else { b.appendChild(img); b.appendChild(content); }
 
   messagesPane.appendChild(b);
+  // ensure scroll to bottom
   messagesPane.scrollTop = messagesPane.scrollHeight;
 }
 
+// select contact
 async function selectContact(username) {
   selectedContact = username;
   chatHeader.textContent = username;
   await loadHistory(username);
+  // server marks messages read for current user in GET /api/messages; refresh badges
   await refreshUnread();
 }
 
+// sendMessage extracted and used by Enter handler
 async function sendMessage() {
   if (!selectedContact) return alert("Select a contact");
   const text = msgInput.value.trim();
@@ -255,17 +276,18 @@ async function sendMessage() {
       const payload = { type: "message", from: currentUser, to: selectedContact, text, image: dataUrl };
       ws.send(JSON.stringify(payload));
       msgInput.value = ""; msgImage.value = "";
-      adjustInputHeight();
+      adjustInputHeight(); // reset height
     };
     reader.readAsDataURL(f);
   } else {
     const payload = { type: "message", from: currentUser, to: selectedContact, text };
     ws.send(JSON.stringify(payload));
     msgInput.value = "";
-    adjustInputHeight();
+    adjustInputHeight(); // reset height
   }
 }
 
+// Enter sends (Shift+Enter -> newline)
 msgInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -273,9 +295,11 @@ msgInput.addEventListener("keydown", (e) => {
   }
 });
 
+// dynamic height adjustment: autosize textarea height to content, clamped by max-height
 function adjustInputHeight() {
+  // reset to auto to measure scrollHeight
   msgInput.style.height = 'auto';
-  const maxH = 300;
+  const maxH = 300; // px
   const newH = Math.min(maxH, msgInput.scrollHeight);
   msgInput.style.height = newH + 'px';
 }
@@ -283,8 +307,10 @@ msgInput.addEventListener("input", () => {
   adjustInputHeight();
 });
 
+// initialize input height on load
 adjustInputHeight();
 
+// ensure nav handlers exist on messages page so other tabs open
 const navProfileBtn = document.getElementById('nav-profile');
 if (navProfileBtn) navProfileBtn.addEventListener('click', () => {
   if (!localStorage.getItem('currentUser')) return window.location.href = 'index.html';
@@ -303,14 +329,18 @@ if (navFeedBtn) navFeedBtn.addEventListener('click', () => {
 const navMessagesBtn = document.getElementById('nav-messages');
 if (navMessagesBtn) navMessagesBtn.addEventListener('click', () => {
   if (!localStorage.getItem('currentUser')) return window.location.href = 'index.html';
+  // already on messages page — optionally focus
 });
 
+// periodically refresh unread badges (menu + contact badges)
 setInterval(() => {
   refreshUnread().catch(()=>{});
 }, 15000);
 
+// initial unread refresh for messages page menu badge immediately
 (async () => {
   await refreshUnread();
 })();
 
+// initial load
 loadContacts();

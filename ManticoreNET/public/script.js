@@ -24,8 +24,8 @@ function showStatus(msg, isError = true, ttl = 4000) {
 function buildApiUrl(url) {
   if (!url) return url;
   if (/^https?:\/\//.test(url)) return url;
-  if (url.startsWith("/api/")) return API_ROOT + url.slice(4);
-  if (url.startsWith("api/")) return API_ROOT + url.slice(3);
+  if (url.startsWith("/api/")) return API_ROOT + url.slice(4); // "/api/foo" -> API_ROOT + "/foo"
+  if (url.startsWith("api/")) return API_ROOT + url.slice(3);  // "api/foo" -> API_ROOT + "/foo"
   return url;
 }
 
@@ -49,9 +49,11 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     showStatus("Enter username and password.");
     return;
   }
+  // NOTE: relative API path (no leading slash)
   const { ok, data } = await postJson("api/login", { username: username.value, password: password.value });
   if (ok && data.success) {
     localStorage.setItem("currentUser", username.value);
+    // navigate to profile page in same base path
     window.location.href = new URL("profile.html", location.href).href;
   } else {
     showStatus(data.error || "Login failed.");
