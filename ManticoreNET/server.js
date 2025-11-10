@@ -15,9 +15,7 @@ const PORT = process.env.PORT || 3000;
 const USERS_FILE = path.join(__dirname, "users.json");
 const POSTS_FILE = path.join(__dirname, "posts.json");
 const MESSAGES_FILE = path.join(__dirname, "messages.json");
-
-// always host API under /ManticoreNET by default (override with BASE_PATH env if needed)
-const BASE_PATH = process.env.BASE_PATH || "/ManticoreNET";
+const BASE_PATH = process.env.BASE_PATH || ""; 
 const API_BASE = (BASE_PATH === "/") ? "/api" : (BASE_PATH + "/api");
 
 
@@ -52,9 +50,13 @@ app.use((req, res, next) => {
 	return next();
 });
 
-// serve static both at root and under BASE_PATH
 app.use(express.static(path.join(__dirname, "public")));
-app.use(BASE_PATH, express.static(path.join(__dirname, "public")));
+
+// make static assets and api available when nginx proxies without rewriting the prefix
+// serve avatars/posts under any one-segment prefix (e.g. /ManticoreNET/avatars/...)
+app.use('/:prefix/avatars', express.static(path.join(__dirname, 'public', 'avatars')));
+app.use('/:prefix/posts', express.static(path.join(__dirname, 'public', 'posts')));
+app.use('/:prefix', express.static(path.join(__dirname, 'public')));
 
 const api = express.Router();
 
@@ -383,10 +385,11 @@ app.get("/api/unread/:username", async (req, res) => {
   res.json({ success: true, unread: counts, total });
 });
 
-// after defining all api.* routes: register api at root /api (compat) and at BASE_PATH/api
+// after defining all api.* routes:
+// register API mounts (do this AFTER api is defined)
 app.use('/api', api);
-app.use(API_BASE, api);
 app.use('/:prefix/api', api);
+app.use(API_BASE, api);
 
 // added: tolerant delegator — if req.path begins with /api/ but wasn't handled by above mounts,
 // forward request to api router. This helps when proxy rewrites/paths are inconsistent.
@@ -405,7 +408,7 @@ app.use((req, res, next) => {
 
 
 const server = http.createServer(app);
-const wss = new WebSocketServer({ server, path: BASE_PATH + "/ws" });
+const wss = new WebSocketServer({ server, path: (BASE_PATH || "") + "/ws" });
 
 const clients = new Map(); // username -> ws
 

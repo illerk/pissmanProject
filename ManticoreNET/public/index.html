@@ -75,26 +75,27 @@
       const user = localStorage.getItem('currentUser');
       if (!user) return;
       try {
-        const BASE_PREFIX = "/ManticoreNET";
-        const res = await fetch(location.origin + BASE_PREFIX + `/api/unread/${encodeURIComponent(user)}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!data || !data.success) return;
-        const total = data.total || 0;
-        const navMessages = document.getElementById('nav-messages');
-        if (total > 0 && navMessages) {
-          let mb = navMessages.querySelector('.unread-badge');
-          if (!mb) {
-            mb = document.createElement('span');
-            mb.className = 'unread-badge';
-            mb.style.marginLeft = '8px';
-            navMessages.appendChild(mb);
-          }
-          mb.textContent = total > 99 ? '99+' : String(total);
-          mb.style.display = '';
-        }
-      } catch(e){}
-    })();
+        const BASE_PREFIX = '/ManticoreNET';
+        const base = BASE_PREFIX.endsWith('/') ? BASE_PREFIX : (BASE_PREFIX + '/');
+        const res = await fetch(location.origin + base + `api/unread/${encodeURIComponent(user)}`);
+         if (!res.ok) return;
+         const data = await res.json();
+         if (!data || !data.success) return;
+         const total = data.total || 0;
+         const navMessages = document.getElementById('nav-messages');
+         if (total > 0 && navMessages) {
+           let mb = navMessages.querySelector('.unread-badge');
+           if (!mb) {
+             mb = document.createElement('span');
+             mb.className = 'unread-badge';
+             mb.style.marginLeft = '8px';
+             navMessages.appendChild(mb);
+           }
+           mb.textContent = total > 99 ? '99+' : String(total);
+           mb.style.display = '';
+         }
+       } catch(e){}
+     })();
   </script>
 </body>
 </html>

@@ -15,14 +15,18 @@ const basePath = location.pathname.replace(/\/[^/]*$/, '');
 const proto = location.protocol === "https:" ? "wss" : "ws";
 const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
-// fixed base prefix for this deployment
-const BASE_PREFIX = "/ManticoreNET";
+// changed: force base path for hosted location
+const BASE_PREFIX = '/ManticoreNET';
+function getBasePath() {
+	// ensure trailing slash, result like "/ManticoreNET/"
+	return BASE_PREFIX.endsWith('/') ? BASE_PREFIX : (BASE_PREFIX + '/');
+}
 
-// unified fetch — build absolute URL using origin + BASE_PREFIX
+// unified fetch — build absolute URL using origin + basePath
 async function fetchJson(url, opts) {
   try {
     const cleaned = String(url).replace(/^\/+/, "");
-    const full = location.origin + BASE_PREFIX + "/" + cleaned;
+    const full = location.origin + getBasePath() + cleaned;
     const r = await fetch(full, opts);
     const data = await r.json();
     return { ok: r.ok, data };
@@ -31,12 +35,12 @@ async function fetchJson(url, opts) {
   }
 }
 
-// resolve asset path to always use BASE_PREFIX
+// resolve asset path to respect fixed subpath hosting
 function resolveAssetPath(p) {
   if (!p) return '';
   if (p.startsWith('http') || p.startsWith('data:')) return p;
   const clean = String(p).replace(/^\/+/, '');
-  return location.origin + BASE_PREFIX + "/" + clean;
+  return location.origin + getBasePath() + clean;
 }
 
 function formatFutureDate(ts) {

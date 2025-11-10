@@ -107,8 +107,9 @@
       const user = localStorage.getItem('currentUser');
       if (!user) return;
       try {
-        const BASE_PREFIX = "/ManticoreNET";
-        const res = await fetch(location.origin + BASE_PREFIX + `/api/unread/${encodeURIComponent(user)}`);
+         const BASE_PREFIX = '/ManticoreNET';
+         const base = BASE_PREFIX.endsWith('/') ? BASE_PREFIX : (BASE_PREFIX + '/');
+         const res = await fetch(location.origin + base + `api/unread/${encodeURIComponent(user)}`);
          if (!res.ok) return;
          const data = await res.json();
          if (!data || !data.success) return;
