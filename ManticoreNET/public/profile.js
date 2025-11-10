@@ -279,7 +279,13 @@ async function renderPosts(posts) {
     const commentsToggle = document.createElement("button");
     commentsToggle.className = "comments-toggle";
     commentsToggle.style.marginTop = "8px";
-    commentsToggle.textContent = "Show comments";
+    // fetch initial comments count for this post
+    let initialCommentsCount = 0;
+    try {
+      const cc = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`);
+      if (cc.ok && cc.data && Array.isArray(cc.data.comments)) initialCommentsCount = cc.data.comments.length;
+    } catch (e) { /* ignore */ }
+    commentsToggle.textContent = `Show comments${initialCommentsCount ? ` (${initialCommentsCount})` : ""}`;
     // comments container starts hidden
     const commentsSection = document.createElement("div");
     commentsSection.style.display = "none";
@@ -298,6 +304,14 @@ async function renderPosts(posts) {
       if (opening) {
         // load comments then show
         await loadCommentsForPost(post.id, commentsList);
+        // update count after load
+        try {
+          const cc2 = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`);
+          const cnt = (cc2.ok && cc2.data && Array.isArray(cc2.data.comments)) ? cc2.data.comments.length : 0;
+          commentsToggle.textContent = `Hide comments${cnt ? ` (${cnt})` : ""}`;
+        } catch (e) {
+          commentsToggle.textContent = "Hide comments";
+        }
         // show composer when opened
         if (currentUser) {
           // prevent duplicate composers
@@ -329,6 +343,14 @@ async function renderPosts(posts) {
               if (ok) {
                 input.value = "";
                 await loadCommentsForPost(post.id, commentsList);
+                // refresh count and update toggle text
+                try {
+                  const cc3 = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`);
+                  const newCount = (cc3.ok && cc3.data && Array.isArray(cc3.data.comments)) ? cc3.data.comments.length : 0;
+                  commentsToggle.textContent = `Hide comments${newCount ? ` (${newCount})` : ""}`;
+                } catch (e) {
+                  commentsToggle.textContent = "Hide comments";
+                }
               } else {
                 showStatus("Failed to post comment");
               }
@@ -338,11 +360,18 @@ async function renderPosts(posts) {
             commentsSection.appendChild(composer);
           }
         }
-        commentsToggle.textContent = "Hide comments";
+        commentsToggle.textContent = commentsToggle.textContent || "Hide comments";
         commentsSection.style.display = "";
       } else {
         commentsSection.style.display = "none";
-        commentsToggle.textContent = "Show comments";
+        // when hiding keep count visible on the "Show" label
+        try {
+          const cc4 = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`);
+          const cnt2 = (cc4.ok && cc4.data && Array.isArray(cc4.data.comments)) ? cc4.data.comments.length : 0;
+          commentsToggle.textContent = `Show comments${cnt2 ? ` (${cnt2})` : ""}`;
+        } catch (e) {
+          commentsToggle.textContent = "Show comments";
+        }
       }
     });
 
