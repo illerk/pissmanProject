@@ -7,8 +7,8 @@ function showStatus(msg, isError = true) {
   status.style.color = isError ? "#f66" : "#8f8";
 }
 
-const BASE_PREFIX = '/ManticoreNET';
-function getBasePath() { return BASE_PREFIX.endsWith('/') ? BASE_PREFIX : (BASE_PREFIX + '/'); }
+const BASE_PREFIX = "/ManticoreNET";
+function getBasePath() { return BASE_PREFIX.endsWith("/") ? BASE_PREFIX : BASE_PREFIX + "/"; }
 
 async function postJson(url, body) {
   try {

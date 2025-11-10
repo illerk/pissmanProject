@@ -99,6 +99,11 @@ async function getUserAvatar(username) {
   return "default-avatar.png";
 }
 
+// deployment base prefix (always use /ManticoreNET)
+const BASE_PREFIX = "/ManticoreNET";
+
+function getBasePath() { return BASE_PREFIX.endsWith("/") ? BASE_PREFIX : BASE_PREFIX + "/"; }
+
 // add: client-side unread map and DOM references
 const unreadCounts = {}; // partner -> count
 const contactElements = new Map(); // username -> { itemEl, badgeEl }
@@ -152,7 +157,7 @@ function updateMenuBadge() {
 
 // fetch unread from server and update badges
 async function refreshUnread() {
-  const { ok, data } = await fetchJson(`/api/unread/${encodeURIComponent(currentUser)}`);
+  const { ok, data } = await fetchJson(`api/unread/${encodeURIComponent(currentUser)}`);
   if (!ok || !data || !data.success) return;
   // replace unreadCounts
   Object.keys(unreadCounts).forEach(k=>delete unreadCounts[k]);
@@ -206,7 +211,7 @@ async function loadContacts() {
 // load conversation history via REST — use async loop and await appendMessage
 async function loadHistory(withUser) {
   messagesPane.innerHTML = "Loading history...";
-  const { ok, data } = await fetchJson(`/api/messages/${encodeURIComponent(currentUser)}/${encodeURIComponent(withUser)}`);
+  const { ok, data } = await fetchJson(`api/messages/${encodeURIComponent(currentUser)}/${encodeURIComponent(withUser)}`);
   if (!ok || !data.messages) { messagesPane.innerHTML = "<div style='color:#f66'>Failed to load history</div>"; return; }
   messagesPane.innerHTML = "";
   for (const m of data.messages) {
