@@ -1,61 +1,18 @@
 // compute base
 const BASE = location.pathname.replace(/\/[^/]*$/, '');
 
-const currentUser = localStorage.getItem("currentUser");
-if (!currentUser) {
-  window.location.href = "index.html";
-}
-document.body.classList.add("logged-in");
-
-const headerLabel = document.getElementById("headerLabel");
-const headerSearch = document.getElementById("headerSearch");
-const logoutTopBtn = document.getElementById("logoutTopBtn");
-
-const profileCard = document.getElementById("profileCard");
-const viewFields = document.getElementById("viewFields");
-const editFields = document.getElementById("editFields");
-const ageText = document.getElementById("ageText");
-const genderText = document.getElementById("genderText");
-const ageInput = document.getElementById("ageInput");
-const genderSelect = document.getElementById("genderSelect");
-const editBtn = document.getElementById("editBtn");
-const uploadBtn = document.getElementById("uploadBtn");
-const fileInput = document.getElementById("fileInput");
-const saveBtn = document.getElementById("saveBtn");
-
-const newPostCard = document.getElementById("newPostCard");
-const postText = document.getElementById("postText");
-const postImageInput = document.getElementById("postImageInput");
-const createPostBtn = document.getElementById("createPostBtn");
-
-const postsListCard = document.getElementById("postsListCard");
-const postsList = document.getElementById("postsList");
-
-const contactsView = document.getElementById("contactsView");
-const contactsList = document.getElementById("contactsList");
-const navContacts = document.getElementById("nav-contacts");
-const navProfile = document.getElementById("nav-profile");
-
-const avatarEl = document.getElementById("avatar");
-const overlay = document.getElementById("overlay");
-const overlayImg = document.getElementById("overlayImg");
-const status = document.getElementById("status");
-
-let editMode = false;
-let viewingUser = currentUser;
-let currentProfile = {};
-const userCache = {};
-
-// small helpers
-function showStatus(msg, isError = true) {
-  status.textContent = msg;
-  status.style.color = isError ? "#f66" : "#8f8";
+// add fixed API base and helper
+const API_BASE = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+function apiUrl(path) {
+  if (!path) return API_BASE;
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  return API_BASE + (path.startsWith("/") ? path : "/" + path);
 }
 
-// unified fetch that resolves relative to current page (preserves sub-path)
+// unified fetch that resolves to fixed API base (preserves correct host + app sub-path)
 async function fetchJson(url, opts) {
   try {
-    const full = new URL(url, location.href).href;
+    const full = apiUrl(url);
     const res = await fetch(full, opts);
     const data = await res.json();
     return { ok: res.ok, data };

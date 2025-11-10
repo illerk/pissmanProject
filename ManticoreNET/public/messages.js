@@ -1,6 +1,14 @@
 // compute base
 const BASE = location.pathname.replace(/\/[^/]*$/, '');
 
+// add fixed API base and helper
+const API_BASE = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+function apiUrl(path) {
+  if (!path) return API_BASE;
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  return API_BASE + (path.startsWith("/") ? path : "/" + path);
+}
+
 // top code
 const currentUser = localStorage.getItem("currentUser");
 if (!currentUser) location.href = "index.html";
@@ -49,10 +57,10 @@ ws.addEventListener("message", (ev) => {
   }
 });
 
-// unified fetch that resolves relative to current page (preserves sub-path)
+// unified fetch that resolves relative to API_BASE (preserves sub-path)
 async function fetchJson(url, opts) {
   try {
-    const full = new URL(url, location.href).href; // e.g. "api/users" -> "/ManticoreNET/api/users"
+    const full = apiUrl(url);
     const r = await fetch(full, opts);
     return { ok: r.ok, data: await r.json() };
   } catch (e) { return { ok: false, data: null }; }

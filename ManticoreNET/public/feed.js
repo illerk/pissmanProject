@@ -15,10 +15,18 @@ const basePath = location.pathname.replace(/\/[^/]*$/, '');
 const proto = location.protocol === "https:" ? "wss" : "ws";
 const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
+// add fixed API base and helper
+const API_BASE = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+function apiUrl(path) {
+  if (!path) return API_BASE;
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  return API_BASE + (path.startsWith("/") ? path : "/" + path);
+}
+
 // unified fetch
 async function fetchJson(url, opts) {
   try {
-    const full = new URL(url, location.href).href;
+    const full = apiUrl(url);
     const res = await fetch(full, opts);
     const data = await res.json();
     return { ok: res.ok, data };

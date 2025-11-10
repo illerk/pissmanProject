@@ -7,10 +7,19 @@ function showStatus(msg, isError = true) {
   status.style.color = isError ? "#f66" : "#8f8";
 }
 
+// add absolute API base and helper
+const API_BASE = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+function apiUrl(path) {
+  if (!path) return API_BASE;
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  // avoid leading-slash resetting host when using URL(), just join
+  return API_BASE + (path.startsWith("/") ? path : "/" + path);
+}
+
 async function postJson(url, body) {
   try {
-    // build URL relative to current document location so sub-paths are preserved
-    const full = new URL(url, location.href).href;
+    // build URL using fixed API base so sub-paths are always correct
+    const full = apiUrl(url);
     const res = await fetch(full, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
