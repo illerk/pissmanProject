@@ -174,7 +174,8 @@ async function loadPosts(username, options = { preserveScroll: true }) {
   const container = postsList;
   const prevScroll = options.preserveScroll ? container.scrollTop : 0;
   postsList.innerHTML = "Loading posts...";
-  const { ok, data } = await fetchJson(`/api/posts/${encodeURIComponent(username)}`);
+  // use absolute API_ROOT URL to ensure correct base path under /ManticoreNET
+  const { ok, data } = await fetchJson(`${API_ROOT}/posts/${encodeURIComponent(username)}`);
   if (!ok || !data.posts) {
     postsList.innerHTML = `<div style="color:#f66">Failed to load posts</div>`;
     return;
