@@ -4,9 +4,21 @@ const status = document.getElementById("status");
 
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
 
-function showStatus(msg, isError = true) {
+let statusTimer = null;
+function showStatus(msg, isError = true, ttl = 4000) {
   status.textContent = msg;
   status.style.color = isError ? "#f66" : "#8f8";
+  if (statusTimer) {
+    clearTimeout(statusTimer);
+    statusTimer = null;
+  }
+  if (ttl && ttl > 0) {
+    statusTimer = setTimeout(() => {
+      status.textContent = "";
+      status.style.color = "";
+      statusTimer = null;
+    }, ttl);
+  }
 }
 
 function buildApiUrl(url) {
