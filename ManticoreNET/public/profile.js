@@ -1,6 +1,9 @@
 // compute base
 const BASE = location.pathname.replace(/\/[^/]*$/, '');
 
+// add: explicit API root (always use this)
+const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+
 const currentUser = localStorage.getItem("currentUser");
 if (!currentUser) {
   window.location.href = "index.html";
@@ -46,19 +49,21 @@ let viewingUser = currentUser;
 let currentProfile = {};
 const userCache = {};
 
-// add API root so client always targets the hosted API path
-const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
-
 // small helpers
 function showStatus(msg, isError = true) {
   status.textContent = msg;
   status.style.color = isError ? "#f66" : "#8f8";
 }
 
-// unified fetch that resolves to API_ROOT (preserves sub-path on server)
+// unified fetch that resolves relative to current page (preserves sub-path)
 async function fetchJson(url, opts) {
   try {
-    const full = new URL(url, API_ROOT).href;
+    // resolve to API_ROOT when requesting API paths
+    let full;
+    if (/^https?:\/\//.test(url)) full = url;
+    else if (url.startsWith("/api/")) full = API_ROOT + url.slice(4);
+    else if (url.startsWith("api/")) full = API_ROOT + url.slice(3);
+    else full = new URL(url, location.href).href;
     const res = await fetch(full, opts);
     const data = await res.json();
     return { ok: res.ok, data };
@@ -269,8 +274,7 @@ async function renderPosts(posts) {
       const delBtn = document.createElement("button"); delBtn.textContent = "Delete";
       delBtn.addEventListener("click", async () => {
         if (!confirm("Delete this post?")) return;
-        // use API_ROOT so DELETE goes to the correct hosted path
-        await fetch(new URL(`/posts/${post.id}`, API_ROOT).href, {
+        await fetch(`${API_ROOT}/posts/${post.id}`, {
           method: "DELETE", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username: currentUser })
         });

@@ -15,13 +15,17 @@ const basePath = location.pathname.replace(/\/[^/]*$/, '');
 const proto = location.protocol === "https:" ? "wss" : "ws";
 const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
-// force API root to the hosted path
+// add: explicit API root
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
 
 // unified fetch
 async function fetchJson(url, opts) {
   try {
-    const full = new URL(url, API_ROOT).href;
+    let full;
+    if (/^https?:\/\//.test(url)) full = url;
+    else if (url.startsWith("/api/")) full = API_ROOT + url.slice(4);
+    else if (url.startsWith("api/")) full = API_ROOT + url.slice(3);
+    else full = new URL(url, location.href).href;
     const res = await fetch(full, opts);
     const data = await res.json();
     return { ok: res.ok, data };
@@ -156,8 +160,7 @@ async function renderPosts(posts) {
       const delBtn = document.createElement('button'); delBtn.textContent = 'Delete';
       delBtn.addEventListener('click', async () => {
         if (!confirm('Delete this post?')) return;
-        // use API_ROOT so DELETE goes to the correct hosted path
-        const res = await fetch(new URL(`/posts/${post.id}`, API_ROOT).href, {
+        const res = await fetch(`${API_ROOT}/posts/${post.id}`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: currentUser })
