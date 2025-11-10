@@ -18,7 +18,11 @@ const MESSAGES_FILE = path.join(__dirname, "messages.json");
 const BASE_PATH = process.env.BASE_PATH || ""; 
 const API_BASE = (BASE_PATH === "/") ? "/api" : (BASE_PATH + "/api");
 
-
+app.use((req, res, next) => {
+  const cl = req.headers['content-length'];
+  if (cl) console.log(`[req] ${req.method} ${req.url} Content-Length: ${cl}`);
+  return next();
+});
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
