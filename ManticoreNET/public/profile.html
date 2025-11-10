@@ -29,13 +29,21 @@
         <div style="display:flex; gap:18px; align-items:center; flex-wrap:wrap">
           <div style="text-align:center">
             <img id="avatar" src="default-avatar.png" alt="avatar">
-            <div style="margin-top:8px; font-size:0.9rem; color:#aaa">Click avatar to view</div>
           </div>
 
           <div style="flex:1; min-width:220px">
             <div id="viewFields">
               <div id="ageDisplay">Age: <span id="ageText">—</span></div>
               <div style="margin-top:8px">Gender: <span id="genderText">—</span></div>
+
+              <!-- bio display -->
+              <div id="bioDisplay" style="margin-top:12px">
+                <div style="font-weight:600">Bio</div>
+                <div style="margin-top:6px; color:#ddd">
+                  <span id="bioText">—</span>
+                  <button id="bioToggle" style="display:none;margin-left:8px;background:none;border:none;color:#8cf;cursor:pointer">▼</button>
+                </div>
+              </div>
             </div>
 
             <div id="editFields" style="display:none">
@@ -48,6 +56,10 @@
                 <option value="female">Female</option>
                 <option value="other">Other</option>
               </select>
+
+              <!-- bio edit -->
+              <label style="margin-top:8px;display:block">Bio</label>
+              <textarea id="bioInput" placeholder="Write a short bio..." style="width:100%; min-height:80px; background:transparent; border:1px solid rgba(255,255,255,0.08); color:#fff; padding:8px; box-sizing:border-box"></textarea>
             </div>
 
             <div style="margin-top:12px; display:flex; gap:8px">

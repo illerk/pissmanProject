@@ -102,7 +102,8 @@ api.post("/register", async (req, res) => {
   }
 
   const hash = await bcrypt.hash(password, 10);
-  users.push({ username, password: hash });
+  // add default bio empty
+  users.push({ username, password: hash, bio: "" });
   await fs.writeJson(USERS_FILE, users, { spaces: 2 });
   res.json({ success: true });
 });
@@ -138,13 +139,14 @@ api.get("/user/:username", async (req, res) => {
 
 
 api.post("/profile", async (req, res) => {
-  const { username, age, gender } = req.body;
+  const { username, age, gender, bio } = req.body;
   if (!username) return res.status(400).json({ error: "Missing username" });
   const users = await fs.readJson(USERS_FILE);
   const idx = users.findIndex(u => u.username === username);
   if (idx === -1) return res.status(404).json({ error: "User not found" });
   users[idx].age = age ?? users[idx].age ?? "";
   users[idx].gender = gender ?? users[idx].gender ?? "";
+  users[idx].bio = (typeof bio === "string") ? bio : (users[idx].bio ?? "");
   await fs.writeJson(USERS_FILE, users, { spaces: 2 });
   res.json({ success: true, profile: { ...users[idx], password: undefined } });
 });

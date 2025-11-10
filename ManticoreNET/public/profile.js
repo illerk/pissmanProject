@@ -121,9 +121,11 @@ function setEditMode(on) {
   if (editMode) {
     ageInput.value = currentProfile.age ?? "";
     genderSelect.value = currentProfile.gender ?? "";
+    bioInput.value = currentProfile.bio ?? "";
   } else {
     ageText.textContent = currentProfile.age ?? "—";
     genderText.textContent = currentProfile.gender ?? "—";
+    renderBio(currentProfile.bio);
     fileInput.value = "";
   }
 }
@@ -423,6 +425,9 @@ async function loadProfile(username = currentUser) {
   avatarEl.src = resolveAsset(currentProfile.avatar) || "default-avatar.png";
   ageText.textContent = currentProfile.age ?? "—";
   genderText.textContent = currentProfile.gender ?? "—";
+  // ensure bio exists
+  if (typeof currentProfile.bio === "undefined") currentProfile.bio = "";
+  renderBio(currentProfile.bio);
   setEditMode(false);
 
   // load posts for this user
@@ -468,9 +473,10 @@ saveBtn.addEventListener("click", async () => {
   if (viewingUser !== currentUser) return;
   const age = ageInput.value;
   const gender = genderSelect.value;
+  const bio = bioInput.value;
   const { ok } = await fetchJson("api/profile", {
     method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: currentUser, age, gender })
+    body: JSON.stringify({ username: currentUser, age, gender, bio })
   });
   if (ok) await loadProfile(viewingUser);
 });
@@ -534,3 +540,39 @@ overlay.addEventListener("click", () => {
 overlayImg.addEventListener("click", () => {
   overlay.classList.remove("visible");
 });
+
+const BIO_LIMIT = 200;
+const bioTextEl = document.getElementById("bioText");
+const bioToggleBtn = document.getElementById("bioToggle");
+const bioInput = document.getElementById("bioInput");
+
+function renderBio(bio) {
+  bio = bio ?? "";
+  if (!bio) {
+    bioTextEl.textContent = "—";
+    bioToggleBtn.style.display = "none";
+    return;
+  }
+  if (bio.length > BIO_LIMIT) {
+    const short = bio.slice(0, BIO_LIMIT).trim();
+    bioTextEl.textContent = short + "…";
+    bioToggleBtn.style.display = "";
+    bioToggleBtn.textContent = "▼";
+    bioToggleBtn.dataset.expanded = "0";
+    bioToggleBtn.onclick = () => {
+      const expanded = bioToggleBtn.dataset.expanded === "1";
+      if (!expanded) {
+        bioTextEl.textContent = bio;
+        bioToggleBtn.textContent = "▲";
+        bioToggleBtn.dataset.expanded = "1";
+      } else {
+        bioTextEl.textContent = bio.slice(0, BIO_LIMIT).trim() + "…";
+        bioToggleBtn.textContent = "▼";
+        bioToggleBtn.dataset.expanded = "0";
+      }
+    };
+  } else {
+    bioTextEl.textContent = bio;
+    bioToggleBtn.style.display = "none";
+  }
+}
