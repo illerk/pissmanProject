@@ -1,9 +1,10 @@
 // compute base
 const BASE = location.pathname.replace(/\/[^/]*$/, '');
 
-// compute API and assets roots relative to current origin + BASE
-const API_ROOT = location.origin + BASE + "/api";
-const ASSET_ROOT = location.origin + BASE + "/public";
+// add: explicit API root (always use this)
+const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+// add: assets root for avatars/posts (serve from /ManticoreNET/public)
+const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
 
 function resolveAsset(url) {
   if (!url) return url;
@@ -268,105 +269,11 @@ async function renderPosts(posts) {
       el.appendChild(img);
     }
 
-    // actions: voting & comments (only basic UI)
+    // actions: only keep delete (for owner)
     const actions = document.createElement("div");
     actions.style.display = "flex"; actions.style.alignItems = "center"; actions.style.gap = "8px"; actions.style.marginTop = "10px";
 
-    const totalVotes = (post.votes || []).reduce((s,v)=>s + Number(v.vote||0), 0);
-    const userVoteEntry = (post.votes || []).find(v => v.username === currentUser);
-    const userVoteVal = userVoteEntry ? userVoteEntry.vote : 0;
-
-    const upBtn = document.createElement("button");
-    upBtn.textContent = `▲ ${totalVotes > 0 ? totalVotes : ''}`.trim();
-    upBtn.style.fontWeight = userVoteVal === 1 ? '700' : '400';
-    upBtn.addEventListener("click", async () => {
-      await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/vote`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: currentUser, vote: 1 })
-      });
-      await loadPosts(viewingUser, { preserveScroll: true });
-    });
-
-    const downBtn = document.createElement("button");
-    downBtn.textContent = `▼ ${totalVotes < 0 ? Math.abs(totalVotes) : ''}`.trim();
-    downBtn.style.fontWeight = userVoteVal === -1 ? '700' : '400';
-    downBtn.addEventListener("click", async () => {
-      await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/vote`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: currentUser, vote: -1 })
-      });
-      await loadPosts(viewingUser, { preserveScroll: true });
-    });
-
-    const commentsBtn = document.createElement("button");
-    const commentsCount = (post.comments || []).length;
-    commentsBtn.textContent = `Comments (${commentsCount})`;
-    const commentsArea = document.createElement("div");
-    commentsArea.style.display = 'none';
-    commentsArea.style.marginTop = '8px';
-    commentsBtn.addEventListener('click', () => {
-      commentsArea.style.display = commentsArea.style.display === 'none' ? '' : 'none';
-      if (commentsArea.style.display !== 'none') {
-        commentsArea.innerHTML = '';
-        for (const c of (post.comments || [])) {
-          const ce = document.createElement('div');
-          ce.style.border = '1px solid rgba(255,255,255,0.03)';
-          ce.style.padding = '8px';
-          ce.style.borderRadius = '6px';
-          const meta = document.createElement('div');
-          meta.style.fontSize = '0.85rem';
-          meta.style.color = '#999';
-          meta.textContent = `${c.username} · ${formatFutureDate(c.createdAt)}`;
-          const txt = document.createElement('div'); txt.textContent = c.text; txt.style.marginTop='6px';
-          // comment vote
-          const cVotes = (c.votes || []).reduce((s,v)=>s + Number(v.vote||0), 0);
-          const cUserVote = (c.votes || []).find(v=>v.username===currentUser)?.vote || 0;
-          const cup = document.createElement('button'); cup.textContent = `▲ ${cVotes>0?cVotes:""}`.trim(); cup.style.fontWeight = cUserVote===1 ? '700' : '400';
-          const cdown = document.createElement('button'); cdown.textContent = `▼ ${cVotes<0?Math.abs(cVotes):""}`.trim(); cdown.style.fontWeight = cUserVote===-1 ? '700' : '400';
-          cup.addEventListener('click', async () => {
-            await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/comments/${encodeURIComponent(c.id)}/vote`, {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ username: currentUser, vote: 1 })
-            });
-            await loadPosts(viewingUser, { preserveScroll: true });
-          });
-          cdown.addEventListener('click', async () => {
-            await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/comments/${encodeURIComponent(c.id)}/vote`, {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ username: currentUser, vote: -1 })
-            });
-            await loadPosts(viewingUser, { preserveScroll: true });
-          });
-
-          const cvs = document.createElement('div'); cvs.style.marginTop='6px'; cvs.style.display='flex'; cvs.style.gap='6px';
-          cvs.appendChild(cup); cvs.appendChild(cdown);
-
-          ce.appendChild(meta); ce.appendChild(txt); ce.appendChild(cvs);
-          commentsArea.appendChild(ce);
-        }
-
-        // add comment UI
-        const addBox = document.createElement('div');
-        addBox.style.display='flex'; addBox.style.flexDirection='column'; addBox.style.gap='6px'; addBox.style.marginTop='8px';
-        const ta = document.createElement('textarea'); ta.placeholder='Write a comment...'; ta.style.width='100%'; ta.style.minHeight='48px';
-        const send = document.createElement('button'); send.textContent = 'Comment';
-        send.addEventListener('click', async () => {
-          const text = (ta.value||'').trim();
-          if (!text) return;
-          await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/comments`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: currentUser, text })
-          });
-          await loadPosts(viewingUser, { preserveScroll: true });
-        });
-        addBox.appendChild(ta); addBox.appendChild(send);
-        commentsArea.appendChild(addBox);
-      }
-    });
-
-    actions.appendChild(upBtn); actions.appendChild(downBtn); actions.appendChild(commentsBtn);
     el.appendChild(actions);
-    el.appendChild(commentsArea);
 
     postsList.appendChild(el);
   }
