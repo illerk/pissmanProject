@@ -52,10 +52,14 @@ function showStatus(msg, isError = true) {
   status.style.color = isError ? "#f66" : "#8f8";
 }
 
-// unified fetch that resolves relative to current page (preserves sub-path)
+// заменяем старую реализацию fetchJson, чтобы всегда использовать /ManticoreNET как базовый префикс
+const BASE_PREFIX = "/ManticoreNET";
+function getBasePath() { return BASE_PREFIX.endsWith("/") ? BASE_PREFIX : BASE_PREFIX + "/"; }
+
 async function fetchJson(url, opts) {
   try {
-    const full = new URL(url, location.href).href;
+    const cleaned = String(url).replace(/^\/+/, "");
+    const full = location.origin + getBasePath() + cleaned;
     const res = await fetch(full, opts);
     const data = await res.json();
     return { ok: res.ok, data };
