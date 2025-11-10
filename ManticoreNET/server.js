@@ -71,7 +71,10 @@ if (!fs.existsSync(POSTS_FILE)) {
 try {
   const postsRaw = fs.readJsonSync(POSTS_FILE);
   const sanitized = (Array.isArray(postsRaw) ? postsRaw : []).map(p => {
-    const {...keep } = p;
+    const { ...keep } = p;
+    // ensure votesBy and score exist
+    keep.votesBy = keep.votesBy || {};
+    keep.score = Number(keep.score ?? Object.values(keep.votesBy || {}).reduce((s,x)=>s+Number(x||0),0));
     return keep;
   });
   fs.writeJsonSync(POSTS_FILE, sanitized, { spaces: 2 });
@@ -297,9 +300,48 @@ api.post("/comments/:postId", async (req, res) => {
 
 api.get("/posts", async (req, res) => {
   const posts = await fs.readJson(POSTS_FILE);
-  // newest first
-  const sorted = posts.slice().sort((a, b) => b.createdAt - a.createdAt);
+  const normalized = (Array.isArray(posts) ? posts : []).map(p => {
+    const copy = { ...p };
+    copy.votesBy = copy.votesBy || {};
+    copy.score = Number(copy.score ?? Object.values(copy.votesBy || {}).reduce((s,x)=>s+Number(x||0),0));
+    return copy;
+  });
+  const sorted = normalized.slice().sort((a, b) => b.createdAt - a.createdAt);
   res.json({ success: true, posts: sorted });
+});
+
+// --- NEW: vote endpoint for posts ---
+api.post("/posts/:id/vote", async (req, res) => {
+  const { id } = req.params;
+  const { username, vote } = req.body;
+  if (!id) return res.status(400).json({ error: "Missing post id" });
+  if (!username) return res.status(400).json({ error: "Missing username" });
+  const posts = await fs.readJson(POSTS_FILE);
+  const idx = (Array.isArray(posts) ? posts : []).findIndex(p => p.id === id);
+  if (idx === -1) return res.status(404).json({ error: "Post not found" });
+
+  posts[idx].votesBy = posts[idx].votesBy || {};
+  const vnum = Number(vote) || 0;
+  if (vnum === 0) {
+    // remove vote
+    delete posts[idx].votesBy[username];
+  } else {
+    posts[idx].votesBy[username] = vnum;
+  }
+  posts[idx].score = Object.values(posts[idx].votesBy || {}).reduce((s,x) => s + Number(x || 0), 0);
+
+  await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
+
+  // notify owner/author over ws (best-effort)
+  try {
+    const payload = JSON.stringify({ type: "post_update", post: posts[idx] });
+    const ownerWs = clients.get(posts[idx].username);
+    if (ownerWs && ownerWs.readyState === WebSocket.OPEN) ownerWs.send(payload);
+    const actorWs = clients.get(username);
+    if (actorWs && actorWs.readyState === WebSocket.OPEN) actorWs.send(payload);
+  } catch (e) { /* ignore */ }
+
+  res.json({ success: true, post: posts[idx] });
 });
 
 // helper: conversation key

@@ -149,12 +149,17 @@ async function renderPosts(posts) {
     downBtn.textContent = '↓';
     downBtn.className = 'vote-btn';
 
-    const myVote = (post.votesBy && post.votesBy[currentUser]) ? Number(post.votesBy[currentUser]) : 0;
-    if (myVote === 1) upBtn.classList.add('active');
-    if (myVote === -1) downBtn.classList.add('active');
+    // --- DYNAMIC: don't capture myVote once, compute it dynamically ---
+    function updateVoteButtons() {
+      const cur = (post.votesBy && post.votesBy[currentUser]) ? Number(post.votesBy[currentUser]) : 0;
+      upBtn.classList.toggle('active', cur === 1);
+      downBtn.classList.toggle('active', cur === -1);
+    }
+    updateVoteButtons();
 
     async function votePost(v) {
-      const wanted = (myVote === v) ? 0 : v;
+      const cur = (post.votesBy && post.votesBy[currentUser]) ? Number(post.votesBy[currentUser]) : 0;
+      const wanted = (cur === v) ? 0 : v;
       const { ok, data } = await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -164,8 +169,7 @@ async function renderPosts(posts) {
       post.votesBy = data.post.votesBy || {};
       post.score = data.post.score ?? Object.values(post.votesBy).reduce((s,x)=>s+Number(x||0),0);
       scoreEl.textContent = post.score;
-      upBtn.classList.toggle('active', (post.votesBy[currentUser] === 1));
-      downBtn.classList.toggle('active', (post.votesBy[currentUser] === -1));
+      updateVoteButtons();
     }
 
     upBtn.addEventListener('click', ()=> votePost(1));
