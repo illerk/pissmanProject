@@ -95,7 +95,9 @@ async function fetchJson(url, opts) {
 }
 function formatFutureDate(ts) {
   const d = new Date(Number(ts));
-  d.setFullYear(d.getFullYear() + 313);
+  d.setFullYear(d.getFullYear() + 312);
+  d.setMonth(d.getMonth() + 3);
+  d.setDate(d.getDate() + 21);
   return d.toLocaleString();
 }
 async function getUserProfile(username) {
