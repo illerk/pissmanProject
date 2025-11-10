@@ -76,7 +76,7 @@ try {
   });
   fs.writeJsonSync(POSTS_FILE, sanitized, { spaces: 2 });
 } catch (e) {
-  // ignore if file not readable yet
+  // ignore if file not readable yettty
 }
 
 
