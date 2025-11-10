@@ -2,7 +2,7 @@ const username = document.getElementById("username");
 const password = document.getElementById("password");
 const status = document.getElementById("status");
 
-const API_ROOT = ""; // don't hardcode external domain; use relative /api paths
+const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
 
 let statusTimer = null;
 function showStatus(msg, isError = true, ttl = 4000) {
@@ -24,8 +24,8 @@ function showStatus(msg, isError = true, ttl = 4000) {
 function buildApiUrl(url) {
   if (!url) return url;
   if (/^https?:\/\//.test(url)) return url;
-  if (url.startsWith("/api/")) return url;    // keep relative API path
-  if (url.startsWith("api/")) return "/" + url;
+  if (url.startsWith("/api/")) return API_ROOT + url.slice(4); // "/api/foo" -> API_ROOT + "/foo"
+  if (url.startsWith("api/")) return API_ROOT + url.slice(3);  // "api/foo" -> API_ROOT + "/foo"
   return url;
 }
 

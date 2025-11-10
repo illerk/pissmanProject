@@ -2,7 +2,7 @@
 const BASE = location.pathname.replace(/\/[^/]*$/, '');
 
 // add: explicit API root (always use this)
-// const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
 // add: assets root for avatars/posts (serve from /ManticoreNET/public)
 const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
 
@@ -79,11 +79,11 @@ function showStatus(msg, isError = true, ttl = 4000) {
 // unified fetch that resolves relative to current page (preserves sub-path)
 async function fetchJson(url, opts) {
   try {
-    // resolve to relative API paths instead of forcing a fixed API_ROOT
+    // resolve to API_ROOT when requesting API paths
     let full;
     if (/^https?:\/\//.test(url)) full = url;
-    else if (url.startsWith("/api/")) full = url;                // keep relative /api/... on same origin
-    else if (url.startsWith("api/")) full = "/" + url;           // treat "api/..." as "/api/..."
+    else if (url.startsWith("/api/")) full = API_ROOT + url.slice(4);
+    else if (url.startsWith("api/")) full = API_ROOT + url.slice(3);
     else full = new URL(url, location.href).href;
     const res = await fetch(full, opts);
     const data = await res.json();
@@ -191,7 +191,7 @@ async function loadPosts(username, options = { preserveScroll: true }) {
 
   try {
     // load all posts (feed) then filter to this user's posts
-    const { ok, data } = await fetchJson('/api/posts');
+    const { ok, data } = await fetchJson(`${API_ROOT}/posts`);
     if (!ok || !data || !Array.isArray(data.posts)) {
       postsList.innerHTML = `<div style="color:#f66">Failed to load posts</div>`;
       return;

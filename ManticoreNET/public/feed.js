@@ -15,9 +15,8 @@ const basePath = location.pathname.replace(/\/[^/]*$/, '');
 const proto = location.protocol === "https:" ? "wss" : "ws";
 const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
-// replace explicit API_ROOT with empty so we use relative /api paths
-const API_ROOT = "";
-
+// add: explicit API root
+const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
 // add: assets root for avatars/posts (serve from /ManticoreNET/public)
 const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
 function resolveAsset(url) {
@@ -32,8 +31,8 @@ async function fetchJson(url, opts) {
   try {
     let full;
     if (/^https?:\/\//.test(url)) full = url;
-    else if (url.startsWith("/api/")) full = url;       // use relative API path on same origin
-    else if (url.startsWith("api/")) full = "/" + url;  // make it absolute on same origin
+    else if (url.startsWith("/api/")) full = API_ROOT + url.slice(4);
+    else if (url.startsWith("api/")) full = API_ROOT + url.slice(3);
     else full = new URL(url, location.href).href;
     const res = await fetch(full, opts);
     const data = await res.json();
@@ -260,6 +259,7 @@ async function renderPosts(posts) {
       } catch(e) {}
     })();
 
+    // ...existing code...
     // await loadCommentsForPost(post.id, commentsList); // remove this line so comments are not auto-loaded
     // but since we added comments hidden, ensure we do NOT auto-load here; remove or comment out line above in original file
   }
