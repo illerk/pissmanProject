@@ -194,11 +194,10 @@ api.get("/users", async (req, res) => {
 
 
 
-api.get("/posts/user/:username", async (req, res) => {
+api.get("/posts/:username", async (req, res) => {
   const { username } = req.params;
   const posts = await fs.readJson(POSTS_FILE);
-  const userPosts = posts.filter(p => p.username === username)
-                        .sort((a, b) => b.createdAt - a.createdAt);
+  const userPosts = posts.filter(p => p.username === username).sort((a,b)=>b.createdAt-a.createdAt);
   res.json({ success: true, posts: userPosts });
 });
 
@@ -264,7 +263,12 @@ api.post("/posts/:id/vote", async (req, res) => {
     existing.vote = Number(vote);
   }
   await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-  res.json({ success: true, votes: p.votes });
+
+  // compute aggregate score and user's current vote
+  const score = (p.votes || []).reduce((s, it) => s + Number(it.vote), 0);
+  const userVote = (p.votes || []).find(v => v.username === username)?.vote ?? 0;
+
+  res.json({ success: true, votes: p.votes, score, userVote });
 });
 
 api.post("/posts/:id/comments", async (req, res) => {
@@ -296,7 +300,11 @@ api.post("/comments/:id/vote", async (req, res) => {
       else if (existing.vote === Number(vote)) c.votes = c.votes.filter(v => v.username !== username);
       else existing.vote = Number(vote);
       await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-      return res.json({ success: true, votes: c.votes });
+
+      const score = (c.votes || []).reduce((s, it) => s + Number(it.vote), 0);
+      const userVote = (c.votes || []).find(v => v.username === username)?.vote ?? 0;
+
+      return res.json({ success: true, votes: c.votes, score, userVote });
     }
   }
   if (!found) return res.status(404).json({ error: "Comment not found" });

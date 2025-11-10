@@ -151,9 +151,11 @@ async function renderPosts(posts) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: currentUser, vote: 1 })
       });
-      if (ok && data.success) {
+      if (ok && data && data.success) {
         post.votes = data.votes;
-        await loadFeed({ preserveScroll: true });
+        count.textContent = (post.votes||[]).reduce((s,v)=>s + Number(v.vote), 0);
+        up.style.opacity = (data.userVote === 1) ? '0.9' : '';
+        down.style.opacity = (data.userVote === -1) ? '0.9' : '';
         container.scrollTop = prev;
       }
     });
@@ -165,9 +167,11 @@ async function renderPosts(posts) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: currentUser, vote: -1 })
       });
-      if (ok && data.success) {
+      if (ok && data && data.success) {
         post.votes = data.votes;
-        await loadFeed({ preserveScroll: true });
+        count.textContent = (post.votes||[]).reduce((s,v)=>s + Number(v.vote), 0);
+        up.style.opacity = (data.userVote === 1) ? '0.9' : '';
+        down.style.opacity = (data.userVote === -1) ? '0.9' : '';
         container.scrollTop = prev;
       }
     });
@@ -219,20 +223,30 @@ async function renderPosts(posts) {
       const cdown = document.createElement('button'); cdown.textContent='▼';
       const ccount = document.createElement('span'); ccount.textContent = voteCount(c.votes);
       cup.addEventListener('click', async ()=> {
-        const { ok } = await fetchJson(`/api/comments/${c.id}/vote`, {
+        const { ok, data } = await fetchJson(`/api/comments/${c.id}/vote`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: currentUser, vote: 1 })
         });
-        if (ok) loadFeed();
+        if (ok && data && data.success) {
+          c.votes = data.votes;
+          ccount.textContent = (c.votes||[]).reduce((s,v)=>s+Number(v.vote),0);
+          cup.style.opacity = (data.userVote === 1) ? '0.9' : '';
+          cdown.style.opacity = (data.userVote === -1) ? '0.9' : '';
+        }
       });
       cdown.addEventListener('click', async ()=> {
-        const { ok } = await fetchJson(`/api/comments/${c.id}/vote`, {
+        const { ok, data } = await fetchJson(`/api/comments/${c.id}/vote`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: currentUser, vote: -1 })
         });
-        if (ok) loadFeed();
+        if (ok && data && data.success) {
+          c.votes = data.votes;
+          ccount.textContent = (c.votes||[]).reduce((s,v)=>s+Number(v.vote),0);
+          cup.style.opacity = (data.userVote === 1) ? '0.9' : '';
+          cdown.style.opacity = (data.userVote === -1) ? '0.9' : '';
+        }
       });
       cv.appendChild(cup); cv.appendChild(ccount); cv.appendChild(cdown);
       ci.appendChild(cv);

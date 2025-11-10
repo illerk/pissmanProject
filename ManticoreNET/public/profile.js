@@ -184,25 +184,30 @@ async function showContacts() {
 
 // load posts for a user
 async function loadPosts(username, options = { preserveScroll: true }) {
+  // preserve scroll position if requested
   const container = postsList;
   const prevScroll = options.preserveScroll ? container.scrollTop : 0;
   postsList.innerHTML = "Loading posts...";
 
   try {
-    // Используем новый endpoint для получения постов пользователя
-    const { ok, data } = await fetchJson(`/api/posts/user/${encodeURIComponent(username)}`);
+    // load all posts (feed) then filter to this user's posts
+    const { ok, data } = await fetchJson(`${API_ROOT}/posts`);
     if (!ok || !data || !Array.isArray(data.posts)) {
       postsList.innerHTML = `<div style="color:#f66">Failed to load posts</div>`;
       return;
     }
-    
-    await renderPosts(data.posts);
+    // filter posts that belong to the requested username
+    const userPosts = data.posts.filter(p => String(p.username) === String(username))
+                               .sort((a,b) => b.createdAt - a.createdAt);
+    await renderPosts(userPosts);
   } catch (e) {
     postsList.innerHTML = `<div style="color:#f66">Failed to load posts</div>`;
     return;
   }
 
+  // restore scroll
   if (options.preserveScroll) {
+    // small timeout to ensure DOM layout applied
     setTimeout(() => { container.scrollTop = prevScroll; }, 0);
   }
 }
@@ -284,10 +289,12 @@ async function renderPosts(posts) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: currentUser, vote: 1 })
       });
-      if (ok && data.success) {
+      if (ok && data && data.success) {
         post.votes = data.votes;
-        // reload posts preserving scroll
-        await loadPosts(viewingUser, { preserveScroll: true });
+        // update UI in-place
+        count.textContent = (post.votes||[]).reduce((s,v)=>s+Number(v.vote),0);
+        up.style.opacity = (data.userVote === 1) ? "0.9" : "";
+        down.style.opacity = (data.userVote === -1) ? "0.9" : "";
         container.scrollTop = prev;
       }
     });
@@ -298,7 +305,13 @@ async function renderPosts(posts) {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: currentUser, vote: -1 })
       });
-      if (ok && data.success) { post.votes = data.votes; count.textContent = (post.votes||[]).reduce((s,v)=>s+Number(v.vote),0); await loadPosts(viewingUser, { preserveScroll:true }); container.scrollTop = prev; }
+      if (ok && data && data.success) {
+        post.votes = data.votes;
+        count.textContent = (post.votes||[]).reduce((s,v)=>s+Number(v.vote),0);
+        up.style.opacity = (data.userVote === 1) ? "0.9" : "";
+        down.style.opacity = (data.userVote === -1) ? "0.9" : "";
+        container.scrollTop = prev;
+      }
     });
 
     actions.appendChild(up); actions.appendChild(count); actions.appendChild(down);
@@ -349,18 +362,28 @@ async function renderPosts(posts) {
       const ccount = document.createElement("span"); ccount.textContent = (c.votes||[]).reduce((s,v)=>s+Number(v.vote),0);
 
       cup.addEventListener("click", async () => {
-        const { ok } = await fetchJson(`/api/comments/${c.id}/vote`, {
+        const { ok, data } = await fetchJson(`/api/comments/${c.id}/vote`, {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username: currentUser, vote: 1 })
         });
-        if (ok) await loadPosts(viewingUser);
+        if (ok && data && data.success) {
+          c.votes = data.votes;
+          ccount.textContent = (c.votes||[]).reduce((s,v)=>s+Number(v.vote),0);
+          cup.style.opacity = (data.userVote === 1) ? "0.9" : "";
+          cdown.style.opacity = (data.userVote === -1) ? "0.9" : "";
+        }
       });
       cdown.addEventListener("click", async () => {
-        const { ok } = await fetchJson(`/api/comments/${c.id}/vote`, {
+        const { ok, data } = await fetchJson(`/api/comments/${c.id}/vote`, {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username: currentUser, vote: -1 })
         });
-        if (ok) await loadPosts(viewingUser);
+        if (ok && data && data.success) {
+          c.votes = data.votes;
+          ccount.textContent = (c.votes||[]).reduce((s,v)=>s+Number(v.vote),0);
+          cup.style.opacity = (data.userVote === 1) ? "0.9" : "";
+          cdown.style.opacity = (data.userVote === -1) ? "0.9" : "";
+        }
       });
 
       cv.appendChild(cup); cv.appendChild(ccount); cv.appendChild(cdown);
