@@ -67,7 +67,7 @@ if (!fs.existsSync(POSTS_FILE)) {
   fs.writeJsonSync(POSTS_FILE, []);
 }
 
-// --- ADJUSTED: ensure posts.json contains votes/comments arrays (do not strip them)
+// --- ADJUSTED: ensure existing posts.json have votes and comments arrays (don't remove them)
 try {
   const postsRaw = fs.readJsonSync(POSTS_FILE);
   const normalized = (Array.isArray(postsRaw) ? postsRaw : []).map(p => {
@@ -227,8 +227,9 @@ api.post("/posts", async (req, res) => {
     username,
     text: text ?? "",
     image: null,
-    createdAt: Date.now()
-    // votes/comments removed
+    createdAt: Date.now(),
+    votes: [],        // added: store votes as [{ username, vote }] vote = 1 or -1
+    comments: []      // added: comments array
   };
   if (image) {
     try {
@@ -242,95 +243,96 @@ api.post("/posts", async (req, res) => {
   res.json({ success: true, post });
 });
 
-// NEW: vote on a post (one vote per username; vote = 1 or -1)
+// --- NEW: vote on a post (one vote per user, toggle if same vote)
 api.post("/posts/:id/vote", async (req, res) => {
   const { id } = req.params;
-  const { username, vote } = req.body;
-  if (!username || typeof vote !== "number" || ![1, -1].includes(vote)) {
-    return res.status(400).json({ error: "Missing username or invalid vote" });
-  }
+  const { username, vote } = req.body; // vote: 1 or -1
+  if (!username || ![1, -1].includes(Number(vote))) return res.status(400).json({ error: "Missing username or invalid vote" });
+
+  const users = await fs.readJson(USERS_FILE);
+  if (!users.find(u => u.username === username)) return res.status(404).json({ error: "User not found" });
+
   const posts = await fs.readJson(POSTS_FILE);
   const idx = posts.findIndex(p => p.id === id);
   if (idx === -1) return res.status(404).json({ error: "Post not found" });
-  posts[idx].votes = posts[idx].votes || [];
-  const existing = posts[idx].votes.find(v => v.username === username);
+
+  const pv = posts[idx].votes = posts[idx].votes || [];
+  const existing = pv.find(v => v.username === username);
   if (existing) {
-    if (existing.vote === vote) {
-      // toggle off
-      posts[idx].votes = posts[idx].votes.filter(v => v.username !== username);
+    if (existing.vote === Number(vote)) {
+      // same vote -> remove (toggle off)
+      const ni = pv.findIndex(v => v.username === username);
+      pv.splice(ni, 1);
     } else {
-      existing.vote = vote;
+      existing.vote = Number(vote);
     }
   } else {
-    posts[idx].votes.push({ username, vote });
+    pv.push({ username, vote: Number(vote) });
   }
+
   await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-  res.json({ success: true, votes: posts[idx].votes });
+  res.json({ success: true, post: posts[idx] });
 });
 
-// GET comments for a post
-api.get("/posts/:id/comments", async (req, res) => {
-  const { id } = req.params;
-  const posts = await fs.readJson(POSTS_FILE);
-  const post = posts.find(p => p.id === id);
-  if (!post) return res.status(404).json({ error: "Post not found" });
-  post.comments = post.comments || [];
-  res.json({ success: true, comments: post.comments });
-});
-
-// POST a new comment to a post
+// --- NEW: add comment to a post
 api.post("/posts/:id/comments", async (req, res) => {
   const { id } = req.params;
   const { username, text } = req.body;
   if (!username || typeof text !== "string") return res.status(400).json({ error: "Missing username or text" });
+
+  const users = await fs.readJson(USERS_FILE);
+  if (!users.find(u => u.username === username)) return res.status(404).json({ error: "User not found" });
+
   const posts = await fs.readJson(POSTS_FILE);
   const idx = posts.findIndex(p => p.id === id);
   if (idx === -1) return res.status(404).json({ error: "Post not found" });
-  posts[idx].comments = posts[idx].comments || [];
+
   const commentId = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,8);
   const comment = {
     id: commentId,
     username,
     text,
     createdAt: Date.now(),
-    votes: [] // array of { username, vote }
+    votes: [] // [{ username, vote }]
   };
+  posts[idx].comments = posts[idx].comments || [];
   posts[idx].comments.push(comment);
   await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-  res.json({ success: true, comment });
+  res.json({ success: true, comment, post: posts[idx] });
 });
 
-// POST vote for a comment by id (search comments across posts)
-api.post("/comments/:id/vote", async (req, res) => {
-  const { id } = req.params;
+// --- NEW: vote on a comment of a post (toggle semantics like post voting)
+api.post("/posts/:postId/comments/:commentId/vote", async (req, res) => {
+  const { postId, commentId } = req.params;
   const { username, vote } = req.body;
-  if (!username || typeof vote !== "number" || ![1, -1].includes(vote)) {
-    return res.status(400).json({ error: "Missing username or invalid vote" });
-  }
+  if (!username || ![1, -1].includes(Number(vote))) return res.status(400).json({ error: "Missing username or invalid vote" });
+
+  const users = await fs.readJson(USERS_FILE);
+  if (!users.find(u => u.username === username)) return res.status(404).json({ error: "User not found" });
+
   const posts = await fs.readJson(POSTS_FILE);
-  let found = false;
-  for (const post of posts) {
-    post.comments = post.comments || [];
-    const cidx = post.comments.findIndex(c => c.id === id);
-    if (cidx !== -1) {
-      found = true;
-      post.comments[cidx].votes = post.comments[cidx].votes || [];
-      const existing = post.comments[cidx].votes.find(v => v.username === username);
-      if (existing) {
-        if (existing.vote === vote) {
-          post.comments[cidx].votes = post.comments[cidx].votes.filter(v => v.username !== username);
-        } else {
-          existing.vote = vote;
-        }
-      } else {
-        post.comments[cidx].votes.push({ username, vote });
-      }
-      break;
+  const pidx = posts.findIndex(p => p.id === postId);
+  if (pidx === -1) return res.status(404).json({ error: "Post not found" });
+
+  posts[pidx].comments = posts[pidx].comments || [];
+  const cidx = posts[pidx].comments.findIndex(c => c.id === commentId);
+  if (cidx === -1) return res.status(404).json({ error: "Comment not found" });
+
+  const cv = posts[pidx].comments[cidx].votes = posts[pidx].comments[cidx].votes || [];
+  const existing = cv.find(v => v.username === username);
+  if (existing) {
+    if (existing.vote === Number(vote)) {
+      const ni = cv.findIndex(v => v.username === username);
+      cv.splice(ni, 1);
+    } else {
+      existing.vote = Number(vote);
     }
+  } else {
+    cv.push({ username, vote: Number(vote) });
   }
-  if (!found) return res.status(404).json({ error: "Comment not found" });
+
   await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-  res.json({ success: true });
+  res.json({ success: true, comment: posts[pidx].comments[cidx] });
 });
 
 // helper: conversation key
