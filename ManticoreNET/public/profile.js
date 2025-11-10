@@ -275,7 +275,100 @@ async function renderPosts(posts) {
 
     el.appendChild(actions);
 
+    // --- NEW: comments section ---
+    const commentsSection = document.createElement("div");
+    commentsSection.style.marginTop = "10px";
+    commentsSection.style.borderTop = "1px solid rgba(255,255,255,0.03)";
+    commentsSection.style.paddingTop = "10px";
+
+    const commentsList = document.createElement("div");
+    commentsList.style.display = "flex";
+    commentsList.style.flexDirection = "column";
+    commentsList.style.gap = "6px";
+    commentsList.innerHTML = "Loading comments...";
+    commentsSection.appendChild(commentsList);
+
+    // only show comment composer if logged in
+    if (currentUser) {
+      const composer = document.createElement("div");
+      composer.style.display = "flex";
+      composer.style.gap = "8px";
+      composer.style.marginTop = "8px";
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = "Write a comment...";
+      input.style.flex = "1";
+      input.style.background = "transparent";
+      input.style.border = "1px solid rgba(255,255,255,0.06)";
+      input.style.color = "#fff";
+      input.style.padding = "6px";
+      input.style.borderRadius = "6px";
+      const btn = document.createElement("button");
+      btn.textContent = "Comment";
+      btn.addEventListener("click", async () => {
+        const txt = input.value.trim();
+        if (!txt) return;
+        const { ok } = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: currentUser, text: txt })
+        });
+        if (ok) {
+          input.value = "";
+          await loadCommentsForPost(post.id, commentsList);
+        } else {
+          showStatus("Failed to post comment");
+        }
+      });
+      composer.appendChild(input);
+      composer.appendChild(btn);
+      commentsSection.appendChild(composer);
+    }
+
+    el.appendChild(commentsSection);
+
+    // append post to list
     postsList.appendChild(el);
+
+    // load comments for this post
+    await loadCommentsForPost(post.id, commentsList);
+  }
+}
+
+// NEW helper: load and render comments for a given post id into a container
+async function loadCommentsForPost(postId, container) {
+  container.innerHTML = "Loading comments...";
+  const { ok, data } = await fetchJson(`/api/comments/${encodeURIComponent(postId)}`);
+  if (!ok || !data || !Array.isArray(data.comments)) {
+    container.innerHTML = `<div style="color:#f66">Failed to load comments</div>`;
+    return;
+  }
+  const comments = data.comments;
+  container.innerHTML = "";
+  if (!comments.length) {
+    container.innerHTML = "<div style='color:#aaa'>No comments yet.</div>";
+    return;
+  }
+  for (const c of comments) {
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.gap = "8px";
+    row.style.alignItems = "flex-start";
+    const avatar = document.createElement("img");
+    avatar.src = resolveAsset((userCache[c.username] && userCache[c.username].avatar) ? userCache[c.username].avatar : `/default-avatar.png`);
+    avatar.style.width = "28px";
+    avatar.style.height = "28px";
+    avatar.style.borderRadius = "6px";
+    avatar.style.objectFit = "cover";
+    avatar.style.cursor = "pointer";
+    avatar.addEventListener("click", () => { loadProfile(c.username); });
+    const body = document.createElement("div");
+    body.style.flex = "1";
+    body.innerHTML = `<div style="font-weight:600">${c.username} <span style="color:#999;font-size:0.8rem;margin-left:8px">${formatFutureDate(c.createdAt)}</span></div>
+                      <div style="color:#ddd; margin-top:4px">${c.text}</div>`;
+    row.appendChild(avatar);
+    row.appendChild(body);
+    container.appendChild(row);
   }
 }
 

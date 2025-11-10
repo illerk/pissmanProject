@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 const USERS_FILE = path.join(__dirname, "users.json");
 const POSTS_FILE = path.join(__dirname, "posts.json");
 const MESSAGES_FILE = path.join(__dirname, "messages.json");
+const COMMENTS_FILE = path.join(__dirname, "comments.json");
 const BASE_PATH = process.env.BASE_PATH || ""; 
 const API_BASE = (BASE_PATH === "/") ? "/api" : (BASE_PATH + "/api");
 
@@ -70,7 +71,7 @@ if (!fs.existsSync(POSTS_FILE)) {
 try {
   const postsRaw = fs.readJsonSync(POSTS_FILE);
   const sanitized = (Array.isArray(postsRaw) ? postsRaw : []).map(p => {
-    const {comments, ...keep } = p;
+    const {...keep } = p;
     return keep;
   });
   fs.writeJsonSync(POSTS_FILE, sanitized, { spaces: 2 });
@@ -81,6 +82,11 @@ try {
 
 if (!fs.existsSync(MESSAGES_FILE)) {
   fs.writeJsonSync(MESSAGES_FILE, []);
+}
+
+
+if (!fs.existsSync(COMMENTS_FILE)) {
+  fs.writeJsonSync(COMMENTS_FILE, []);
 }
 
 
@@ -235,6 +241,53 @@ api.post("/posts", async (req, res) => {
   posts.push(post);
   await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
   res.json({ success: true, post });
+});
+
+// --- NEW: comments endpoints ---
+api.get("/comments/:postId", async (req, res) => {
+  const { postId } = req.params;
+  if (!postId) return res.status(400).json({ error: "Missing postId" });
+  const comments = await fs.readJson(COMMENTS_FILE);
+  const list = (Array.isArray(comments) ? comments : []).filter(c => c.postId === postId)
+               .sort((a,b) => a.createdAt - b.createdAt);
+  res.json({ success: true, comments: list });
+});
+
+api.post("/comments/:postId", async (req, res) => {
+  const { postId } = req.params;
+  const { username, text } = req.body;
+  if (!postId) return res.status(400).json({ error: "Missing postId" });
+  if (!username) return res.status(400).json({ error: "Missing username" });
+  const comments = await fs.readJson(COMMENTS_FILE);
+  const id = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,8);
+  const comment = {
+    id,
+    postId,
+    username,
+    text: String(text ?? ""),
+    createdAt: Date.now()
+  };
+  comments.push(comment);
+  await fs.writeJson(COMMENTS_FILE, comments, { spaces: 2 });
+
+  // attempt to find post owner and notify over websockets
+  try {
+    const posts = await fs.readJson(POSTS_FILE);
+    const post = (Array.isArray(posts) ? posts : []).find(p => p.id === postId);
+    if (post) {
+      const payload = JSON.stringify({ type: "comment", comment, post });
+      // notify post owner
+      const ownerWs = clients.get(post.username);
+      if (ownerWs && ownerWs.readyState === WebSocket.OPEN) ownerWs.send(payload);
+      // notify comment author (if connected)
+      const authorWs = clients.get(username);
+      if (authorWs && authorWs.readyState === WebSocket.OPEN) authorWs.send(payload);
+    }
+  } catch (e) {
+    // ignore notification failures
+  }
+
+  res.json({ success: true, comment });
 });
 
 // --- REMOVED: DELETE /posts/:id endpoint (post deletion disabled) ---
