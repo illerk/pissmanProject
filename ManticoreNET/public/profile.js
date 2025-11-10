@@ -11,10 +11,15 @@ function resolveAsset(url) {
 }
 
 const currentUser = localStorage.getItem("currentUser");
+
+// allow guests to view other users' profiles and contacts list:
+// if there's a ?user=... param we should NOT redirect guests
+const urlParams = new URLSearchParams(location.search);
+const userParam = urlParams.get('user');
 if (!currentUser) {
   window.location.href = "index.html";
 }
-if (currentUser === "GUEST") {
+if (currentUser === "GUEST" && !userParam && location.hash !== '#contacts') {
   window.location.href = "feed.html";
 }
 document.body.classList.add("logged-in");
