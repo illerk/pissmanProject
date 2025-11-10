@@ -17,6 +17,8 @@ const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
 // add: explicit API root
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+// NEW: guest sentinel
+const GUEST_ID = "__guest__";
 // add: assets root for avatars/posts (serve from /ManticoreNET/public)
 const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
 function resolveAsset(url) {
@@ -278,7 +280,20 @@ async function loadCommentsForPost(postId, container) {
   }
 }
 
+
+// hide new post composer for guest users
+const newPostCardEl = document.getElementById('newPostCardFeed');
+if (currentUser === GUEST_ID && newPostCardEl) {
+  newPostCardEl.style.display = 'none';
+}
+
+// guard create post action (defensive)
 createPostBtnFeed.addEventListener('click', async () => {
+  if (currentUser === GUEST_ID) {
+    // guest cannot create posts
+    alert('Guest cannot create posts. Log in to post.');
+    return;
+  }
   const text = postTextFeed.value.trim();
   const f = postImageInputFeed.files[0];
   if (f) {

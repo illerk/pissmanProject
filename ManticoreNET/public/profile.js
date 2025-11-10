@@ -5,6 +5,7 @@ const BASE = location.pathname.replace(/\/[^/]*$/, '');
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
 // add: assets root for avatars/posts (serve from /ManticoreNET/public)
 const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/public";
+const GUEST_ID = "__guest__";
 
 function resolveAsset(url) {
   if (!url) return url;
@@ -313,7 +314,7 @@ async function renderPosts(posts) {
           commentsToggle.textContent = "Hide comments";
         }
         // show composer when opened
-        if (currentUser) {
+        if (currentUser && currentUser !== GUEST_ID) {
           // prevent duplicate composers
           if (!commentsSection.querySelector('.comment-composer')) {
             const composer = document.createElement("div");
@@ -502,8 +503,12 @@ saveBtn.addEventListener("click", async () => {
   if (ok) await loadProfile(viewingUser);
 });
 
+// hide new-post card when guest
+if (currentUser === GUEST_ID && newPostCard) newPostCard.style.display = 'none';
+
 // create post (only for own profile)
 createPostBtn.addEventListener("click", async () => {
+  if (currentUser === GUEST_ID) { showStatus('Guests cannot create posts.'); return; }
   if (viewingUser !== currentUser) return;
   const text = postText.value.trim();
   const f = postImageInput.files[0];
@@ -538,6 +543,11 @@ if (logoutTopBtn) logoutTopBtn.addEventListener("click", () => {
 (async function init() {
   const params = new URLSearchParams(location.search);
   const userParam = params.get('user');
+  // if no explicit ?user and currentUser is guest -> redirect to feed (guest has no profile)
+  if (!userParam && currentUser === GUEST_ID) {
+    window.location.href = new URL('feed.html', location.href).href;
+    return;
+  }
   if (userParam) {
     await loadProfile(userParam);
     return;

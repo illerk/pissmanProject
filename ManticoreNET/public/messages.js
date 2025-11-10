@@ -3,7 +3,10 @@ const BASE = location.pathname.replace(/\/[^/]*$/, '');
 
 // top code
 const currentUser = localStorage.getItem("currentUser");
-if (!currentUser) location.href = "index.html";
+// NEW: guest sentinel
+const GUEST_ID = "__guest__";
+// redirect guests away from messages page (they cannot send messages)
+if (!currentUser || currentUser === GUEST_ID) location.href = "feed.html";
 document.body.classList.add("logged-in");
 
 const contactsPane = document.getElementById("contactsPane");

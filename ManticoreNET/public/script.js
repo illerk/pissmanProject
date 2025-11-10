@@ -3,6 +3,7 @@ const password = document.getElementById("password");
 const status = document.getElementById("status");
 
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+const GUEST_ID = "__guest__"; // guest sentinel
 
 let statusTimer = null;
 function showStatus(msg, isError = true, ttl = 4000) {
@@ -72,3 +73,13 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     showStatus(data.error || "Registration failed.");
   }
 });
+
+// NEW: Guest button — set guest id and go to feed. Guest has no profile and cannot post/message/comment.
+const guestBtn = document.getElementById("guestBtn");
+if (guestBtn) {
+  guestBtn.addEventListener("click", () => {
+    localStorage.setItem("currentUser", GUEST_ID);
+    // navigate to feed; guest can view feed and profiles but cannot post/comment/message
+    window.location.href = new URL("feed.html", location.href).href;
+  });
+}
