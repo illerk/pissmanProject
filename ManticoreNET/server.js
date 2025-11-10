@@ -31,13 +31,8 @@ app.use((req, res, next) => {
 	// If URL contains /api/ somewhere later, strip everything before it so routes mounted at /api/... match.
 	const apiIndex = req.url.indexOf("/api/");
 	if (apiIndex > 0) {
-		// only strip when the server expects API mounted at "/api" (no custom BASE_PATH).
-		// If API_BASE is something like "/ManticoreNET/api", don't strip here so app.use("/:base/api", api) can match.
-		if (API_BASE === "/api") {
-			req.url = req.url.slice(apiIndex);
-			return next();
-		}
-		// otherwise leave req.url as-is and allow routes mounted at "/:base/api" or a custom API_BASE to match.
+		req.url = req.url.slice(apiIndex);
+		return next();
 	}
 	// If URL is prefixed with "/public/", strip that prefix so static files served from /public are reachable.
 	if (req.url.startsWith("/public/")) {
