@@ -174,13 +174,23 @@ async function loadPosts(username, options = { preserveScroll: true }) {
   const container = postsList;
   const prevScroll = options.preserveScroll ? container.scrollTop : 0;
   postsList.innerHTML = "Loading posts...";
-  // use absolute API_ROOT URL to ensure correct base path under /ManticoreNET
-  const { ok, data } = await fetchJson(`${API_ROOT}/posts/${encodeURIComponent(username)}`);
-  if (!ok || !data.posts) {
+
+  try {
+    // load all posts (feed) then filter to this user's posts
+    const { ok, data } = await fetchJson(`${API_ROOT}/posts`);
+    if (!ok || !data || !Array.isArray(data.posts)) {
+      postsList.innerHTML = `<div style="color:#f66">Failed to load posts</div>`;
+      return;
+    }
+    // filter posts that belong to the requested username
+    const userPosts = data.posts.filter(p => String(p.username) === String(username))
+                               .sort((a,b) => b.createdAt - a.createdAt);
+    await renderPosts(userPosts);
+  } catch (e) {
     postsList.innerHTML = `<div style="color:#f66">Failed to load posts</div>`;
     return;
   }
-  await renderPosts(data.posts);
+
   // restore scroll
   if (options.preserveScroll) {
     // small timeout to ensure DOM layout applied
