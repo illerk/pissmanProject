@@ -205,6 +205,10 @@ async function loadPosts(username, options = { preserveScroll: true }) {
   }
 }
 
+const GUEST_USER = "GUEST";
+const isGuest = currentUser === GUEST_USER;
+const isLogged = !!currentUser && !isGuest;
+
 async function renderPosts(posts) {
   postsList.innerHTML = "";
   if (!posts.length) { postsList.innerHTML = "<div style='color:#aaa'>No posts yet.</div>"; return; }
@@ -267,33 +271,63 @@ async function renderPosts(posts) {
     const up = document.createElement("button"); up.textContent = "▲";
     const down = document.createElement("button"); down.textContent = "▼";
     const count = document.createElement("span"); count.textContent = (post.votes||[]).reduce((s,v)=>s+Number(v.vote),0);
-    count.style.minWidth = "28px"; count.style.textAlign = "center";
-    const myV = (post.votes||[]).find(v=>v.username===currentUser)?.vote ?? 0;
-    if (myV === 1) up.style.opacity = "0.9";
-    if (myV === -1) down.style.opacity = "0.9";
+
+    if (!isLogged) {
+      up.disabled = true;
+      down.disabled = true;
+      up.title = "Only logged-in users can vote";
+      down.title = "Only logged-in users can vote";
+      up.style.opacity = "0.5";
+      down.style.opacity = "0.5";
+    }
 
     up.addEventListener("click", async () => {
-      const container = postsList;
-      const prev = container.scrollTop;
-      const { ok, data } = await fetchJson(`/api/posts/${post.id}/vote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: currentUser, vote: 1 })
-      });
-      if (ok && data.success) {
+      if (!isLogged) { alert("You must be logged in to vote"); return; }
+      try {
+        const container = postsList;
+        const prev = container.scrollTop;
+        console.log("Voting up", post.id, "user", currentUser);
+        const { ok, data } = await fetchJson(`/api/posts/${post.id}/vote`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: currentUser, vote: 1 })
+        });
+        console.log("Vote response", ok, data);
+        if (!ok || !data || !data.success) {
+          showStatus((data && data.error) ? `Vote failed: ${data.error}` : "Vote failed");
+          return;
+        }
         post.votes = data.votes;
         await loadPosts(viewingUser, { preserveScroll: true });
         container.scrollTop = prev;
+      } catch (e) {
+        console.error("Vote error", e);
+        showStatus("Network error while voting");
       }
     });
     down.addEventListener("click", async () => {
-      const container = postsList;
-      const prev = container.scrollTop;
-      const { ok, data } = await fetchJson(`/api/posts/${post.id}/vote`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: currentUser, vote: -1 })
-      });
-      if (ok && data.success) { post.votes = data.votes; count.textContent = (post.votes||[]).reduce((s,v)=>s+Number(v.vote),0); await loadPosts(viewingUser, { preserveScroll:true }); container.scrollTop = prev; }
+      if (!isLogged) { alert("You must be logged in to vote"); return; }
+      try {
+        const container = postsList;
+        const prev = container.scrollTop;
+        console.log("Voting down", post.id, "user", currentUser);
+        const { ok, data } = await fetchJson(`/api/posts/${post.id}/vote`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: currentUser, vote: -1 })
+        });
+        console.log("Vote response", ok, data);
+        if (!ok || !data || !data.success) {
+          showStatus((data && data.error) ? `Vote failed: ${data.error}` : "Vote failed");
+          return;
+        }
+        post.votes = data.votes;
+        count.textContent = (post.votes||[]).reduce((s,v)=>s+Number(v.vote),0);
+        await loadPosts(viewingUser, { preserveScroll:true });
+        container.scrollTop = prev;
+      } catch (e) {
+        console.error("Vote error", e);
+        showStatus("Network error while voting");
+      }
     });
 
     actions.appendChild(up); actions.appendChild(count); actions.appendChild(down);
