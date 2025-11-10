@@ -3,6 +3,15 @@ const BASE = location.pathname.replace(/\/[^/]*$/, '');
 
 // add: explicit API root (always use this)
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+// add: assets root for avatars/posts
+const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET";
+
+function resolveAsset(url) {
+  if (!url) return url;
+  if (/^(https?:|data:)/.test(url)) return url;
+  if (url.startsWith("/")) return ASSET_ROOT + url;
+  return url;
+}
 
 const currentUser = localStorage.getItem("currentUser");
 if (!currentUser) {
@@ -81,8 +90,11 @@ async function getUserProfile(username) {
   if (userCache[username]) return userCache[username];
   const r = await fetchJson(`/api/user/${encodeURIComponent(username)}`);
   if (r.ok && r.data.success) {
-    userCache[username] = r.data.profile;
-    return r.data.profile;
+    // resolve avatar to full asset URL
+    const prof = r.data.profile;
+    if (prof && prof.avatar) prof.avatar = resolveAsset(prof.avatar);
+    userCache[username] = prof;
+    return prof;
   }
   return null;
 }
@@ -131,7 +143,7 @@ async function showContacts() {
     item.style.borderRadius = "6px";
 
     const img = document.createElement("img");
-    img.src = u.avatar || "default-avatar.png";
+    img.src = resolveAsset(u.avatar) || "default-avatar.png";
     img.style.width = "56px";
     img.style.height = "56px";
     img.style.objectFit = "cover";
@@ -222,7 +234,8 @@ async function renderPosts(posts) {
     }
     if (post.image) {
       const img = document.createElement("img");
-      img.src = post.image + "?t=" + Date.now();
+      const resolved = resolveAsset(post.image);
+      img.src = resolved ? (resolved + (resolved.includes("?") ? "&" : "?") + "t=" + Date.now()) : "";
       img.style.maxWidth = "100%";
       img.style.marginTop = "8px";
       img.style.borderRadius = "6px";
@@ -384,7 +397,7 @@ async function loadProfile(username = currentUser) {
     return;
   }
   currentProfile = data.profile;
-  avatarEl.src = currentProfile.avatar || "default-avatar.png";
+  avatarEl.src = resolveAsset(currentProfile.avatar) || "default-avatar.png";
   ageText.textContent = currentProfile.age ?? "—";
   genderText.textContent = currentProfile.gender ?? "—";
   setEditMode(false);

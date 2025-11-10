@@ -17,6 +17,14 @@ const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
 // add: explicit API root
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+// add: assets root for avatars/posts
+const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET";
+function resolveAsset(url) {
+  if (!url) return url;
+  if (/^(https?:|data:)/.test(url)) return url;
+  if (url.startsWith("/")) return ASSET_ROOT + url;
+  return url;
+}
 
 // unified fetch
 async function fetchJson(url, opts) {
@@ -87,7 +95,7 @@ async function renderPosts(posts) {
     left.style.gap = '8px';
 
     const authorImg = document.createElement('img');
-    authorImg.src = author?.avatar || 'default-avatar.png';
+    authorImg.src = resolveAsset(author?.avatar) || 'default-avatar.png';
     authorImg.style.width = '36px';
     authorImg.style.height = '36px';
     authorImg.style.objectFit = 'cover';
@@ -107,7 +115,14 @@ async function renderPosts(posts) {
     el.appendChild(header);
 
     if (post.text) { const txt = document.createElement('div'); txt.style.marginTop='8px'; txt.textContent = post.text; el.appendChild(txt); }
-    if (post.image) { const img = document.createElement('img'); img.src = post.image ? new URL(post.image, location.href).href : ''; img.style.maxWidth='100%'; img.style.marginTop='8px'; img.style.borderRadius='6px'; img.style.cursor='pointer'; img.addEventListener('click', ()=>{ document.getElementById('overlayImg').src = img.src; document.getElementById('overlay').classList.add('visible'); }); el.appendChild(img); }
+    if (post.image) {
+      const img = document.createElement('img');
+      const resolved = resolveAsset(post.image);
+      img.src = resolved ? (resolved + (resolved.includes("?") ? "&" : "?") + "t=" + Date.now()) : '';
+      img.style.maxWidth='100%'; img.style.marginTop='8px'; img.style.borderRadius='6px'; img.style.cursor='pointer';
+      img.addEventListener('click', ()=>{ document.getElementById('overlayImg').src = img.src; document.getElementById('overlay').classList.add('visible'); });
+      el.appendChild(img);
+    }
 
     const actions = document.createElement('div');
     actions.style.display = 'flex';
@@ -185,7 +200,7 @@ async function renderPosts(posts) {
       const cHeader = document.createElement('div'); cHeader.style.display='flex'; cHeader.style.alignItems='center'; cHeader.style.gap='8px';
       const cImg = document.createElement('img');
       const cAuthor = await getUserProfile(c.username);
-      cImg.src = (cAuthor && cAuthor.avatar) ? cAuthor.avatar : 'default-avatar.png';
+      cImg.src = resolveAsset(cAuthor && cAuthor.avatar) || 'default-avatar.png';
       cImg.style.width='28px'; cImg.style.height='28px'; cImg.style.objectFit='cover'; cImg.style.borderRadius='6px'; cImg.style.cursor='pointer';
       cImg.addEventListener('click', ()=> window.location.href = `profile.html?user=${encodeURIComponent(c.username)}`);
       const cMeta = document.createElement('div');

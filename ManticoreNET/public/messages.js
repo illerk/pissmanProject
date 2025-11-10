@@ -51,6 +51,14 @@ ws.addEventListener("message", (ev) => {
 
 // add: explicit API root
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
+// add: assets root for avatars/posts
+const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET";
+function resolveAsset(url) {
+  if (!url) return url;
+  if (/^(https?:|data:)/.test(url)) return url;
+  if (url.startsWith("/")) return ASSET_ROOT + url;
+  return url;
+}
 
 // unified fetch that resolves relative to current page (preserves sub-path)
 async function fetchJson(url, opts) {
@@ -73,7 +81,8 @@ async function getUserAvatar(username) {
   const { ok, data } = await fetchJson(`/api/user/${encodeURIComponent(username)}`);
   if (ok && data && data.success) {
     userCache[username] = data.profile;
-    return data.profile.avatar || "default-avatar.png";
+    if (userCache[username].avatar) userCache[username].avatar = resolveAsset(userCache[username].avatar);
+    return userCache[username].avatar || "default-avatar.png";
   }
   return "default-avatar.png";
 }
@@ -159,7 +168,7 @@ async function loadContacts() {
     item.style.display = "flex"; item.style.alignItems = "center"; item.style.gap = "8px"; item.style.cursor="pointer";
     item.style.padding="6px"; item.style.border="1px solid rgba(255,255,255,0.03)"; item.style.borderRadius="6px";
     const img = document.createElement("img");
-    img.src = u.avatar || "default-avatar.png";
+    img.src = resolveAsset(u.avatar) || "default-avatar.png";
     img.style.width="40px"; img.style.height="40px"; img.style.borderRadius="6px";
     img.style.objectFit = "cover";
     img.addEventListener("click", ()=> location.href = new URL(`profile.html?user=${encodeURIComponent(u.username)}`, location.href).href);
@@ -208,7 +217,7 @@ async function appendMessage(m, mine) {
   b.style.display = "flex"; b.style.gap="8px"; b.style.alignItems="flex-start";
   if (mine) b.style.justifyContent = "flex-end";
 
-  // get avatar for message sender
+  // get avatar for message sender (already resolved by getUserAvatar)
   const avatarSrc = await getUserAvatar(m.from);
 
   const img = document.createElement("img");
@@ -228,7 +237,9 @@ async function appendMessage(m, mine) {
     content.appendChild(txt);
   }
   if (m.image) {
-    const im = document.createElement("img"); im.src = m.image; im.style.maxWidth = "240px"; im.style.marginTop="6px"; im.style.borderRadius="6px"; im.style.cursor="pointer";
+    const im = document.createElement("img");
+    im.src = resolveAsset(m.image) || m.image;
+    im.style.maxWidth = "240px"; im.style.marginTop="6px"; im.style.borderRadius="6px"; im.style.cursor="pointer";
     im.addEventListener("click", ()=> { overlayImg.src = im.src; overlay.classList.add("visible"); });
     content.appendChild(im);
   }
