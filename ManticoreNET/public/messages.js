@@ -48,16 +48,30 @@ function resolveAsset(url) {
   return url;
 }
 
-async function fetchJson(url, opts) {
+async function fetchJson(url, opts = {}) {
   try {
     let full;
     if (/^https?:\/\//.test(url)) full = url;
     else if (url.startsWith("/api/")) full = API_ROOT + url.slice(4);
     else if (url.startsWith("api/")) full = API_ROOT + url.slice(3);
     else full = new URL(url, location.href).href;
+
+    opts = { ...opts };
+    opts.headers = { ...(opts.headers || {}) };
+
+    if (opts.body && !opts.headers['Content-Type'] && !opts.headers['content-type']) {
+      opts.headers['Content-Type'] = 'application/json';
+    }
+
     const r = await fetch(full, opts);
-    return { ok: r.ok, data: await r.json() };
-  } catch (e) { return { ok: false, data: null }; }
+    let data = null;
+    try { data = await r.json(); } catch (e) {}
+    if (!r.ok) console.error('fetchJson error', full, r.status, data);
+    return { ok: r.ok, data };
+  } catch (e) {
+    console.error('fetchJson network error', url, e);
+    return { ok: false, data: null };
+  }
 }
 
 const userCache = {};

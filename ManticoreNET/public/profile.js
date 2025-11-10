@@ -72,18 +72,31 @@ function showStatus(msg, isError = true, ttl = 4000) {
   }
 }
 
-async function fetchJson(url, opts) {
+async function fetchJson(url, opts = {}) {
   try {
     let full;
     if (/^https?:\/\//.test(url)) full = url;
     else if (url.startsWith("/api/")) full = API_ROOT + url.slice(4);
     else if (url.startsWith("api/")) full = API_ROOT + url.slice(3);
     else full = new URL(url, location.href).href;
+
+    opts = { ...opts };
+    opts.headers = { ...(opts.headers || {}) };
+
+    if (opts.body && !opts.headers['Content-Type'] && !opts.headers['content-type']) {
+      opts.headers['Content-Type'] = 'application/json';
+    }
+
     const res = await fetch(full, opts);
-    const data = await res.json();
+    let data = null;
+    try { data = await res.json(); } catch (e) { /* non-json response */ }
+    if (!res.ok) {
+      console.error('fetchJson error', full, res.status, data);
+    }
     return { ok: res.ok, data };
   } catch (e) {
-    return { ok: false, data: { error: "Network error" } };
+    console.error('fetchJson network error', url, e);
+    return { ok: false, data: { error: 'Network error' } };
   }
 }
 function formatFutureDate(ts) {
@@ -294,11 +307,15 @@ async function renderPosts(posts) {
       const delBtn = document.createElement("button"); delBtn.textContent = "Delete";
       delBtn.addEventListener("click", async () => {
         if (!confirm("Delete this post?")) return;
-        await fetch(`${API_ROOT}/posts/${post.id}`, {
-          method: "DELETE", headers: { "Content-Type": "application/json" },
+        const { ok } = await fetchJson(`/api/posts/${post.id}`, {
+          method: "DELETE",
           body: JSON.stringify({ username: currentUser })
         });
-        await loadPosts(viewingUser);
+        if (ok) {
+          await loadPosts(viewingUser);
+        } else {
+          showStatus("Failed to delete post");
+        }
       });
       actions.appendChild(delBtn);
     }
