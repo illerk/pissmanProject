@@ -2,7 +2,6 @@ const BASE = location.pathname.replace(/\/[^/]*$/, '');
 
 const currentUser = localStorage.getItem("currentUser");
 if (!currentUser) location.href = "index.html";
-if (currentUser === "GUEST") location.href = "feed.html";
 document.body.classList.add("logged-in");
 
 const contactsPane = document.getElementById("contactsPane");

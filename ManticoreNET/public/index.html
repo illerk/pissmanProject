@@ -23,14 +23,13 @@
     <main class="content">
       <div class="card login-center">
         <h2 style="margin:0 0 12px 0">Welcome back</h2>
-        <p style="color:#aaa; margin:0 0 12px 0">Sign in to your account</p>
+        <p style="color:#aaa; margin:0 0 12px 0">Sign in to continue to your network</p>
 
         <input id="username" placeholder="Username">
         <input id="password" type="password" placeholder="Password" style="margin-top:8px">
         <div style="display:flex; gap:8px; margin-top:12px; justify-content:flex-start">
           <button id="loginBtn">Login</button>
           <button id="registerBtn">Register</button>
-          <button id="guestBtn">Guest</button>
         </div>
         <p id="status" style="margin-top:12px;color:#aaa"></p>
       </div>
@@ -95,14 +94,6 @@
         }
       } catch(e){}
     })();
-
-    const guestBtn = document.getElementById('guestBtn');
-    if (guestBtn) {
-      guestBtn.addEventListener('click', () => {
-        localStorage.setItem('currentUser', 'GUEST');
-        window.location.href = 'feed.html';
-      });
-    }
   </script>
 </body>
 </html>
