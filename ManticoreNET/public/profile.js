@@ -273,39 +273,6 @@ async function renderPosts(posts) {
     const actions = document.createElement("div");
     actions.style.display = "flex"; actions.style.alignItems = "center"; actions.style.gap = "8px"; actions.style.marginTop = "10px";
 
-    // simple like control (profile view)
-    const likeWrap = document.createElement("div");
-    likeWrap.style.display = "flex";
-    likeWrap.style.alignItems = "center";
-    likeWrap.style.gap = "6px";
-
-    const likeBtn = document.createElement("button");
-    likeBtn.className = "like-btn";
-    likeBtn.textContent = (post.likes && post.likes.includes(currentUser)) ? '♥' : '♡';
-    likeBtn.style.fontSize = "1rem";
-
-    const likeCount = document.createElement("div");
-    likeCount.textContent = String(post.likesCount ?? (Array.isArray(post.likes) ? post.likes.length : 0));
-    likeCount.style.minWidth = "28px";
-    likeCount.style.textAlign = "center";
-
-    likeBtn.addEventListener("click", async () => {
-      const { ok, data } = await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/like`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: currentUser })
-      });
-      if (!ok || !data || !data.post) { showStatus("Like failed"); return; }
-      post.likes = data.post.likes || [];
-      post.likesCount = data.post.likesCount ?? (Array.isArray(post.likes) ? post.likes.length : 0);
-      likeBtn.textContent = post.likes.includes(currentUser) ? '♥' : '♡';
-      likeCount.textContent = String(post.likesCount);
-    });
-
-    likeWrap.appendChild(likeBtn);
-    likeWrap.appendChild(likeCount);
-    actions.appendChild(likeWrap);
-
     el.appendChild(actions);
 
     // --- NEW: comments toggle (hidden by default) ---
