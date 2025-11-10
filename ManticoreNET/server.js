@@ -244,40 +244,6 @@ api.post("/posts", async (req, res) => {
   res.json({ success: true, post });
 });
 
-// --- NEW: voting endpoint for posts ---
-api.post("/posts/:id/vote", async (req, res) => {
-  const { id } = req.params;
-  const { username, vote } = req.body;
-  if (!id) return res.status(400).json({ error: "Missing post id" });
-  if (!username) return res.status(400).json({ error: "Missing username" });
-  // vote should be numeric (1, -1 or 0)
-  const v = Number(vote || 0);
-  if (![ -1, 0, 1 ].includes(v)) return res.status(400).json({ error: "Invalid vote value" });
-
-  const posts = await fs.readJson(POSTS_FILE);
-  const idx = (Array.isArray(posts) ? posts : []).findIndex(p => p.id === id);
-  if (idx === -1) return res.status(404).json({ error: "Post not found" });
-
-  const post = posts[idx];
-  if (!post.votesBy || typeof post.votesBy !== "object") post.votesBy = {};
-
-  if (v === 0) {
-    // remove vote
-    delete post.votesBy[username];
-  } else {
-    post.votesBy[username] = v;
-  }
-
-  // compute score
-  const score = Object.values(post.votesBy || {}).reduce((s, x) => s + Number(x || 0), 0);
-  post.score = score;
-
-  posts[idx] = post;
-  await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-
-  res.json({ success: true, post });
-});
-
 // --- NEW: comments endpoints ---
 api.get("/comments/:postId", async (req, res) => {
   const { postId } = req.params;

@@ -291,29 +291,25 @@ async function renderPosts(posts) {
     downBtn.textContent = "↓";
     downBtn.className = "vote-btn";
 
-    // mark current user's vote if any (use mutable variable)
-    let currentVote = (post.votesBy && post.votesBy[currentUser]) ? Number(post.votesBy[currentUser]) : 0;
-    if (currentVote === 1) upBtn.classList.add("active");
-    if (currentVote === -1) downBtn.classList.add("active");
+    // mark current user's vote if any
+    const myVote = (post.votesBy && post.votesBy[currentUser]) ? Number(post.votesBy[currentUser]) : 0;
+    if (myVote === 1) upBtn.classList.add("active");
+    if (myVote === -1) downBtn.classList.add("active");
 
     async function votePost(v) {
-      // compute desired vote based on up-to-date currentVote
-      const wanted = (currentVote === v) ? 0 : v; // toggle off if clicking same
+      const wanted = (myVote === v) ? 0 : v; // toggle off if clicking same
       const { ok, data } = await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: currentUser, vote: wanted })
       });
       if (!ok || !data.post) { showStatus("Vote failed"); return; }
-      // apply server-returned votes mapping and score
       post.votesBy = data.post.votesBy || {};
       post.score = data.post.score ?? Object.values(post.votesBy).reduce((s,x)=>s+Number(x||0),0);
-      // update local currentVote from authoritative server state
-      currentVote = (post.votesBy && post.votesBy[currentUser]) ? Number(post.votesBy[currentUser]) : 0;
       // update UI
       scoreEl.textContent = post.score;
-      upBtn.classList.toggle("active", (currentVote === 1));
-      downBtn.classList.toggle("active", (currentVote === -1));
+      upBtn.classList.toggle("active", (post.votesBy[currentUser] === 1));
+      downBtn.classList.toggle("active", (post.votesBy[currentUser] === -1));
     }
 
     upBtn.addEventListener("click", ()=> votePost(1));
