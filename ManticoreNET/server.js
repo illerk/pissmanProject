@@ -7,9 +7,6 @@ import { fileURLToPath } from "url";
 import http from "http";
 import WebSocket, { WebSocketServer } from "ws";
 
-// ADDED: likes route moved to external module
-import createLikesRouter from "./likes.js";
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -255,9 +252,29 @@ api.post("/posts", async (req, res) => {
   res.json({ success: true, post });
 });
 
-// --- MOVED: like toggle endpoint moved to likes.js ---
-// attach likes router (uses POSTS_FILE)
-api.use(createLikesRouter(POSTS_FILE));
+// --- NEW: simple likes toggle endpoint ---
+api.post("/posts/:id/like", async (req, res) => {
+  const { id } = req.params;
+  const { username } = req.body;
+  if (!id) return res.status(400).json({ error: "Missing post id" });
+  if (!username) return res.status(400).json({ error: "Missing username" });
+
+  const posts = await fs.readJson(POSTS_FILE);
+  const idx = (Array.isArray(posts) ? posts : []).findIndex(p => p.id === id);
+  if (idx === -1) return res.status(404).json({ error: "Post not found" });
+
+  posts[idx].likes = Array.isArray(posts[idx].likes) ? posts[idx].likes : (posts[idx].likes ? Object.values(posts[idx].likes) : []);
+  const has = posts[idx].likes.includes(username);
+  if (has) {
+    posts[idx].likes = posts[idx].likes.filter(u => u !== username);
+  } else {
+    posts[idx].likes.push(username);
+  }
+  posts[idx].likesCount = posts[idx].likes.length;
+
+  await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
+  res.json({ success: true, post: posts[idx] });
+});
 
 // --- NEW: comments endpoints ---
 api.get("/comments/:postId", async (req, res) => {
