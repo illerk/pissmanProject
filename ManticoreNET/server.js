@@ -72,11 +72,9 @@ try {
   const postsRaw = fs.readJsonSync(POSTS_FILE);
   const sanitized = (Array.isArray(postsRaw) ? postsRaw : []).map(p => {
     const { ...keep } = p;
-    // ensure votesBy and score exist
-    keep.votesBy = keep.votesBy ?? {};
-    keep.score = (typeof keep.score === "number")
-      ? keep.score
-      : Object.values(keep.votesBy).reduce((s, x) => s + Number(x || 0), 0);
+    // remove legacy voting fields if present
+    delete keep.votesBy;
+    delete keep.score;
     return keep;
   });
   fs.writeJsonSync(POSTS_FILE, sanitized, { spaces: 2 });
@@ -234,9 +232,8 @@ api.post("/posts", async (req, res) => {
     username,
     text: text ?? "",
     image: null,
-    createdAt: Date.now(),
-    votesBy: {}, // <--- initialize votes mapping username -> 1|-1
-    score: 0     // <--- initialize score
+    createdAt: Date.now()
+    // removed votesBy/score (voting disabled)
   };
   if (image) {
     try {
@@ -307,35 +304,6 @@ api.get("/posts", async (req, res) => {
   const sorted = posts.slice().sort((a, b) => b.createdAt - a.createdAt);
   res.json({ success: true, posts: sorted });
 });
-
-// --- NEW: unified vote handler (works when mounted under /api, /:base/api and when routed via api router) ---
-async function handleVote(req, res) {
-  const id = req.params.id;
-  const { username, vote } = req.body;
-  if (!id) return res.status(400).json({ error: "Missing post id" });
-  if (!username) return res.status(400).json({ error: "Missing username" });
-  const v = Number(vote);
-  if (![ -1, 0, 1 ].includes(v)) return res.status(400).json({ error: "Invalid vote value" });
-
-  const posts = await fs.readJson(POSTS_FILE);
-  const idx = (Array.isArray(posts) ? posts : []).findIndex(p => p.id === id);
-  if (idx === -1) return res.status(404).json({ error: "Post not found" });
-
-  posts[idx].votesBy = posts[idx].votesBy ?? {};
-  if (v === 0) {
-    if (Object.prototype.hasOwnProperty.call(posts[idx].votesBy, username)) {
-      delete posts[idx].votesBy[username];
-    }
-  } else {
-    posts[idx].votesBy[username] = v;
-  }
-
-  posts[idx].score = Object.values(posts[idx].votesBy || {}).reduce((s, x) => s + Number(x || 0), 0);
-
-  await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-
-  res.json({ success: true, post: posts[idx] });
-}
 
 // register on the api router (existing clients that hit API_BASE + /posts/:id/vote)
 api.post("/posts/:id/vote", handleVote);

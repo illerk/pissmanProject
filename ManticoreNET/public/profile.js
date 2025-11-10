@@ -273,53 +273,7 @@ async function renderPosts(posts) {
     const actions = document.createElement("div");
     actions.style.display = "flex"; actions.style.alignItems = "center"; actions.style.gap = "8px"; actions.style.marginTop = "10px";
 
-    // --- NEW: vote controls ---
-    const voteWrap = document.createElement("div");
-    voteWrap.className = "vote-controls";
-    voteWrap.style.display = "flex";
-    voteWrap.style.alignItems = "center";
-    voteWrap.style.gap = "6px";
-
-    const upBtn = document.createElement("button");
-    upBtn.textContent = "↑";
-    upBtn.className = "vote-btn";
-    const scoreEl = document.createElement("div");
-    scoreEl.textContent = (post.score ?? Object.values(post.votesBy || {}).reduce((s,x)=>s+Number(x||0),0)) || "0";
-    scoreEl.style.minWidth = "28px";
-    scoreEl.style.textAlign = "center";
-    const downBtn = document.createElement("button");
-    downBtn.textContent = "↓";
-    downBtn.className = "vote-btn";
-
-    // mark current user's vote if any
-    const myVote = (post.votesBy && post.votesBy[currentUser]) ? Number(post.votesBy[currentUser]) : 0;
-    if (myVote === 1) upBtn.classList.add("active");
-    if (myVote === -1) downBtn.classList.add("active");
-
-    async function votePost(v) {
-      const wanted = (myVote === v) ? 0 : v; // toggle off if clicking same
-      const { ok, data } = await fetchJson(`/api/posts/${encodeURIComponent(post.id)}/vote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: currentUser, vote: wanted })
-      });
-      if (!ok || !data.post) { showStatus("Vote failed"); return; }
-      post.votesBy = data.post.votesBy || {};
-      post.score = data.post.score ?? Object.values(post.votesBy).reduce((s,x)=>s+Number(x||0),0);
-      // update UI
-      scoreEl.textContent = post.score;
-      upBtn.classList.toggle("active", (post.votesBy[currentUser] === 1));
-      downBtn.classList.toggle("active", (post.votesBy[currentUser] === -1));
-    }
-
-    upBtn.addEventListener("click", ()=> votePost(1));
-    downBtn.addEventListener("click", ()=> votePost(-1));
-
-    voteWrap.appendChild(upBtn);
-    voteWrap.appendChild(scoreEl);
-    voteWrap.appendChild(downBtn);
-    actions.appendChild(voteWrap);
-
+    // NOTE: voting UI removed (server no longer supports votes)
     el.appendChild(actions);
 
     // --- NEW: comments toggle (hidden by default) ---
@@ -347,39 +301,43 @@ async function renderPosts(posts) {
         await loadCommentsForPost(post.id, commentsList);
         // show composer when opened
         if (currentUser) {
-          const composer = document.createElement("div");
-          composer.style.display = "flex";
-          composer.style.gap = "8px";
-          composer.style.marginTop = "8px";
-          const input = document.createElement("input");
-          input.type = "text";
-          input.placeholder = "Write a comment...";
-          input.style.flex = "1";
-          input.style.background = "transparent";
-          input.style.border = "1px solid rgba(255,255,255,0.06)";
-          input.style.color = "#fff";
-          input.style.padding = "6px";
-          input.style.borderRadius = "6px";
-          const btn = document.createElement("button");
-          btn.textContent = "Comment";
-          btn.addEventListener("click", async () => {
-            const txt = input.value.trim();
-            if (!txt) return;
-            const { ok } = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ username: currentUser, text: txt })
+          // prevent duplicate composers
+          if (!commentsSection.querySelector('.comment-composer')) {
+            const composer = document.createElement("div");
+            composer.className = "comment-composer";
+            composer.style.display = "flex";
+            composer.style.gap = "8px";
+            composer.style.marginTop = "8px";
+            const input = document.createElement("input");
+            input.type = "text";
+            input.placeholder = "Write a comment...";
+            input.style.flex = "1";
+            input.style.background = "transparent";
+            input.style.border = "1px solid rgba(255,255,255,0.06)";
+            input.style.color = "#fff";
+            input.style.padding = "6px";
+            input.style.borderRadius = "6px";
+            const btn = document.createElement("button");
+            btn.textContent = "Comment";
+            btn.addEventListener("click", async () => {
+              const txt = input.value.trim();
+              if (!txt) return;
+              const { ok } = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: currentUser, text: txt })
+              });
+              if (ok) {
+                input.value = "";
+                await loadCommentsForPost(post.id, commentsList);
+              } else {
+                showStatus("Failed to post comment");
+              }
             });
-            if (ok) {
-              input.value = "";
-              await loadCommentsForPost(post.id, commentsList);
-            } else {
-              showStatus("Failed to post comment");
-            }
-          });
-          composer.appendChild(input);
-          composer.appendChild(btn);
-          commentsSection.appendChild(composer);
+            composer.appendChild(input);
+            composer.appendChild(btn);
+            commentsSection.appendChild(composer);
+          }
         }
         commentsToggle.textContent = "Hide comments";
         commentsSection.style.display = "";
