@@ -67,6 +67,18 @@ if (!fs.existsSync(POSTS_FILE)) {
   fs.writeJsonSync(POSTS_FILE, []);
 }
 
+// --- ADDED: sanitize existing posts.json to remove votes/comments fields
+try {
+  const postsRaw = fs.readJsonSync(POSTS_FILE);
+  const sanitized = (Array.isArray(postsRaw) ? postsRaw : []).map(p => {
+    const { votes, comments, ...keep } = p;
+    return keep;
+  });
+  fs.writeJsonSync(POSTS_FILE, sanitized, { spaces: 2 });
+} catch (e) {
+  // ignore if file not readable yet
+}
+
 
 if (!fs.existsSync(MESSAGES_FILE)) {
   fs.writeJsonSync(MESSAGES_FILE, []);
@@ -212,9 +224,8 @@ api.post("/posts", async (req, res) => {
     username,
     text: text ?? "",
     image: null,
-    createdAt: Date.now(),
-    votes: [], 
-    comments: [] 
+    createdAt: Date.now()
+    // votes/comments removed
   };
   if (image) {
     try {
@@ -247,59 +258,8 @@ api.delete("/posts/:id", async (req, res) => {
   res.json({ success: true });
 });
 
-api.post("/posts/:id/vote", async (req, res) => {
-  const { id } = req.params;
-  const { username, vote } = req.body;
-  if (!username || ![1,-1].includes(Number(vote))) return res.status(400).json({ error: "Invalid input" });
-  const posts = await fs.readJson(POSTS_FILE);
-  const p = posts.find(x => x.id === id);
-  if (!p) return res.status(404).json({ error: "Post not found" });
-  const existing = p.votes.find(v => v.username === username);
-  if (!existing) {
-    p.votes.push({ username, vote: Number(vote) });
-  } else if (existing.vote === Number(vote)) {
-    p.votes = p.votes.filter(v => v.username !== username);
-  } else {
-    existing.vote = Number(vote);
-  }
-  await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-  res.json({ success: true, votes: p.votes });
-});
-
-api.post("/posts/:id/comments", async (req, res) => {
-  const { id } = req.params;
-  const { username, text } = req.body;
-  if (!username || !text) return res.status(400).json({ error: "Missing data" });
-  const posts = await fs.readJson(POSTS_FILE);
-  const p = posts.find(x => x.id === id);
-  if (!p) return res.status(404).json({ error: "Post not found" });
-  const cid = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,6);
-  const comment = { id: cid, username, text, createdAt: Date.now(), votes: [] };
-  p.comments.push(comment);
-  await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-  res.json({ success: true, comment });
-});
-
-api.post("/comments/:id/vote", async (req, res) => {
-  const { id } = req.params;
-  const { username, vote } = req.body;
-  if (!username || ![1,-1].includes(Number(vote))) return res.status(400).json({ error: "Invalid input" });
-  const posts = await fs.readJson(POSTS_FILE);
-  let found = false;
-  for (const p of posts) {
-    const c = p.comments.find(cm => cm.id === id);
-    if (c) {
-      found = true;
-      const existing = c.votes.find(v => v.username === username);
-      if (!existing) c.votes.push({ username, vote: Number(vote) });
-      else if (existing.vote === Number(vote)) c.votes = c.votes.filter(v => v.username !== username);
-      else existing.vote = Number(vote);
-      await fs.writeJson(POSTS_FILE, posts, { spaces: 2 });
-      return res.json({ success: true, votes: c.votes });
-    }
-  }
-  if (!found) return res.status(404).json({ error: "Comment not found" });
-});
+// --- REMOVED: /posts/:id/vote, /posts/:id/comments and /comments/:id/vote endpoints ---
+/* these endpoints were intentionally removed — voting and commenting are disabled */
 
 api.get("/posts", async (req, res) => {
   const posts = await fs.readJson(POSTS_FILE);
