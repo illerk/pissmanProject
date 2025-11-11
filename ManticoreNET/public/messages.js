@@ -1,11 +1,7 @@
 // compute base
 const BASE = location.pathname.replace(/\/[^/]*$/, '');
-
-// top code
 const currentUser = localStorage.getItem("currentUser");
-// NEW: guest sentinel
 const GUEST_ID = "__guest__";
-// redirect guests away from messages page (they cannot send messages)
 if (!currentUser || currentUser === GUEST_ID) location.href = "feed.html";
 document.body.classList.add("logged-in");
 
@@ -20,26 +16,20 @@ const overlayImg = document.getElementById("overlayImg");
 const logoutTopBtn = document.getElementById("logoutTopBtn");
 if (logoutTopBtn) logoutTopBtn.addEventListener("click", () => { localStorage.removeItem("currentUser"); location.href = "index.html"; });
 
-// compute ws base (path part of current URL)
-const basePath = location.pathname.replace(/\/[^/]*$/, ''); // e.g. "/ManticoreNET"
+const basePath = location.pathname.replace(/\/[^/]*$/, '');
 const proto = location.protocol === "https:" ? "wss" : "ws";
-// build ws URL relative to current location so sub-paths are respected
 const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
-// --- REPLACE plain one-off WebSocket with reconnect-safe wrapper ---
-// remove previous `const ws = new WebSocket(wsUrl);` + its listeners and use managed connection
 let ws = null;
 let wsOpenPromise = null;
 let reconnectDelay = 1000;
 let reconnectTimer = null;
 
 function attachWsHandlers(wsInstance) {
-	// auth on open
 	wsInstance.addEventListener("open", () => {
 		reconnectDelay = 1000;
 		try { wsInstance.send(JSON.stringify({ type: "auth", username: currentUser })); } catch (e) {}
 	});
-	// forward incoming messages to existing handler logic
 	wsInstance.addEventListener("message", (ev) => {
 		let msg;
 		try { msg = JSON.parse(ev.data); } catch (e) { return; }
@@ -55,29 +45,24 @@ function attachWsHandlers(wsInstance) {
 			}
 			updateMenuBadge();
 		}
-		// keep handling other message types if previously supported...
 	});
 	wsInstance.addEventListener("close", () => {
-		// schedule reconnect with backoff
 		if (!reconnectTimer) {
 			reconnectTimer = setTimeout(() => {
 				reconnectTimer = null;
-				connectWs().catch(()=>{}); // try reconnect
+				connectWs().catch(()=>{}); 
 			}, reconnectDelay);
 			reconnectDelay = Math.min(30000, reconnectDelay * 2);
 		}
 	});
 	wsInstance.addEventListener("error", () => {
-		// let 'close' handle reconnection; avoid noisy console errors
 	});
 }
 
 function connectWs() {
-	// return existing promise if connecting/open
 	if (ws && (ws.readyState === WebSocket.OPEN)) return Promise.resolve(ws);
 	if (ws && ws.readyState === WebSocket.CONNECTING && wsOpenPromise) return wsOpenPromise;
 
-	// create new socket
 	ws = new WebSocket(wsUrl);
 	wsOpenPromise = new Promise((resolve, reject) => {
 		const onOpen = () => {
@@ -98,16 +83,14 @@ function connectWs() {
 		ws.addEventListener("error", onError);
 	});
 	attachWsHandlers(ws);
-	// fallback: if open event doesn't fire in a reasonable time, allow rejection
 	const timeout = setTimeout(() => {
 		if (wsOpenPromise) {
-			wsOpenPromise = wsOpenPromise.then(()=>{}, ()=>{}); // silence
+			wsOpenPromise = wsOpenPromise.then(()=>{}, ()=>{}); 
 		}
 	}, 8000);
 	return wsOpenPromise;
 }
 
-// helper used by send to ensure connection
 async function ensureSend(jsonPayload) {
 	try {
 		const sock = await connectWs();
@@ -116,14 +99,11 @@ async function ensureSend(jsonPayload) {
 			return true;
 		}
 	} catch (e) {
-		// ignore, will return false
 	}
 	return false;
 }
 
-// add: explicit API root
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
-// add: assets root for avatars/posts (serve from /ManticoreNET/public)
 const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET";
 function resolveAsset(url) {
   if (!url) return url;
@@ -132,7 +112,6 @@ function resolveAsset(url) {
   return url;
 }
 
-// unified fetch that resolves relative to current page (preserves sub-path)
 async function fetchJson(url, opts) {
   try {
     let full;
@@ -145,7 +124,6 @@ async function fetchJson(url, opts) {
   } catch (e) { return { ok: false, data: null }; }
 }
 
-// add: cache for user profiles/avatars
 const userCache = {};
 async function getUserAvatar(username) {
   if (!username) return "default-avatar.png";
@@ -159,15 +137,12 @@ async function getUserAvatar(username) {
   return "default-avatar.png";
 }
 
-// add: client-side unread map and DOM references
-const unreadCounts = {}; // partner -> count
-const contactElements = new Map(); // username -> { itemEl, badgeEl }
+const unreadCounts = {};
+const contactElements = new Map();
 const navMessagesEl = document.getElementById('nav-messages');
 
-// add near top (keep previous total for notifications)
 let __prevUnreadTotal = 0;
 
-// create or update badge helper
 function ensureContactBadge(username, parentEl) {
   let entry = contactElements.get(username);
   if (!entry) {
@@ -175,7 +150,6 @@ function ensureContactBadge(username, parentEl) {
     badge.className = 'unread-badge';
     badge.style.display = 'none';
     badge.style.marginLeft = '6px';
-    // attach later beside name; return entry
     entry = { badgeEl: badge, itemEl: parentEl };
     contactElements.set(username, entry);
   }
@@ -191,7 +165,6 @@ function setContactBadge(username, count) {
   } else {
     entry.badgeEl.style.display = 'none';
   }
-  // update global menu badge
   updateMenuBadge();
 }
 
@@ -213,24 +186,19 @@ function updateMenuBadge() {
   }
 }
 
-// fetch unread from server and update badges
 async function refreshUnread() {
   const { ok, data } = await fetchJson(`/api/unread/${encodeURIComponent(currentUser)}`);
   if (!ok || !data || !data.success) return;
-  // replace unreadCounts
   Object.keys(unreadCounts).forEach(k=>delete unreadCounts[k]);
   Object.assign(unreadCounts, data.unread || {});
-  // apply to contact elements
   for (const [username, entry] of contactElements.entries()) {
     setContactBadge(username, unreadCounts[username] || 0);
   }
   updateMenuBadge();
 
-  // show desktop notification if total increased
   try {
     const total = Object.values(unreadCounts).reduce((s,n)=>s+(n||0),0);
     if (total > __prevUnreadTotal) {
-      // request permission if needed
       if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
         try { await Notification.requestPermission(); } catch(e) {}
       }

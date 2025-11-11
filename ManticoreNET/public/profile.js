@@ -424,7 +424,6 @@ async function renderPosts(posts) {
         commentsSection.style.display = "";
       } else {
         commentsSection.style.display = "none";
-        // when hiding keep count visible on the "Show" label
         try {
           const cc4 = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`);
           const cnt2 = (cc4.ok && cc4.data && Array.isArray(cc4.data.comments)) ? cc4.data.comments.length : 0;
@@ -438,14 +437,11 @@ async function renderPosts(posts) {
     el.appendChild(commentsToggle);
     el.appendChild(commentsSection);
 
-    // append post to list
     postsList.appendChild(el);
 
-    // do not auto-load comments (they are hidden by default)
   }
 }
 
-// NEW helper: load and render comments for a given post id into a container
 async function loadCommentsForPost(postId, container) {
   container.innerHTML = "Loading comments...";
   const { ok, data } = await fetchJson(`/api/comments/${encodeURIComponent(postId)}`);
@@ -465,7 +461,6 @@ async function loadCommentsForPost(postId, container) {
     row.style.gap = "8px";
     row.style.alignItems = "flex-start";
 
-    // try to load the author's profile (getUserProfile resolves avatar via resolveAsset)
     const prof = await getUserProfile(c.username);
     const avatar = document.createElement("img");
     avatar.src = (prof && prof.avatar) ? prof.avatar : resolveAsset('/default-avatar.png');
@@ -486,7 +481,6 @@ async function loadCommentsForPost(postId, container) {
   }
 }
 
-// load profile (single entry point)
 async function loadProfile(username = currentUser) {
   viewingUser = username;
   const isOwn = viewingUser === currentUser;
@@ -494,13 +488,11 @@ async function loadProfile(username = currentUser) {
   headerLabel.textContent = viewingUser;
   headerSearch.textContent = isOwn ? "Profile" : `${viewingUser}'s Profile`;
 
-  // show profile card and posts list
   contactsView.style.display = "none";
   profileCard.style.display = "";
   postsListCard.style.display = "";
   newPostCard.style.display = isOwn ? "" : "none";
 
-  // load profile data
   const { ok, data } = await fetchJson(`/api/user/${encodeURIComponent(viewingUser)}`);
   if (!ok || !data.success) {
     showStatus(data.error || "Failed to load profile");
@@ -510,30 +502,24 @@ async function loadProfile(username = currentUser) {
   avatarEl.src = resolveAsset(currentProfile.avatar) || "default-avatar.png";
   ageText.textContent = currentProfile.age ?? "—";
   genderText.textContent = currentProfile.gender ?? "—";
-  // ensure bio exists
   if (typeof currentProfile.bio === "undefined") currentProfile.bio = "";
   renderBio(currentProfile.bio);
   setEditMode(false);
 
-  // hide edit UI for non-owners
   if (!isOwn) {
     editBtn.style.display = "none";
     uploadBtn.style.display = "none";
     saveBtn.style.display = "none";
   } else {
-    // ensure edit button visible for owner (setEditMode already set upload/save)
     editBtn.style.display = "";
   }
 
-  // load posts for this user
   await loadPosts(viewingUser);
 }
 
-// nav bindings
 if (navContacts) navContacts.addEventListener("click", () => { showContacts(); });
 if (navProfile) navProfile.addEventListener("click", () => { loadProfile(currentUser); });
 
-// file upload for avatar (only active in edit mode)
 fileInput.addEventListener("change", async () => {
   if (!editMode) return;
   const f = fileInput.files[0];
@@ -547,9 +533,8 @@ fileInput.addEventListener("change", async () => {
       body: JSON.stringify({ username: currentUser, image: dataUrl })
     });
     if (ok) {
-      // refresh profile avatar
       const p = await getUserProfile(currentUser);
-      userCache[currentUser] = null; // clear cache so next getUserProfile fetches updated avatar
+      userCache[currentUser] = null; 
       await loadProfile(viewingUser);
     } else {
       showStatus("Upload failed");
@@ -558,11 +543,10 @@ fileInput.addEventListener("change", async () => {
   reader.readAsDataURL(f);
 });
 
-// edit/save handlers (only for own profile)
 editBtn.addEventListener("click", async () => {
   if (viewingUser !== currentUser) return;
   if (!editMode) setEditMode(true);
-  else await loadProfile(viewingUser); // cancel -> reload profile
+  else await loadProfile(viewingUser);
 });
 saveBtn.addEventListener("click", async () => {
   if (viewingUser !== currentUser) return;
@@ -576,10 +560,8 @@ saveBtn.addEventListener("click", async () => {
   if (ok) await loadProfile(viewingUser);
 });
 
-// hide new-post card when guest
 if (currentUser === GUEST_ID && newPostCard) newPostCard.style.display = 'none';
 
-// create post (only for own profile)
 createPostBtn.addEventListener("click", async () => {
   if (currentUser === GUEST_ID) { showStatus('Guests cannot create posts.'); return; }
   if (viewingUser !== currentUser) return;
@@ -605,18 +587,15 @@ createPostBtn.addEventListener("click", async () => {
   }
 });
 
-// logout top
 if (logoutTopBtn) logoutTopBtn.addEventListener("click", () => {
   localStorage.removeItem("currentUser");
   document.body.classList.remove("logged-in");
   window.location.href = "index.html";
 });
 
-// init: respect ?user= and #contacts, run only once
 (async function init() {
   const params = new URLSearchParams(location.search);
   const userParam = params.get('user');
-  // if no explicit ?user and currentUser is guest -> redirect to feed (guest has no profile)
   if (!userParam && currentUser === GUEST_ID) {
     window.location.href = new URL('feed.html', location.href).href;
     return;
@@ -632,12 +611,10 @@ if (logoutTopBtn) logoutTopBtn.addEventListener("click", () => {
   await loadProfile();
 })();
 
-// added: make Upload avatar button open file picker
 uploadBtn.addEventListener("click", () => {
   fileInput.click();
 });
 
-// added: close overlay when clicking background or the image
 overlay.addEventListener("click", () => {
   overlay.classList.remove("visible");
 });
@@ -681,7 +658,6 @@ function renderBio(bio) {
   }
 }
 
-// open avatar in full-screen overlay when clicked
 avatarEl.addEventListener("click", () => {
   if (!avatarEl.src) return;
   overlayImg.src = avatarEl.src;

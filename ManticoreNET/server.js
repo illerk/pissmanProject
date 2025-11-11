@@ -28,22 +28,17 @@ app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
 app.use((req, res, next) => {
-	// If URL contains /api/ somewhere later, strip everything before it so routes mounted at /api/... match.
 	const apiIndex = req.url.indexOf("/api/");
 	if (apiIndex > 0) {
 		req.url = req.url.slice(apiIndex);
 		return next();
 	}
-	// If URL is prefixed with "/public/", strip that prefix so static files served from /public are reachable.
 	if (req.url.startsWith("/public/")) {
-		req.url = req.url.slice("/public".length); // "/public/xyz" -> "/xyz"
+		req.url = req.url.slice("/public".length); 
 		return next();
 	}
-	// If nginx proxies with a base path like /ManticoreNET/, strip that base if present (for static files).
-	// Detect common pattern: "/ManticoreNET/<rest>"
 	const m = req.url.match(/^\/[A-Za-z0-9_-]+(\/.*)$/);
 	if (m) {
-		// only strip when the remaining path looks like an app path (e.g. starts with /api/ or /avatars/ or /index.html or /profile.html)
 		const rest = m[1] || "/";
 		if (rest.startsWith("/api/") || rest.startsWith("/avatars/") || rest.startsWith("/posts/") ||
 			rest === "/" || rest.endsWith(".html") || rest.endsWith(".css") || rest.endsWith(".js")) {
@@ -72,17 +67,14 @@ try {
   const postsRaw = fs.readJsonSync(POSTS_FILE);
   const sanitized = (Array.isArray(postsRaw) ? postsRaw : []).map(p => {
     const { ...keep } = p;
-    // remove legacy voting fields if present
     delete keep.votesBy;
     delete keep.score;
-    // ensure likes array and count exist
     keep.likes = Array.isArray(keep.likes) ? keep.likes : (keep.likes ? Object.values(keep.likes) : []);
     keep.likesCount = (typeof keep.likesCount === "number") ? keep.likesCount : (Array.isArray(keep.likes) ? keep.likes.length : 0);
     return keep;
   });
   fs.writeJsonSync(POSTS_FILE, sanitized, { spaces: 2 });
 } catch (e) {
-  // ignore if file not readable yet
 }
 
 
@@ -123,7 +115,6 @@ api.post("/register", async (req, res) => {
   }
 
   const hash = await bcrypt.hash(password, 10);
-  // add default bio empty
   users.push({ username, password: hash, bio: "" });
   await fs.writeJson(USERS_FILE, users, { spaces: 2 });
   res.json({ success: true });
@@ -236,9 +227,8 @@ api.post("/posts", async (req, res) => {
     text: text ?? "",
     image: null,
     createdAt: Date.now(),
-    likes: [],       // <-- initialize likes
-    likesCount: 0    // <-- initialize likesCount
-    // removed votesBy/score (voting disabled)
+    likes: [],       
+    likesCount: 0   
   };
   if (image) {
     try {
@@ -276,7 +266,6 @@ api.post("/posts/:id/like", async (req, res) => {
   res.json({ success: true, post: posts[idx] });
 });
 
-// --- NEW: comments endpoints ---
 api.get("/comments/:postId", async (req, res) => {
   const { postId } = req.params;
   if (!postId) return res.status(400).json({ error: "Missing postId" });
@@ -303,44 +292,35 @@ api.post("/comments/:postId", async (req, res) => {
   comments.push(comment);
   await fs.writeJson(COMMENTS_FILE, comments, { spaces: 2 });
 
-  // attempt to find post owner and notify over websockets
   try {
     const posts = await fs.readJson(POSTS_FILE);
     const post = (Array.isArray(posts) ? posts : []).find(p => p.id === postId);
     if (post) {
       const payload = JSON.stringify({ type: "comment", comment, post });
-      // notify post owner
       const ownerWs = clients.get(post.username);
       if (ownerWs && ownerWs.readyState === WebSocket.OPEN) ownerWs.send(payload);
-      // notify comment author (if connected)
       const authorWs = clients.get(username);
       if (authorWs && authorWs.readyState === WebSocket.OPEN) authorWs.send(payload);
     }
   } catch (e) {
-    // ignore notification failures
   }
 
   res.json({ success: true, comment });
 });
 
-// --- REMOVED: DELETE /posts/:id endpoint (post deletion disabled) ---
-// original handler removed so server no longer accepts requests to delete posts
 
 
 api.get("/posts", async (req, res) => {
   const posts = await fs.readJson(POSTS_FILE);
-  // newest first
   const sorted = posts.slice().sort((a, b) => b.createdAt - a.createdAt);
   res.json({ success: true, posts: sorted });
 });
 
-// helper: conversation key
 function convoKey(a, b) {
   const arr = [String(a), String(b)].sort();
   return arr.join("--");
 }
 
-// helper: save message
 async function saveMessage(a, b, message) {
   const messages = await fs.readJson(MESSAGES_FILE);
   const key = convoKey(a, b);
@@ -353,7 +333,6 @@ async function saveMessage(a, b, message) {
   await fs.writeJson(MESSAGES_FILE, messages, { spaces: 2 });
 }
 
-// helper: load conversation
 async function loadConversation(a, b) {
   const messages = await fs.readJson(MESSAGES_FILE);
   const key = convoKey(a, b);
@@ -361,18 +340,15 @@ async function loadConversation(a, b) {
   return convo ? convo.messages : [];
 }
 
-// REST endpoint: get conversation between two users
 app.get("/api/messages/:a/:b", async (req, res) => {
   const { a, b } = req.params;
   if (!a || !b) return res.status(400).json({ error: "Missing users" });
 
-  // load messages, mark as read for requester 'a' messages that were sent to 'a'
   const msgsAll = await fs.readJson(MESSAGES_FILE);
   const key = convoKey(a, b);
   const convo = msgsAll.find(m => m.key === key);
   const msgs = convo ? convo.messages : [];
 
-  // ensure messages have readBy array; mark those addressed to 'a' as read by 'a'
   let changed = false;
   for (const m of msgs) {
     if (!Array.isArray(m.readBy)) m.readBy = [];
@@ -382,20 +358,18 @@ app.get("/api/messages/:a/:b", async (req, res) => {
     }
   }
   if (changed) {
-    // write back updated messages structure
     await fs.writeJson(MESSAGES_FILE, msgsAll, { spaces: 2 });
   }
 
   res.json({ success: true, messages: msgs });
 });
 
-// new: get unread counts for a user
 app.get("/api/unread/:username", async (req, res) => {
   const { username } = req.params;
   if (!username) return res.status(400).json({ error: "Missing username" });
 
   const messages = await fs.readJson(MESSAGES_FILE);
-  const counts = {}; // partner -> count
+  const counts = {}; 
   let total = 0;
   for (const convo of messages) {
     for (const m of convo.messages || []) {
@@ -410,21 +384,14 @@ app.get("/api/unread/:username", async (req, res) => {
   res.json({ success: true, unread: counts, total });
 });
 
-// after defining all api.* routes:
 app.use(API_BASE, api);
 
-// Ensure API also responds on plain "/api" so clients hitting "/api/..." (root) work
-// This makes the server tolerant to requests that don't include the app base path.
 if (API_BASE !== "/api") {
   app.use("/api", api);
 }
 
-// --- ADDED: accept API mounted under a dynamic first segment like "/ManticoreNET/api"
-// This makes endpoints reachable when requests arrive as "/<someBase>/api/..." (e.g. "/ManticoreNET/api/posts/...")
 app.use("/:base/api", api);
 
-// --- ADDED: serve a tiny default-avatar fallback so clients won't 404 if default-avatar.png missing in /public
-// Responds both on "/default-avatar.png" and "/:base/default-avatar.png"
 const DEFAULT_AVATAR_BASE64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=";
 app.get(['/default-avatar.png', '/:base/default-avatar.png'], (req, res) => {
   const buf = Buffer.from(DEFAULT_AVATAR_BASE64, 'base64');
@@ -432,11 +399,10 @@ app.get(['/default-avatar.png', '/:base/default-avatar.png'], (req, res) => {
   res.send(buf);
 });
 
-// adjust WebSocket server to listen on path `${BASE_PATH}/ws`
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: (BASE_PATH || "") + "/ws" });
 
-const clients = new Map(); // username -> ws
+const clients = new Map(); 
 
 wss.on("connection", (ws) => {
   let username = null;
@@ -462,17 +428,14 @@ wss.on("connection", (ws) => {
         text: text ?? "",
         image: image ?? null,
         createdAt: Date.now(),
-        readBy: [from] // sender has 'read' the message
+        readBy: [from] 
       };
-      // save
       await saveMessage(from, to, message);
 
-      // deliver to recipient if connected
       const recipientWs = clients.get(to);
       if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
         recipientWs.send(JSON.stringify({ type: "message", message }));
       }
-      // echo back to sender
       if (clients.get(from) && clients.get(from).readyState === WebSocket.OPEN) {
         clients.get(from).send(JSON.stringify({ type: "message", message }));
       }

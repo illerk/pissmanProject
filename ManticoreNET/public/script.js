@@ -3,7 +3,7 @@ const password = document.getElementById("password");
 const status = document.getElementById("status");
 
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
-const GUEST_ID = "__guest__"; // guest sentinel
+const GUEST_ID = "__guest__"; 
 
 let statusTimer = null;
 function showStatus(msg, isError = true, ttl = 4000) {
@@ -25,8 +25,8 @@ function showStatus(msg, isError = true, ttl = 4000) {
 function buildApiUrl(url) {
   if (!url) return url;
   if (/^https?:\/\//.test(url)) return url;
-  if (url.startsWith("/api/")) return API_ROOT + url.slice(4); // "/api/foo" -> API_ROOT + "/foo"
-  if (url.startsWith("api/")) return API_ROOT + url.slice(3);  // "api/foo" -> API_ROOT + "/foo"
+  if (url.startsWith("/api/")) return API_ROOT + url.slice(4); 
+  if (url.startsWith("api/")) return API_ROOT + url.slice(3);  
   return url;
 }
 
@@ -50,11 +50,9 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     showStatus("Enter username and password.");
     return;
   }
-  // NOTE: relative API path (no leading slash)
   const { ok, data } = await postJson("api/login", { username: username.value, password: password.value });
   if (ok && data.success) {
     localStorage.setItem("currentUser", username.value);
-    // navigate to profile page in same base path
     window.location.href = new URL("profile.html", location.href).href;
   } else {
     showStatus(data.error || "Login failed.");
@@ -74,12 +72,10 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   }
 });
 
-// NEW: Guest button — set guest id and go to feed. Guest has no profile and cannot post/message/comment.
 const guestBtn = document.getElementById("guestBtn");
 if (guestBtn) {
   guestBtn.addEventListener("click", () => {
     localStorage.setItem("currentUser", GUEST_ID);
-    // navigate to feed; guest can view feed and profiles but cannot post/comment/message
     window.location.href = new URL("feed.html", location.href).href;
   });
 }

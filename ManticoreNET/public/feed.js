@@ -15,11 +15,8 @@ const basePath = location.pathname.replace(/\/[^/]*$/, '');
 const proto = location.protocol === "https:" ? "wss" : "ws";
 const wsUrl = `${proto}://${location.host}${basePath}/ws`;
 
-// add: explicit API root
 const API_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET/api";
-// NEW: guest sentinel
 const GUEST_ID = "__guest__";
-// add: assets root for avatars/posts (serve from /ManticoreNET/public)
 const ASSET_ROOT = "https://immersivethingsforsierra.ru/ManticoreNET";
 function resolveAsset(url) {
   if (!url) return url;
@@ -28,7 +25,6 @@ function resolveAsset(url) {
   return url;
 }
 
-// unified fetch
 async function fetchJson(url, opts) {
   try {
     let full;
@@ -130,7 +126,6 @@ async function renderPosts(posts) {
       el.appendChild(img);
     }
 
-    // actions container
     const actions = document.createElement('div');
     actions.style.display = 'flex';
     actions.style.alignItems = 'center';
@@ -140,11 +135,9 @@ async function renderPosts(posts) {
 
     el.appendChild(actions);
 
-    // --- NEW: comments toggle (hidden by default) ---
     const commentsToggle = document.createElement('button');
     commentsToggle.className = 'comments-toggle';
     commentsToggle.style.marginTop = '8px';
-    // fetch initial comments count for this post
     let initialCommentsCount = 0;
     try {
       const cc = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`);
@@ -166,7 +159,6 @@ async function renderPosts(posts) {
       const opening = commentsSection.style.display === 'none';
       if (opening) {
         await loadCommentsForPost(post.id, commentsList);
-        // update count and set to "Hide comments (N)"
         try {
           const cc2 = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`);
           const cnt = (cc2.ok && cc2.data && Array.isArray(cc2.data.comments)) ? cc2.data.comments.length : 0;
@@ -174,7 +166,6 @@ async function renderPosts(posts) {
         } catch (e) {
           commentsToggle.textContent = 'Hide comments';
         }
-        // ensure composer exists; disable for guests
         if (!commentsSection.querySelector('.comment-composer')) {
           const composer = document.createElement('div');
           composer.className = 'comment-composer';
@@ -232,7 +223,6 @@ async function renderPosts(posts) {
         commentsSection.style.display = '';
       } else {
         commentsSection.style.display = 'none';
-        // when hiding, set to Show comments (N)
         try {
           const cc4 = await fetchJson(`/api/comments/${encodeURIComponent(post.id)}`);
           const cnt2 = (cc4.ok && cc4.data && Array.isArray(cc4.data.comments)) ? cc4.data.comments.length : 0;
@@ -247,11 +237,10 @@ async function renderPosts(posts) {
     el.appendChild(commentsSection);
     feedPosts.appendChild(el);
 
-    // do not auto-load comments
   }
 }
 
-// NEW helper for feed.js
+
 async function loadCommentsForPost(postId, container) {
   container.innerHTML = 'Loading comments...';
   const { ok, data } = await fetchJson(`/api/comments/${encodeURIComponent(postId)}`);
@@ -271,7 +260,7 @@ async function loadCommentsForPost(postId, container) {
     row.style.gap = '8px';
     row.style.alignItems = 'flex-start';
 
-    // load author's profile (getUserProfile resolves avatar via resolveAsset)
+
     const prof = await getUserProfile(c.username);
     const avatar = document.createElement('img');
     avatar.src = (prof && prof.avatar) ? prof.avatar : resolveAsset('/default-avatar.png');
@@ -295,16 +284,13 @@ async function loadCommentsForPost(postId, container) {
 }
 
 
-// hide new post composer for guest users
 const newPostCardEl = document.getElementById('newPostCardFeed');
 if (currentUser === GUEST_ID && newPostCardEl) {
   newPostCardEl.style.display = 'none';
 }
 
-// guard create post action (defensive)
 createPostBtnFeed.addEventListener('click', async () => {
   if (currentUser === GUEST_ID) {
-    // guest cannot create posts
     alert('Guest cannot create posts. Log in to post.');
     return;
   }
