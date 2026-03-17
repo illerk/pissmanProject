@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #map {
+      position: relative;
+      display: inline-block;
+    }
+
+    #map img {
+      max-width: 100%;
+      display: block;
+    }
+
+    .point {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: red;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+    }
+
+    .point::after {
+    content: attr(data-name);
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    }
+  </style>
+</head>
+<body>
+
+<input type="file" id="upload">
+
+<div id="map">
+  <img id="mapImage">
+</div>
+
+<button onclick="exportJSON()">Экспорт</button>
+
+<script>
+let locations = [];
+
+const img = document.getElementById("mapImage");
+const map = document.getElementById("map");
+
+document.getElementById("upload").onchange = (e) => {
+  const file = e.target.files[0];
+  img.src = URL.createObjectURL(file);
+};
+
+map.onclick = (e) => {
+  const rect = map.getBoundingClientRect();
+
+  const x = (e.clientX - rect.left) / rect.width;
+  const y = (e.clientY - rect.top) / rect.height;
+
+  const name = prompt("Название локации:");
+  if (!name) return;
+
+  const id = name.toLowerCase().replace(/\s+/g, "_");
+
+  locations.push({ id, name, x, y });
+
+  drawPoint(x, y);
+};
+
+function drawPoint(x, y) {
+  const point = document.createElement("div");
+  point.className = "point";
+  point.style.left = (x * 100) + "%";
+  point.style.top = (y * 100) + "%";
+  map.appendChild(point);
+}
+
+function exportJSON() {
+  console.log(JSON.stringify({ locations }, null, 2));
+}
+</script>
+
+</body>
+</html>
