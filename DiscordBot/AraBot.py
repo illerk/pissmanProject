@@ -540,9 +540,8 @@ class AraBot(discord.Client):
             if name not in data:
                 await interaction.response.send_message("Такого персонажа нет.", ephemeral=True)
                 return
-            embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
-            if data[name].get('image_url'):
-                embed.set_image(url=data[name]['image_url'])
+            # Собираем поля для embed
+            fields = []
             if data[name].get('show_skills', True):
                 skills = data[name]['fields'].get("Навыки", {})
                 if skills:
@@ -551,21 +550,117 @@ class AraBot(discord.Client):
                         mod = calc_modifier(value)
                         sign = "+" if mod >= 0 else ""
                         skill_lines.append(f"{skill} - {value} ({sign}{mod})")
-                    embed.add_field(name="Навыки", value="\n".join(skill_lines), inline=False)
+                    skill_text = "\n".join(skill_lines)
+                    fields.append({"name": "Навыки", "value": skill_text, "inline": False})
             inv = data[name]['fields'].get("Инвентарь", {})
             if inv:
                 inv_lines = []
                 for item, info in inv.items():
-                    line = f"\n__{item}__ [x{info['quantity']}]"
+                    line = f"__{item}__ [x{info['quantity']}]"
                     if info.get("description"):
                         line += f"\n-# {info['description']}"
                     inv_lines.append(line)
-                embed.add_field(name="Инвентарь", value="\n".join(inv_lines), inline=False)
+                inv_text = "\n".join(inv_lines)
+                fields.append({"name": "Инвентарь", "value": inv_text, "inline": False})
             for key, value in data[name]['fields'].items():
                 if key in ["Навыки", "Инвентарь"]:
                     continue
-                embed.add_field(name=key, value=value, inline=False)
-            await interaction.response.send_message(embed=embed)
+                fields.append({"name": key, "value": str(value), "inline": False})
+
+            # Embed лимиты
+            EMBED_TOTAL_LIMIT = 6000
+            EMBED_FIELD_LIMIT = 1024
+            EMBED_MAX_FIELDS = 25
+
+            embeds = []
+            current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
+            if data[name].get('image_url'):
+                current_embed.set_image(url=data[name]['image_url'])
+            current_length = len(current_embed.title) + len(current_embed.description or "")
+            field_count = 0
+
+            for f in fields:
+                value = f["value"]
+                # Если поле слишком длинное, разбиваем по строкам и пробелам, не разделяя слова
+                if len(value) > EMBED_FIELD_LIMIT:
+                    lines = value.split("\n")
+                    chunk = ""
+                    first_field = True
+                    for line in lines:
+                        while len(line) > EMBED_FIELD_LIMIT:
+                            split_pos = line.rfind(' ', 0, EMBED_FIELD_LIMIT)
+                            if split_pos == -1:
+                                split_pos = EMBED_FIELD_LIMIT
+                            chunk_part = line[:split_pos]
+                            line = line[split_pos:].lstrip()
+                            if chunk:
+                                chunk += "\n" + chunk_part
+                            else:
+                                chunk = chunk_part
+                            # Только первый field с названием, остальные с пустым именем
+                            field_name = f["name"] if first_field else ""
+                            current_embed.add_field(name=field_name, value=chunk, inline=f["inline"])
+                            field_count += 1
+                            current_length += len(chunk)
+                            chunk = ""
+                            first_field = False
+                            if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
+                                embeds.append(current_embed)
+                                current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
+                                if data[name].get('image_url'):
+                                    current_embed.set_image(url=data[name]['image_url'])
+                                current_length = len(current_embed.title)
+                                field_count = 0
+                        if len(chunk) + len(line) + 1 > EMBED_FIELD_LIMIT:
+                            field_name = f["name"] if first_field else ""
+                            current_embed.add_field(name=field_name, value=chunk, inline=f["inline"])
+                            field_count += 1
+                            current_length += len(chunk)
+                            chunk = line
+                            first_field = False
+                            if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
+                                embeds.append(current_embed)
+                                current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
+                                if data[name].get('image_url'):
+                                    current_embed.set_image(url=data[name]['image_url'])
+                                current_length = len(current_embed.title)
+                                field_count = 0
+                        else:
+                            chunk += ("\n" if chunk else "") + line
+                    if chunk:
+                        field_name = f["name"] if first_field else ""
+                        current_embed.add_field(name=field_name, value=chunk, inline=f["inline"])
+                        field_count += 1
+                        current_length += len(chunk)
+                        if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
+                            embeds.append(current_embed)
+                            current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
+                            if data[name].get('image_url'):
+                                current_embed.set_image(url=data[name]['image_url'])
+                            current_length = len(current_embed.title)
+                            field_count = 0
+                else:
+                    current_embed.add_field(name=f["name"], value=value, inline=f["inline"])
+                    field_count += 1
+                    current_length += len(value)
+                    if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
+                        embeds.append(current_embed)
+                        current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
+                        if data[name].get('image_url'):
+                            current_embed.set_image(url=data[name]['image_url'])
+                        current_length = len(current_embed.title)
+                        field_count = 0
+
+            # Добавляем последний embed
+            if field_count > 0 or len(embeds) == 0:
+                embeds.append(current_embed)
+
+            # Отправляем все embed
+            for idx, emb in enumerate(embeds):
+                if idx == 0:
+                    await interaction.response.send_message(embed=emb)
+                else:
+                    await interaction.followup.send(embed=emb)
 
         @self.tree.command(name="char_toggle_skills", description="Переключить отображение навыков", guild=guild)
         @app_commands.describe(name="Имя персонажа")
