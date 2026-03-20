@@ -476,7 +476,7 @@ class AraBot(discord.Client):
                 if cached_path:
                     data[name]['image_url'] = cached_path
                     save_data(data)
-                    await interaction.response.send_message(f"Картинка для **{name}** установлена (кэширована локально).")
+                    await interaction.response.send_message(f"Картинка для **{name}** установлена .")
                     return
                 else:
                     await interaction.response.send_message(f"Ошибка: не удалось загрузить Discord картинку. Попробуй позже.", ephemeral=True)
