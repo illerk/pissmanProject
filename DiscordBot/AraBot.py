@@ -45,6 +45,10 @@ DEFAULT_SKILLS = {
 def calc_modifier(value):
     return math.floor((value - 10) / 2)
 
+def is_valid_url(url: str) -> bool:
+    """Проверяет, является ли строка валидным HTTP(S) URL"""
+    return url.startswith(("http://", "https://"))
+
 async def name_autocomplete(interaction: discord.Interaction, current: str):
     try:
         data = load_data()
@@ -610,8 +614,9 @@ class AraBot(discord.Client):
 
             embeds = []
             current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
-            if data[name].get('image_url'):
-                current_embed.set_image(url=data[name]['image_url'])
+            image_url = data[name].get('image_url', '')
+            if image_url and is_valid_url(image_url):
+                current_embed.set_image(url=image_url)
             current_length = len(current_embed.title) + len(current_embed.description or "")
             field_count = 0
 
@@ -643,8 +648,8 @@ class AraBot(discord.Client):
                             if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
                                 embeds.append(current_embed)
                                 current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
-                                if data[name].get('image_url'):
-                                    current_embed.set_image(url=data[name]['image_url'])
+                                if image_url and is_valid_url(image_url):
+                                    current_embed.set_image(url=image_url)
                                 current_length = len(current_embed.title)
                                 field_count = 0
                         if len(chunk) + len(line) + 1 > EMBED_FIELD_LIMIT:
@@ -657,8 +662,8 @@ class AraBot(discord.Client):
                             if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
                                 embeds.append(current_embed)
                                 current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
-                                if data[name].get('image_url'):
-                                    current_embed.set_image(url=data[name]['image_url'])
+                                if image_url and is_valid_url(image_url):
+                                    current_embed.set_image(url=image_url)
                                 current_length = len(current_embed.title)
                                 field_count = 0
                         else:
@@ -671,8 +676,8 @@ class AraBot(discord.Client):
                         if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
                             embeds.append(current_embed)
                             current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
-                            if data[name].get('image_url'):
-                                current_embed.set_image(url=data[name]['image_url'])
+                            if image_url and is_valid_url(image_url):
+                                current_embed.set_image(url=image_url)
                             current_length = len(current_embed.title)
                             field_count = 0
                 else:
@@ -682,8 +687,8 @@ class AraBot(discord.Client):
                     if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
                         embeds.append(current_embed)
                         current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
-                        if data[name].get('image_url'):
-                            current_embed.set_image(url=data[name]['image_url'])
+                        if image_url and is_valid_url(image_url):
+                            current_embed.set_image(url=image_url)
                         current_length = len(current_embed.title)
                         field_count = 0
 
