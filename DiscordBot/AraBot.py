@@ -181,13 +181,30 @@ async def render_map_with_characters(map_name: str, bot: discord.Client) -> str:
             if url:
                 try:
                     if url.startswith("avatars/") and os.path.exists(url):
-                        # Локальный файл
-                        avatar_img = Image.open(url).convert("RGBA")
+                        # Локальный файл - загружаем полностью в память
+                        try:
+                            with open(url, 'rb') as f:
+                                avatar_img = Image.open(BytesIO(f.read())).convert("RGBA")
+                        except FileNotFoundError:
+                            print(f"[Map] Локальный файл не найден: {url}")
+                            avatar_img = None
                     else:
                         # URL
-                        resp = requests.get(url, timeout=20)
-                        avatar_img = Image.open(BytesIO(resp.content)).convert("RGBA")
-                except Exception:
+                        try:
+                            resp = requests.get(url, timeout=20)
+                            resp.raise_for_status()
+                            avatar_img = Image.open(BytesIO(resp.content)).convert("RGBA")
+                        except requests.exceptions.Timeout:
+                            print(f"[Map] Таймаут при загрузке: {url}")
+                            avatar_img = None
+                        except requests.exceptions.RequestException as e:
+                            print(f"[Map] Ошибка сети при загрузке {url}: {e}")
+                            avatar_img = None
+                        except Exception as e:
+                            print(f"[Map] Ошибка обработки изображения {url}: {e}")
+                            avatar_img = None
+                except Exception as e:
+                    print(f"[Map] Неожиданная ошибка при загрузке аватарки {name}: {e}")
                     avatar_img = None
             if avatar_img:
                 avatar_img = avatar_img.resize((avatar_size, avatar_size), Image.LANCZOS)
