@@ -176,8 +176,13 @@ async def render_map_with_characters(map_name: str, bot: discord.Client) -> str:
             url = ch.get("image_url", "") or ""
             if url:
                 try:
-                    resp = requests.get(url, timeout=8)
-                    avatar_img = Image.open(BytesIO(resp.content)).convert("RGBA")
+                    if url.startswith("avatars/") and os.path.exists(url):
+                        # Локальный файл
+                        avatar_img = Image.open(url).convert("RGBA")
+                    else:
+                        # URL
+                        resp = requests.get(url, timeout=8)
+                        avatar_img = Image.open(BytesIO(resp.content)).convert("RGBA")
                 except Exception:
                     avatar_img = None
             if avatar_img:
@@ -241,7 +246,38 @@ class AraBot(discord.Client):
 
         print("✨ Регистрация новых команд...")
 
-        # --- Существующие команды (оставить без изменений) ---
+        @self.tree.command(name="char_image_alt", description="Установить аватарку персонажа через файл", guild=guild)
+        @app_commands.describe(name="Имя персонажа", image="Файл изображения (attachment)")
+        @app_commands.autocomplete(name=name_autocomplete)
+        async def char_image_alt(interaction: discord.Interaction, name: str, image: discord.Attachment):
+                data = load_data()
+                if name not in data:
+                    await interaction.response.send_message("Персонаж с таким именем не найден.", ephemeral=True)
+                    return
+                member = await interaction.guild.fetch_member(interaction.user.id)
+                if data[name]['owner_id'] != interaction.user.id and not has_admin_or_role(member):
+                    await interaction.response.send_message("Нет прав для изменения аватарки этого персонажа.", ephemeral=True)
+                    return
+                # Проверяем тип файла
+                if not image.filename.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+                    await interaction.response.send_message("Файл должен быть изображением (.png, .jpg, .jpeg, .webp)", ephemeral=True)
+                    return
+                # Сохраняем файл в папку avatars
+                avatars_dir = "avatars"
+                os.makedirs(avatars_dir, exist_ok=True)
+                ext = os.path.splitext(image.filename)[1]
+                safe_name = f"{name}_{interaction.user.id}{ext}"
+                avatar_path = os.path.join(avatars_dir, safe_name)
+                try:
+                    await image.save(avatar_path)
+                except Exception as e:
+                    await interaction.response.send_message(f"Ошибка при сохранении файла: {e}", ephemeral=True)
+                    return
+                # Записываем локальный путь в image_url
+                data[name]['image_url'] = avatar_path
+                save_data(data)
+                await interaction.response.send_message(f"Аватарка для **{name}** установлена из файла.")
+
         @self.tree.command(name="hello", description="Сказать привет", guild=guild)
         async def say_hello(interaction: discord.Interaction):
             await interaction.response.send_message("Привет-привет!")
