@@ -185,7 +185,7 @@ async def render_map_with_characters(map_name: str, bot: discord.Client) -> str:
                         avatar_img = Image.open(url).convert("RGBA")
                     else:
                         # URL
-                        resp = requests.get(url, timeout=8)
+                        resp = requests.get(url, timeout=20)
                         avatar_img = Image.open(BytesIO(resp.content)).convert("RGBA")
                 except Exception:
                     avatar_img = None
@@ -615,8 +615,17 @@ class AraBot(discord.Client):
             embeds = []
             current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
             image_url = data[name].get('image_url', '')
-            if image_url and is_valid_url(image_url):
+            
+            # Подготавливаем файл для локальной аватарки
+            avatar_file = None
+            if image_url.startswith("avatars/") and os.path.exists(image_url):
+                # Локальный файл - отправляем как attachment
+                avatar_file = discord.File(image_url, filename="avatar.png")
+                current_embed.set_image(url="attachment://avatar.png")
+            elif image_url and is_valid_url(image_url):
+                # Обычная URL ссылка
                 current_embed.set_image(url=image_url)
+            
             current_length = len(current_embed.title) + len(current_embed.description or "")
             field_count = 0
 
@@ -648,7 +657,9 @@ class AraBot(discord.Client):
                             if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
                                 embeds.append(current_embed)
                                 current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
-                                if image_url and is_valid_url(image_url):
+                                if image_url.startswith("avatars/") and os.path.exists(image_url) and len(embeds) == 1:
+                                    current_embed.set_image(url="attachment://avatar.png")
+                                elif image_url and is_valid_url(image_url):
                                     current_embed.set_image(url=image_url)
                                 current_length = len(current_embed.title)
                                 field_count = 0
@@ -662,7 +673,9 @@ class AraBot(discord.Client):
                             if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
                                 embeds.append(current_embed)
                                 current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
-                                if image_url and is_valid_url(image_url):
+                                if image_url.startswith("avatars/") and os.path.exists(image_url) and len(embeds) == 1:
+                                    current_embed.set_image(url="attachment://avatar.png")
+                                elif image_url and is_valid_url(image_url):
                                     current_embed.set_image(url=image_url)
                                 current_length = len(current_embed.title)
                                 field_count = 0
@@ -676,7 +689,9 @@ class AraBot(discord.Client):
                         if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
                             embeds.append(current_embed)
                             current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
-                            if image_url and is_valid_url(image_url):
+                            if image_url.startswith("avatars/") and os.path.exists(image_url) and len(embeds) == 1:
+                                current_embed.set_image(url="attachment://avatar.png")
+                            elif image_url and is_valid_url(image_url):
                                 current_embed.set_image(url=image_url)
                             current_length = len(current_embed.title)
                             field_count = 0
@@ -687,7 +702,9 @@ class AraBot(discord.Client):
                     if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
                         embeds.append(current_embed)
                         current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
-                        if image_url and is_valid_url(image_url):
+                        if image_url.startswith("avatars/") and os.path.exists(image_url) and len(embeds) == 1:
+                            current_embed.set_image(url="attachment://avatar.png")
+                        elif image_url and is_valid_url(image_url):
                             current_embed.set_image(url=image_url)
                         current_length = len(current_embed.title)
                         field_count = 0
@@ -699,7 +716,7 @@ class AraBot(discord.Client):
             # Отправляем все embed
             for idx, emb in enumerate(embeds):
                 if idx == 0:
-                    await interaction.response.send_message(embed=emb)
+                    await interaction.response.send_message(embed=emb, file=avatar_file)
                 else:
                     await interaction.followup.send(embed=emb)
 
