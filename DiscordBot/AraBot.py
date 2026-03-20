@@ -49,6 +49,46 @@ def is_valid_url(url: str) -> bool:
     """Проверяет, является ли строка валидным HTTP(S) URL"""
     return url.startswith(("http://", "https://"))
 
+def cache_discord_avatar(url: str, char_name: str, user_id: int) -> str:
+    """
+    Кэширует Discord CDN изображение локально.
+    Если успешно загружено, обновляет image_url и возвращает локальный путь.
+    Если ошибка, возвращает None.
+    """
+    if not url.startswith("https://cdn.discordapp.com"):
+        return url  # Не Discord URL, возвращаем как есть
+    
+    try:
+        resp = requests.get(url, timeout=20)
+        resp.raise_for_status()
+        
+        # Определяем расширение файла
+        content_type = resp.headers.get('content-type', 'image/png')
+        ext_map = {
+            'image/jpeg': '.jpg',
+            'image/png': '.png',
+            'image/webp': '.webp',
+            'image/gif': '.gif'
+        }
+        ext = ext_map.get(content_type, '.png')
+        
+        # Сохраняем локально
+        avatars_dir = "avatars"
+        os.makedirs(avatars_dir, exist_ok=True)
+        
+        safe_name = f"{char_name}_discord_{user_id}{ext}"
+        avatar_path = os.path.join(avatars_dir, safe_name)
+        
+        # Сохраняем в файл
+        with open(avatar_path, 'wb') as f:
+            f.write(resp.content)
+        
+        print(f"[Cache] Discord URL кэширован: {avatar_path}")
+        return avatar_path
+    except Exception as e:
+        print(f"[Cache] Не удалось кэшировать Discord URL {url}: {e}")
+        return None
+
 async def name_autocomplete(interaction: discord.Interaction, current: str):
     try:
         data = load_data()
@@ -194,6 +234,13 @@ async def render_map_with_characters(map_name: str, bot: discord.Client) -> str:
                             resp = requests.get(url, timeout=20)
                             resp.raise_for_status()
                             avatar_img = Image.open(BytesIO(resp.content)).convert("RGBA")
+                        except requests.exceptions.HTTPError as e:
+                            if e.response.status_code == 404 and "cdn.discordapp.com" in url:
+                                # Discord URL истек - попытаемся кэшировать (если это возможно из render функции)
+                                print(f"[Map] Discord URL истек (404): {url}")
+                            else:
+                                print(f"[Map] HTTP ошибка {e.response.status_code} при загрузке {url}")
+                            avatar_img = None
                         except requests.exceptions.Timeout:
                             print(f"[Map] Таймаут при загрузке: {url}")
                             avatar_img = None
@@ -422,6 +469,20 @@ class AraBot(discord.Client):
             if data[name]['owner_id'] != interaction.user.id and not has_admin_or_role(member):
                 await interaction.response.send_message("Ты не можешь менять чужого персонажа.", ephemeral=True)
                 return
+            
+            # Если это Discord CDN URL, кэшируем его локально
+            if url.startswith("https://cdn.discordapp.com"):
+                cached_path = cache_discord_avatar(url, name, interaction.user.id)
+                if cached_path:
+                    data[name]['image_url'] = cached_path
+                    save_data(data)
+                    await interaction.response.send_message(f"Картинка для **{name}** установлена (кэширована локально).")
+                    return
+                else:
+                    await interaction.response.send_message(f"Ошибка: не удалось загрузить Discord картинку. Попробуй позже.", ephemeral=True)
+                    return
+            
+            # Обычный URL
             data[name]['image_url'] = url
             save_data(data)
             await interaction.response.send_message(f"Картинка для **{name}** установлена.")
