@@ -13,10 +13,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Файл для хранения персонажей
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(BASE_DIR, 'characters.json')
-MAPS_DIR = os.path.join(BASE_DIR, 'maps')  # папка с картами (png) и json (имя.png + имя.json)
-AVATARS_DIR = os.path.join(BASE_DIR, 'avatars')
+DATA_FILE = 'characters.json'
+MAPS_DIR = "maps"  # папка с картами (png) и json (имя.png + имя.json)
 
 # Загрузка и сохранение персонажей
 def load_data():
@@ -51,15 +49,6 @@ def is_valid_url(url: str) -> bool:
     """Проверяет, является ли строка валидным HTTP(S) URL"""
     return url.startswith(("http://", "https://"))
 
-def resolve_local_path(path: str) -> str:
-    """Возвращает абсолютный локальный путь, если файл существует."""
-    if not path:
-        return ""
-    if os.path.isabs(path) and os.path.exists(path):
-        return path
-    resolved = os.path.join(BASE_DIR, path)
-    return resolved if os.path.exists(resolved) else path
-
 def cache_discord_avatar(url: str, char_name: str, user_id: int) -> str:
     """
     Кэширует Discord CDN изображение локально.
@@ -84,10 +73,11 @@ def cache_discord_avatar(url: str, char_name: str, user_id: int) -> str:
         ext = ext_map.get(content_type, '.png')
         
         # Сохраняем локально
-        os.makedirs(AVATARS_DIR, exist_ok=True)
+        avatars_dir = "avatars"
+        os.makedirs(avatars_dir, exist_ok=True)
         
         safe_name = f"{char_name}_discord_{user_id}{ext}"
-        avatar_path = os.path.join(AVATARS_DIR, safe_name)
+        avatar_path = os.path.join(avatars_dir, safe_name)
         
         # Сохраняем в файл
         with open(avatar_path, 'wb') as f:
@@ -229,9 +219,8 @@ async def render_map_with_characters(map_name: str, bot: discord.Client) -> str:
             avatar_img = None
             url = ch.get("image_url", "") or ""
             if url:
-                url = resolve_local_path(url)
                 try:
-                    if os.path.exists(url):
+                    if url.startswith("avatars/") and os.path.exists(url):
                         # Локальный файл - загружаем полностью в память
                         try:
                             with open(url, 'rb') as f:
@@ -342,10 +331,11 @@ class AraBot(discord.Client):
                     await interaction.response.send_message("Файл должен быть изображением (.png, .jpg, .jpeg, .webp)", ephemeral=True)
                     return
                 # Сохраняем файл в папку avatars
-                os.makedirs(AVATARS_DIR, exist_ok=True)
+                avatars_dir = "avatars"
+                os.makedirs(avatars_dir, exist_ok=True)
                 ext = os.path.splitext(image.filename)[1]
                 safe_name = f"{name}_{interaction.user.id}{ext}"
-                avatar_path = os.path.join(AVATARS_DIR, safe_name)
+                avatar_path = os.path.join(avatars_dir, safe_name)
                 try:
                     await image.save(avatar_path)
                 except Exception as e:
@@ -703,11 +693,10 @@ class AraBot(discord.Client):
             embeds = []
             current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
             image_url = data[name].get('image_url', '')
-            image_url = resolve_local_path(image_url)
             
             # Подготавливаем файл для локальной аватарки
             avatar_file = None
-            if image_url and os.path.exists(image_url):
+            if image_url.startswith("avatars/") and os.path.exists(image_url):
                 # Локальный файл - отправляем как attachment
                 avatar_file = discord.File(image_url, filename="avatar.png")
                 current_embed.set_image(url="attachment://avatar.png")
@@ -718,68 +707,85 @@ class AraBot(discord.Client):
             current_length = len(current_embed.title) + len(current_embed.description or "")
             field_count = 0
 
-            # Разбиваем поля на сегменты не длиннее EMBED_FIELD_LIMIT
-            segments = []
             for f in fields:
-                name = f["name"]
                 value = f["value"]
-                inline = f["inline"]
-                if len(value) <= EMBED_FIELD_LIMIT:
-                    segments.append({"name": name, "value": value, "inline": inline})
-                    continue
-
-                lines = value.split("\n")
-                chunk = ""
-                first_segment = True
-                for line in lines:
-                    while len(line) > EMBED_FIELD_LIMIT:
-                        split_pos = line.rfind(' ', 0, EMBED_FIELD_LIMIT)
-                        if split_pos == -1:
-                            split_pos = EMBED_FIELD_LIMIT
-                        part = line[:split_pos]
-                        line = line[split_pos:].lstrip()
-                        chunk = chunk + ("\n" if chunk else "") + part
-                        segment_name = name if first_segment else ""
-                        segments.append({"name": segment_name, "value": chunk, "inline": inline})
-                        chunk = ""
-                        first_segment = False
-                    if len(chunk) + len(line) + (1 if chunk else 0) > EMBED_FIELD_LIMIT:
-                        if chunk:
-                            segment_name = name if first_segment else ""
-                            segments.append({"name": segment_name, "value": chunk, "inline": inline})
-                            first_segment = False
-                        chunk = line
-                    else:
-                        chunk += ("\n" if chunk else "") + line
-                if chunk:
-                    segment_name = name if first_segment else ""
-                    segments.append({"name": segment_name, "value": chunk, "inline": inline})
-
-            embeds = []
-            first_embed = True
-            current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
-            if image_url and os.path.exists(image_url):
-                current_embed.set_image(url="attachment://avatar.png")
-            elif image_url and is_valid_url(image_url):
-                current_embed.set_image(url=image_url)
-            current_length = len(current_embed.title) + len(current_embed.description or "")
-            field_count = 0
-
-            for segment in segments:
-                segment_len = len(segment["name"]) + len(segment["value"])
-                if field_count >= EMBED_MAX_FIELDS or current_length + segment_len > EMBED_TOTAL_LIMIT:
-                    embeds.append(current_embed)
-                    current_embed = discord.Embed(color=0x7289da)
-                    if image_url and os.path.exists(image_url) and first_embed:
-                        current_embed.set_image(url="attachment://avatar.png")
-                    elif image_url and is_valid_url(image_url) and first_embed:
-                        current_embed.set_image(url=image_url)
-                    current_length = len(current_embed.title) + len(current_embed.description or "")
-                    field_count = 0
-                    first_embed = False
-                current_embed.add_field(name=segment["name"], value=segment["value"], inline=segment["inline"])
-                field_count += 1
-                current_length += segment_len
+                # Если поле слишком длинное, разбиваем по строкам и пробелам, не разделяя слова
+                if len(value) > EMBED_FIELD_LIMIT:
+                    lines = value.split("\n")
+                    chunk = ""
+                    first_field = True
+                    for line in lines:
+                        while len(line) > EMBED_FIELD_LIMIT:
+                            split_pos = line.rfind(' ', 0, EMBED_FIELD_LIMIT)
+                            if split_pos == -1:
+                                split_pos = EMBED_FIELD_LIMIT
+                            chunk_part = line[:split_pos]
+                            line = line[split_pos:].lstrip()
+                            if chunk:
+                                chunk += "\n" + chunk_part
+                            else:
+                                chunk = chunk_part
+                            # Только первый field с названием, остальные с пустым именем
+                            field_name = f["name"] if first_field else ""
+                            current_embed.add_field(name=field_name, value=chunk, inline=f["inline"])
+                            field_count += 1
+                            current_length += len(chunk)
+                            chunk = ""
+                            first_field = False
+                            if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
+                                embeds.append(current_embed)
+                                current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
+                                if image_url.startswith("avatars/") and os.path.exists(image_url) and len(embeds) == 1:
+                                    current_embed.set_image(url="attachment://avatar.png")
+                                elif image_url and is_valid_url(image_url):
+                                    current_embed.set_image(url=image_url)
+                                current_length = len(current_embed.title)
+                                field_count = 0
+                        if len(chunk) + len(line) + 1 > EMBED_FIELD_LIMIT:
+                            field_name = f["name"] if first_field else ""
+                            current_embed.add_field(name=field_name, value=chunk, inline=f["inline"])
+                            field_count += 1
+                            current_length += len(chunk)
+                            chunk = line
+                            first_field = False
+                            if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
+                                embeds.append(current_embed)
+                                current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
+                                if image_url.startswith("avatars/") and os.path.exists(image_url) and len(embeds) == 1:
+                                    current_embed.set_image(url="attachment://avatar.png")
+                                elif image_url and is_valid_url(image_url):
+                                    current_embed.set_image(url=image_url)
+                                current_length = len(current_embed.title)
+                                field_count = 0
+                        else:
+                            chunk += ("\n" if chunk else "") + line
+                    if chunk:
+                        field_name = f["name"] if first_field else ""
+                        current_embed.add_field(name=field_name, value=chunk, inline=f["inline"])
+                        field_count += 1
+                        current_length += len(chunk)
+                        if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
+                            embeds.append(current_embed)
+                            current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
+                            if image_url.startswith("avatars/") and os.path.exists(image_url) and len(embeds) == 1:
+                                current_embed.set_image(url="attachment://avatar.png")
+                            elif image_url and is_valid_url(image_url):
+                                current_embed.set_image(url=image_url)
+                            current_length = len(current_embed.title)
+                            field_count = 0
+                else:
+                    current_embed.add_field(name=f["name"], value=value, inline=f["inline"])
+                    field_count += 1
+                    current_length += len(value)
+                    if current_length > EMBED_TOTAL_LIMIT or field_count >= EMBED_MAX_FIELDS:
+                        embeds.append(current_embed)
+                        current_embed = discord.Embed(title=f"Лист персонажа: {name}", color=0x7289da)
+                        if image_url.startswith("avatars/") and os.path.exists(image_url) and len(embeds) == 1:
+                            current_embed.set_image(url="attachment://avatar.png")
+                        elif image_url and is_valid_url(image_url):
+                            current_embed.set_image(url=image_url)
+                        current_length = len(current_embed.title)
+                        field_count = 0
 
             # Добавляем последний embed
             if field_count > 0 or len(embeds) == 0:
