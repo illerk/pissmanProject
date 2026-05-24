@@ -2357,22 +2357,21 @@ implantCreateForm.addEventListener('submit', function(e) {
   };
 
   implantStatuses.signal.input.addEventListener('change', function () {
-  implantStatuses.signal.input.checked = implantStatuses.signal.state; // Обновление UI
+  implantStatuses.signal.input.checked = implantStatuses.signal.state;
   implantControlLoading.style.display = "block";
   implantControlMessage.textContent = "";
 
   setTimeout(() => {
     implantControlLoading.style.display = "none";
 
-    // Проверка состояния Signal Broadcasting
     if (!implantStatuses.signal.state) {
       implantControlMessage.style.color = "#ff3c3c";
       implantControlMessage.textContent = "ERROR: Signal broadcasting is disabled. Controls are locked.";
-      toggleControls(false); // Отключение всех элементов управления
+      toggleControls(false);
     } else {
       implantControlMessage.style.color = "#66fcf1";
       implantControlMessage.textContent = "Signal broadcasting channel is active.";
-      toggleControls(true); // Включение всех элементов управления
+      toggleControls(true);
     }
 
     setTimeout(() => {
@@ -3679,8 +3678,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-let adminRights = false; // Флаг для проверки прав администратора
-const hiddenAdminCommand = "x7y9z"; // Скрытая команда
+let adminRights = false;
+const hiddenAdminCommand = "x7y9z";
   function handleCommand(cmd) {
   const c = cmd.trim().toLowerCase();
   switch (c) {
@@ -3816,12 +3815,9 @@ const hiddenAdminCommand = "x7y9z"; // Скрытая команда
   });
 
 })();
-// ...existing code...
 
-// filepath: c:\Users\ACER Nitro\Downloads\PsycheVault_Implant_Scan_Report_Another_Kostilny.html
 
 function showWirePuzzle(onSuccess, onFail) {
-  // Комплементарные пары (цвета-антагонисты)
   const COLORS = [
     {name: 'Red', color: '#ff3c3c', comp: 'Cyan'},
     {name: 'Cyan', color: '#66fcf1', comp: 'Red'},
@@ -3832,18 +3828,15 @@ function showWirePuzzle(onSuccess, onFail) {
     {name: 'Blue', color: '#3c6cff', comp: 'Orange'},
     {name: 'Orange', color: '#ffb366', comp: 'Blue'}
   ];
-  const N = 6; // Можно 6-8 для максимальной сложности
+  const N = 6;
 
-  // Случайный порядок на левой и правой стороне
   let leftOrder = COLORS.slice(0, N).sort(() => Math.random() - 0.5);
   let rightOrder = COLORS.slice(0, N).map(c => COLORS.find(x => x.name === c.comp)).sort(() => Math.random() - 0.5);
 
-  // Проверка: левый соединяется с комплементарным правым
   function isCorrectPair(leftIdx, rightIdx) {
     return rightOrder[rightIdx].name === leftOrder[leftIdx].comp;
   }
 
-  // Модальное окно
   let modal = document.createElement('div');
   modal.style.position = 'fixed';
   modal.style.left = 0;
@@ -3872,7 +3865,6 @@ function showWirePuzzle(onSuccess, onFail) {
   const status = modal.querySelector('#wire-puzzle-status');
   const cancelBtn = modal.querySelector('#wire-puzzle-cancel');
 
-  // Размеры
   const leftX = 60, rightX = 460, yStep = 48, socketR = 18;
   let leftSockets = leftOrder.map((c, i) => ({
     ...c,
@@ -3885,7 +3877,6 @@ function showWirePuzzle(onSuccess, onFail) {
     y: yStep + i * yStep
   }));
 
-  // SVG для проводов
   let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute('width', '520');
   svg.setAttribute('height', N * 56);
@@ -3895,16 +3886,13 @@ function showWirePuzzle(onSuccess, onFail) {
   svg.style.pointerEvents = 'none';
   area.appendChild(svg);
 
-  // Состояние соединений
-  let connections = {}; // leftIdx -> rightIdx
-  let usedRight = {};   // rightIdx -> true
-  let feedback = {};    // leftIdx -> "ok"|"fail"
+  let connections = {};
+  let usedRight = {};
+  let feedback = {};
 
-  // Рисуем сокеты
   function drawSockets() {
     area.innerHTML = '';
     area.appendChild(svg);
-    // Левые
     leftSockets.forEach((sock, i) => {
       let d = document.createElement('div');
       d.className = 'wire-socket';
@@ -3925,10 +3913,8 @@ function showWirePuzzle(onSuccess, onFail) {
       d.style.transition = 'box-shadow 0.2s, background 0.2s';
       d.setAttribute('data-side', 'left');
       d.setAttribute('data-idx', i);
-      // Без подписи!
       area.appendChild(d);
     });
-    // Правые
     rightSockets.forEach((sock, i) => {
       let d = document.createElement('div');
       d.className = 'wire-socket';
@@ -3949,12 +3935,10 @@ function showWirePuzzle(onSuccess, onFail) {
       d.style.transition = 'box-shadow 0.2s, background 0.2s';
       d.setAttribute('data-side', 'right');
       d.setAttribute('data-idx', i);
-      // Без подписи!
       area.appendChild(d);
     });
   }
 
-  // Drag logic
   let dragging = null;
   let dragLine = null;
 
@@ -3966,13 +3950,11 @@ function showWirePuzzle(onSuccess, onFail) {
 
   function redrawWires() {
     svg.innerHTML = '';
-    // Нарисовать все соединённые провода
     Object.entries(connections).forEach(([lIdx, rIdx]) => {
       let left = getSocketCenter('left', +lIdx);
       let right = getSocketCenter('right', +rIdx);
       let color = leftSockets[lIdx].color;
       let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      // Цвет провода: зелёный если верно, красный если неверно
       let wireColor = feedback[lIdx] === "ok" ? "#66fc66" : feedback[lIdx] === "fail" ? "#ff3c3c" : color;
       let c1x = left.x + 80, c1y = left.y + (Math.random()-0.5)*24;
       let c2x = right.x - 80, c2y = right.y + (Math.random()-0.5)*24;
@@ -3983,11 +3965,9 @@ function showWirePuzzle(onSuccess, onFail) {
       path.setAttribute('filter', 'url(#glow)');
       svg.appendChild(path);
     });
-    // Нарисовать текущий drag-провод
     if (dragging && dragLine) {
       svg.appendChild(dragLine);
     }
-    // SVG glow filter
     if (!svg.querySelector('filter')) {
       let defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
       defs.innerHTML = `
@@ -4006,12 +3986,11 @@ function showWirePuzzle(onSuccess, onFail) {
   drawSockets();
   redrawWires();
 
-  // Drag events
   area.addEventListener('mousedown', function(e) {
     let t = e.target.closest('.wire-socket');
     if (t && t.getAttribute('data-side') === 'left') {
       let lIdx = +t.getAttribute('data-idx');
-      if (connections[lIdx] !== undefined) return; // Уже соединён
+      if (connections[lIdx] !== undefined) return;
       dragging = {lIdx, color: leftSockets[lIdx].color};
       dragLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
       dragLine.setAttribute('stroke', dragging.color);
@@ -4020,7 +3999,6 @@ function showWirePuzzle(onSuccess, onFail) {
       dragLine.setAttribute('filter', 'url(#glow)');
       redrawWires();
       document.body.style.cursor = 'grabbing';
-      // Подсветить возможные правые сокеты
     }
   });
 
@@ -4056,12 +4034,10 @@ area.addEventListener('mousemove', function(e) {
 area.addEventListener('mouseup', function(e) {
   if (dragging) {
     let rect = area.getBoundingClientRect();
-    // Учитываем скролл страницы!
     let mx = e.clientX - rect.left;
     let my = e.clientY - rect.top;
     let found = null;
     rightSockets.forEach((sock, i) => {
-      // sock.x и sock.y — это координаты относительно area!
       let dx = mx - (sock.x);
       let dy = my - (sock.y);
       if (Math.sqrt(dx*dx + dy*dy) < 30 && !usedRight[i]) found = i;
@@ -4080,7 +4056,6 @@ area.addEventListener('mouseup', function(e) {
     }
     dragging = null;
     dragLine = null;
-    // Сбросить подсветку
     document.querySelectorAll('.wire-socket[data-side="right"]').forEach(el => {
       el.style.boxShadow = '';
     });
@@ -4090,10 +4065,8 @@ area.addEventListener('mouseup', function(e) {
   }
 });
 
-  // Проверка победы
   function checkWin() {
     if (Object.keys(connections).length === N) {
-      // Все соединения сделаны — проверяем, все ли верные
       let ok = true;
       for (let l in connections) {
         let r = connections[l];
@@ -4108,7 +4081,6 @@ area.addEventListener('mouseup', function(e) {
       } else {
         status.textContent = "✖ Some wires are wrong! Wrong wires are red. Try again.";
         setTimeout(() => {
-          // Сбросить только неверные соединения
           for (let l in connections) {
             if (feedback[l] === "fail") {
               delete connections[l];
