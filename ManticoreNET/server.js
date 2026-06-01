@@ -6,6 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import http from "http";
 import WebSocket, { WebSocketServer } from "ws";
+import logger from "./logger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,7 +22,7 @@ const API_BASE = (BASE_PATH === "/") ? "/api" : (BASE_PATH + "/api");
 
 app.use((req, res, next) => {
   const cl = req.headers['content-length'];
-  if (cl) console.log(`[req] ${req.method} ${req.url} Content-Length: ${cl}`);
+  if (cl) logger.info(`[req] ${req.method} ${req.url} Content-Length: ${cl}`);
   return next();
 });
 app.use(bodyParser.json({ limit: "50mb" }));
@@ -75,6 +76,7 @@ try {
   });
   fs.writeJsonSync(POSTS_FILE, sanitized, { spaces: 2 });
 } catch (e) {
+  logger.error("Failed to sanitize posts file: " + (e && (e.stack || e.message) || e));
 }
 
 
@@ -234,6 +236,7 @@ api.post("/posts", async (req, res) => {
     try {
       post.image = await saveDataUrlImage(image, `post-${id}`);
     } catch (e) {
+      logger.warn(`Invalid post image for ${username}: ${e && e.message || e}`);
       return res.status(400).json({ error: "Invalid image data" });
     }
   }
@@ -303,6 +306,7 @@ api.post("/comments/:postId", async (req, res) => {
       if (authorWs && authorWs.readyState === WebSocket.OPEN) authorWs.send(payload);
     }
   } catch (e) {
+    logger.error("Notify comment error: " + (e && (e.stack || e.message) || e));
   }
 
   res.json({ success: true, comment });
@@ -453,5 +457,14 @@ wss.on("connection", (ws) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}${BASE_PATH}`);
+  logger.info(`Server running on http://localhost:${PORT}${BASE_PATH}`);
+});
+
+process.on('uncaughtException', (err) => {
+  try { logger.error('uncaughtException: ' + (err && (err.stack || err.message) || err)); } catch (e) { console.error(err); }
+  setTimeout(() => process.exit(1), 1000);
+});
+
+process.on('unhandledRejection', (reason) => {
+  try { logger.error('unhandledRejection: ' + (reason && (reason.stack || reason) || reason)); } catch (e) { console.error(reason); }
 });
